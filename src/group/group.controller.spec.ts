@@ -14,7 +14,7 @@ describe('Group Controller', () => {
   beforeAll(async () => {
     module = await Test.createTestingModule({
       controllers: [GroupController],
-      components: [{
+      providers: [{
         provide: GroupService,
         useClass: GroupServiceMock
       }]
