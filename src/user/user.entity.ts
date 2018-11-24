@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, CreateDateColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, CreateDateColumn, Column, OneToMany } from 'typeorm';
+import { Post } from '../post/post.entity';
 
 @Entity()
 export class User {
@@ -28,6 +29,11 @@ export class User {
     // This is analagous to forum avatars or Usenet X-Face.
     @Column('text', { nullable: true })
     icon: string;
+
+    // `posts` holds a list of all posts this user has made.
+    // It's really only used to make the Post relation work.
+    @OneToMany(type => Post, post => post.sender)
+    posts: Post[];
 
     // We store the date the user's record was created, mostly for debugging,
     // but also so we can do the "date joined" thing on profile pages.

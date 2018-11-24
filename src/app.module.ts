@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 import { UserModule } from './user/user.module';
 import { GroupModule } from './group/group.module';
+import { PostModule } from './post/post.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(), UserModule, GroupModule],
+  imports: [TypeOrmModule.forRoot(), UserModule, GroupModule, PostModule],
   controllers: [AppController],
   providers: [AppService],
 })
