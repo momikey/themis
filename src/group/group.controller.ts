@@ -12,9 +12,9 @@ export class GroupController {
         return this.groupService.findAll();
     }
 
-    @Get('/:id')
-    async find(@Param('id') id: number): Promise<Group> {
-        return this.groupService.find(id);
+    @Get('/:name')
+    async find(@Param('name') name: string): Promise<Group> {
+        return this.groupService.findByName(name);
     }
 
     @Post()
@@ -22,8 +22,8 @@ export class GroupController {
         return this.groupService.create(group);
     }
 
-    @Delete('/:id')
-    async delete(id: number): Promise<Group> {
-        return this.groupService.delete(id);
+    @Delete('/:name')
+    async delete(name: string): Promise<Group> {
+        return this.groupService.delete(name);
     }
 }
