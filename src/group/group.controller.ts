@@ -23,7 +23,7 @@ export class GroupController {
     }
 
     @Delete('/:name')
-    async delete(name: string): Promise<Group> {
+    async delete(@Param('name') name: string): Promise<Group> {
         return this.groupService.delete(name);
     }
 }
