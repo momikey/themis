@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, NotFoundException } from '@nestjs/common';
 import { GroupService } from './group.service';
 import { Group } from './group.entity';
 import { CreateGroupDto } from './create-group.dto';
@@ -9,21 +9,27 @@ export class GroupController {
 
     @Get()
     async findAll(): Promise<Group[]> {
-        return this.groupService.findAll();
+        return await this.groupService.findAll();
     }
 
     @Get('/:name')
     async find(@Param('name') name: string): Promise<Group> {
-        return this.groupService.findByName(name);
+        const response = await this.groupService.findByName(name);
+
+        if (response) {
+            return response;
+        } else {
+            throw new NotFoundException(name);
+        }
     }
 
     @Post()
     async create(@Body() group: CreateGroupDto): Promise<Group> {
-        return this.groupService.create(group);
+        return await this.groupService.create(group);
     }
 
     @Delete('/:name')
     async delete(@Param('name') name: string): Promise<Group> {
-        return this.groupService.delete(name);
+        return await this.groupService.delete(name);
     }
 }
