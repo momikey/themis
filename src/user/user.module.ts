@@ -8,7 +8,6 @@ import { PostModule } from 'src/post/post.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
-    PostModule
   ],
   providers: [UserService],
   controllers: [UserController]
