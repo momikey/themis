@@ -7,11 +7,10 @@ import { UserModule } from './user/user.module';
 import { GroupModule } from './group/group.module';
 import { PostModule } from './post/post.module';
 import { ActivitypubModule } from './activitypub/activitypub.module';
-import { ApiModule } from './api/api.module';
 import { ConfigModule } from './config/config.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(), UserModule, GroupModule, PostModule, ActivitypubModule, ApiModule, ConfigModule],
+  imports: [TypeOrmModule.forRoot(), UserModule, GroupModule, PostModule, ActivitypubModule, ConfigModule],
   controllers: [AppController],
   providers: [AppService],
 })
