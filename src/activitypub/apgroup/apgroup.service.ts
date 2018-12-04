@@ -1,36 +1,14 @@
 import { Injectable, HttpService } from '@nestjs/common';
-import { GroupActor } from '../group-actor.dto';
-import { Group } from 'src/group/group.entity';
-import { ConfigService } from 'src/config/config.service';
-import { GroupActorHelper } from '../group-actor.helper';
 
+// ApgroupService is the back end for retrieving ActivityPub groups.
+// These are intended to be Actor objects, as per the AP spec, 
 @Injectable()
 export class ApgroupService {
     constructor(
         private readonly httpService: HttpService,
     ) {}
 
-    // !!! Temporary for testing !!!
-    private readonly groups = new Map<string, GroupActor>();
-
-    create(group: GroupActor) {
-        const username = group.preferredUsername;
-
-        this.groups.set(username, group);
-    }
-
-    retrieve(name: string) : GroupActor {
-        return this.groups.get(name);
-    }
-
-    update(name: string, group: GroupActor) {
-        this.groups.set(name, group);
-    }
-
-    delete(name: string) {
-        this.groups.delete(name);
-    }
-
+    // Find a single group, given its "internal" name.
     findGroup(name: string) {
         const response = this.httpService.get(
             'http://localhost:3000/internal/groups/' + name);
@@ -41,6 +19,9 @@ export class ApgroupService {
         return p;
     }
 
+    // Get all the groups known to this server.
+    // TODO: Should this only retrieve *local* groups?
+    // (Something to think about when we start looking into federation, etc.)
     getAllGroups() {
         const response = this.httpService.get(
             'http://localhost:3000/internal/groups');

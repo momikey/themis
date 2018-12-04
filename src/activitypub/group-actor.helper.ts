@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { ConfigService } from "src/config/config.service";
-import { Group } from "src/group/group.entity";
+import { ConfigService } from "../config/config.service";
+import { Group } from "../group/group.entity";
 import { GroupActor } from "./group-actor.dto";
 
 @Injectable()
