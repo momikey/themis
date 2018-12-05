@@ -12,12 +12,13 @@ export class UserService {
     ) {}
 
     async create(user: CreateUserDto): Promise<User> {
-        const userEntity = new User();
-        userEntity.name = user.name;
-        userEntity.server = user.server;
-        userEntity.displayName = user.displayName;
-        userEntity.summary = user.summary;
-        userEntity.icon = user.iconUrl;
+        const userEntity = this.userRepository.create({
+        name: user.name,
+        server: user.server,
+        displayName: user.displayName,
+        summary: user.summary,
+        icon: user.iconUrl
+    });
 
         return await this.userRepository.save(userEntity);
     }

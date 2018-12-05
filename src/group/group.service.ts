@@ -12,11 +12,12 @@ export class GroupService {
     ) {}
 
     async create(group: CreateGroupDto): Promise<Group> {
-        const groupEntity = new Group();
-        groupEntity.name = group.name;
-        groupEntity.server = group.server;
-        groupEntity.displayName = group.displayName;
-        groupEntity.summary = group.summary;
+        const groupEntity = this.groupRepository.create({
+            name: group.name,
+            server: group.server,
+            displayName: group.displayName,
+            summary: group.summary
+        });
 
         return await this.groupRepository.save(groupEntity);
     }
