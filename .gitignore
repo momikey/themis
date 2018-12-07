@@ -4,3 +4,5 @@ node_modules/
 .directory
 *.sqlite3
 public/lib/
+public/build.js
+dist/
