@@ -5,7 +5,7 @@
   "author": "Michael H. Potter",
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
+    "build": "webpack && tsc",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "ts-node -r tsconfig-paths/register src/main.ts",
     "start:dev": "nodemon",
@@ -16,7 +16,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "build:webpack": "webpack"
   },
   "dependencies": {
     "@nestjs/common": "^5.4.1",
@@ -41,15 +42,20 @@
     "@types/jest": "^23.3.10",
     "@types/node": "^10.12.11",
     "@types/supertest": "^2.0.5",
+    "css-loader": "^1.0.1",
     "jest": "^23.5.0",
     "nodemon": "^1.18.7",
     "prettier": "^1.15.3",
     "supertest": "^3.1.0",
     "ts-jest": "^23.10.5",
-    "ts-loader": "^4.4.2",
+    "ts-loader": "^4.5.0",
     "ts-node": "^7.0.1",
     "tsconfig-paths": "^3.5.0",
-    "tslint": "5.11.0"
+    "tslint": "5.11.0",
+    "vue-loader": "^15.4.2",
+    "vue-template-compiler": "^2.5.17",
+    "webpack": "^4.27.1",
+    "webpack-cli": "^3.1.2"
   },
   "jest": {
     "moduleFileExtensions": [
