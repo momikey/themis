@@ -1,6 +1,7 @@
 var path = require('path')
 var webpack = require('webpack')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 
 module.exports = {
     mode: 'development',
@@ -30,6 +31,8 @@ module.exports = {
                 ],
                 options: {
                     appendTsSuffixTo: [/\.vue$/],
+                    reportFiles: ['src/views/**/*.{ts,tsx}'],
+                    transpileOnly: true
                 }
             },
             {
@@ -63,7 +66,10 @@ module.exports = {
     },
     devtool: '#eval-source-map',
     plugins: [
-        new VueLoaderPlugin()
+        new VueLoaderPlugin(),
+        new ForkTsCheckerWebpackPlugin({
+            vue: true
+        })
     ]
 }
 
