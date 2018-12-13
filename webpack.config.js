@@ -5,7 +5,9 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 
 module.exports = {
     mode: 'development',
-    entry: './src/views/index.ts',
+    entry: {
+        index: './src/views/index.ts'
+    },
     output: {
         path: path.resolve(__dirname, './public'),
         publicPath: '/public/',
@@ -55,6 +57,11 @@ module.exports = {
         extensions: ['.ts', '.js', '.vue', '.json'],
         alias: {
             'vue$': 'vue/dist/vue.esm.js'
+        }
+    },
+    optimization: {
+        splitChunks: {
+            chunks: 'all'
         }
     },
     devServer: {
