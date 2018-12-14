@@ -10,4 +10,11 @@ export class AppController {
   root() {
     return this.appService.root();
   }
+
+  // We'll take this out later
+  @Get('/admin')
+  @Render('admin')
+  getAdminPanel() {
+    return {};
+  }
 }

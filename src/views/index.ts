@@ -7,7 +7,6 @@ let v = new Vue({
     </div>
     `,
     data: {
-        name: "World",
         info: null
     },
     components: {

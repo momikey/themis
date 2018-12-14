@@ -6,12 +6,13 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 module.exports = {
     mode: 'development',
     entry: {
-        index: './src/views/index.ts'
+        index: './src/views/index.ts',
+        admin: './src/views/admin.ts'
     },
     output: {
         path: path.resolve(__dirname, './public'),
         publicPath: '/public/',
-        filename: 'build.js'
+        filename: '[name].build.js'
     },
     module: {
         rules: [
