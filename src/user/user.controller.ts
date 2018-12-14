@@ -19,7 +19,7 @@ export class UserController {
         if (response) {
             return response;
         } else {
-            throw new NotFoundException(name);;
+            throw new NotFoundException(name);
         }
     }
 
