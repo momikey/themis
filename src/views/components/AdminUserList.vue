@@ -1,6 +1,7 @@
 <template>
     <div class="user-list-container">
-        <details class="user-entry" v-for="user in users" :key="user.id">
+        <section class="user-entry" v-for="user in users" :key="user.id">
+        <details class="user-details">
             <summary class="user-summary">
                 <span class="internal-name">{{formatUserName(user)}}</span>
                 <span class="display-name">({{user.displayName}})</span>
@@ -12,6 +13,11 @@
                 <li>Created on:<span class='user-info-data'>{{user.date}}</span></li>
             </ul>
         </details>
+        <div class="user-buttons">
+            <button class="user-button edit" @click="editUser(user)">Edit</button>
+            <button class="user-button delete" @click="deleteUser(user)">Delete</button>
+        </div>
+        </section>
     </div>
 </template>
 
@@ -28,6 +34,14 @@ export default Vue.extend({
     methods: {
         formatUserName: function (user) {
             return `@${user.name}`;
+        },
+        editUser: function (user) {
+            console.log(user);
+            
+        },
+        deleteUser: function (user) {
+            console.log(user);
+
         }
     },
     mounted () {
@@ -40,7 +54,28 @@ export default Vue.extend({
 
 
 <style>
+    .user-entry {
+        display: flex;
+        border: none;
+        background-color: aliceblue;
+    }
+
+    .user-details {
+        /* align-self: center; */
+        padding: 1em;
+    }
+
+    .user-summary {
+        vertical-align: middle;
+    }
+
+    .user-buttons {
+        margin-left: auto;
+        margin-top: .5em;
+        margin-bottom: .5em;
+    }
+
     .user-info-data {
-        padding-left: 1ex;
+        margin-left: 1ex;
     }
 </style>
