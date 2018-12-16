@@ -37,7 +37,8 @@
 
 <script lang="ts">
 import Vue, { VueConstructor } from 'vue'
-import UserList from './AdminUserList.vue';
+import UserList from './AdminUserList.vue'
+import UserCreate from './AdminUserCreate.vue'
 import GroupList from './AdminGroupList.vue'
 
 export default Vue.extend({
@@ -88,6 +89,7 @@ export default Vue.extend({
     },
     components: {
         UserList,
+        UserCreate,
         GroupList
     }
 })
