@@ -18,16 +18,16 @@ export class User {
     server: string;
 
     // `displayName` is the "preferred" name for the user.
-    @Column('text', { nullable: true })
+    @Column('text')
     displayName: string;
 
     // `summary` is used for profile information, such as a bio or whatever.
-    @Column('text', { nullable: true })
+    @Column('text')
     summary: string;
 
     // `icon` is meant to contain a link (URI) to an icon image.
     // This is analagous to forum avatars or Usenet X-Face.
-    @Column('text', { nullable: true })
+    @Column('text')
     icon: string;
 
     // `posts` holds a list of all posts this user has made.
