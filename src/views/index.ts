@@ -1,15 +1,13 @@
 import Vue from "vue";
+import ThemisFrontPage from './components/FrontPage.vue';
 
 let v = new Vue({
     el: "#app",
-    template: `
-    <div class="themis-frontend-minimal">
-    </div>
-    `,
+    template: `<themis-front-page class="themis-front-page" />`,
     data: {
-        info: null
     },
     components: {
+        ThemisFrontPage
     },
     mounted () {
     }
