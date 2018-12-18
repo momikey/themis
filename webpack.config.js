@@ -6,8 +6,9 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 module.exports = {
     mode: 'development',
     entry: {
-        index: './src/views/index.ts',
-        admin: './src/views/admin.ts'
+        index:   './src/views/index.ts',
+        admin:   './src/views/admin.ts',
+        web:     './src/views/web.ts',
     },
     output: {
         path: path.resolve(__dirname, './public'),

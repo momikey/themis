@@ -17,4 +17,11 @@ export class AppController {
   getAdminPanel() {
     return {};
   }
+
+  // TODO: Do more with this, like authentication and stuff
+  @Get('/web')
+  @Render('web')
+  getWebInterface() {
+    return {};
+  }
 }
