@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository, getRepository } from 'typeorm';
+import { Repository, getRepository, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './post.entity';
 import { CreatePostDto } from './create-post.dto';
@@ -46,7 +46,19 @@ export class PostService {
         return await this.postRepository.findOne(id);
     }
 
-    async findbyUuid(uuid: string): Promise<Post> {
+    async findByUuid(uuid: string): Promise<Post> {
         return await this.postRepository.findOne({ uuid: uuid });
+    }
+
+    async findByGroup(group: string): Promise<Post[]> {
+        const response = await this.postRepository.find({
+            relations: ["sender"],
+            where: [
+                { group: Like(`%${group},%`) },
+                { group: Like(`%${group}`)}
+            ]
+        })
+
+        return response;
     }
 }

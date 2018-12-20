@@ -3,6 +3,7 @@ import { Post  as HttpPost } from '@nestjs/common';
 import { PostService } from './post.service';
 import { Post } from './post.entity';
 import { CreatePostDto } from './create-post.dto';
+import { async } from 'rxjs/internal/scheduler/async';
 
 @Controller('internal/posts')
 export class PostController {
@@ -13,9 +14,16 @@ export class PostController {
         return this.postService.findAll();
     }
 
-    @Get('/:uuid')
+    @Get('/get/:uuid')
     async findByUuid(@Param('uuid') uuid: string) {
-        const response = this.postService.findbyUuid(uuid);
+        const response = await this.postService.findByUuid(uuid);
+
+        return response;
+    }
+
+    @Get('/by-group/:group')
+    async findByGroup(@Param('group') group: string) {
+        const response = await this.postService.findByGroup(group);
 
         return response;
     }
@@ -27,7 +35,7 @@ export class PostController {
         return await this.postService.create(post);
     }
 
-    @Delete('/:uuid')
+    @Delete('/get/:uuid')
     async delete(@Param('uuid') uuid: string) {
         return await this.postService.delete(uuid);
     }
