@@ -16,7 +16,21 @@
 
         <div class="vertical container">
         <section class="thread-list pane">
-            {{threadPaneText}}
+            <header>
+                <h1 v-if="currentGroup">Posts in group 
+                    <span class="group-name">{{currentGroup.name}}</span>
+                </h1>
+                <h1 v-else>{{noGroupSelectedText}}</h1>
+
+                <button class="create-post" @click="createPost">New Post</button>
+                <button v-if="currentThread" class="create-reply" @click="replyToPost">Reply</button>
+            </header>
+
+            <thread-list class="thread-list-container"
+                @thread-selected="threadSelected"
+                @post-selected="postSelected"
+                :group="currentGroup"
+            />
         </section>
 
         <section class="current-post pane">
@@ -29,21 +43,42 @@
 <script lang="ts">
 import Vue, { VueConstructor } from 'vue'
 import GroupList from './GroupList.vue'
+import ThreadList from './ThreadList.vue'
 
 export default Vue.extend({
     data () {
         return {
-            threadPaneText: "No group selected",
+            currentGroup: null,
+            currentThread: null,
+            currentPost: null,
+
+            noGroupSelectedText: "No group selected",
             currentPostText: "",
         }
     },
+    computed: {
+
+    },
     methods: {
         groupSelected (group) {
-            this.threadPaneText = group;
+            this.currentGroup = group;
+        },
+        threadSelected (thread) {
+            this.currentThread = thread;
+        },
+        postSelected (post) {
+            this.currentPost = post;
+        },
+        createPost () {
+
+        },
+        replyToPost () {
+
         }
     },
     components: {
-        GroupList
+        GroupList,
+        ThreadList,
     }
 })
 </script>
@@ -56,7 +91,7 @@ export default Vue.extend({
         height: 100%;
     }
 
-    .vertical-container {
+    .three-pane-view .vertical.container {
         display: flex;
         flex-direction: column;
         flex-grow: 1;
@@ -88,6 +123,15 @@ export default Vue.extend({
         min-height: 40%;
         overflow-y: auto;
         overflow-x: hidden;
+    }
+
+    .thread-list header {
+        display: flex;
+        justify-items: stretch;
+    }
+
+    .thread-list header button {
+        margin-left: auto;
     }
 
     .current-post {
