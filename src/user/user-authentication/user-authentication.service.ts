@@ -16,11 +16,11 @@ export class UserAuthenticationService {
         private readonly jwtService: JwtService
     ) {}
 
-    async createToken(username: string) {
+    async createToken(user: JwtPayload) {
         // TODO: temp method
         // const user = await this.userService.findByName(username);
         const token: JwtPayload = {
-            username: username,
+            username: user.username,
             email: ''   // Not yet implemented
         }
 

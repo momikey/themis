@@ -67,6 +67,8 @@ export default Vue.extend({
             axios.post('/internal/authenticate/create-token', {
                 username: this.loginName
             })
+            .then(response => console.log(response.data.accessToken))
+            .catch(error => console.log(error));
         },
 
         showCreateForm: function () {
