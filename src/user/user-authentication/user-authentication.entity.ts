@@ -26,5 +26,9 @@ export class UserAuthentication {
     // We don't do anything with that just yet, but give it time.
     reset: boolean;
 
+    // JWT bearer token. I'm not sure if we're supposed to store this,
+    // but it makes sense. After all, we'll be storing it on the *user* side.
+    token: string;
+
     // TODO: Do we need a date field here? Might be useful for password expiration.
 }

@@ -4,8 +4,19 @@
             <section class="account-box">
             <transition name="slide-left" mode="out-in">
                 <div class="existing-account" v-if="!isCreating" key="existing">
-                    <input id="login-name" name="login-name" placeholder="Username" />
-                    <input id="login-password" name="login-password" type="password"  placeholder="Password" />
+                    <input 
+                        id="login-name" 
+                        name="login-name" 
+                        placeholder="Username" 
+                        v-model="loginName"
+                    />
+                    <input 
+                        id="login-password" 
+                        name="login-password" 
+                        type="password" 
+                        placeholder="Password" 
+                        v-model="loginPassword"
+                    />
                     <br />
                     <button id="login-submit" class="button login" @click="loginSubmit">Log in</button>
                     <button id="create-new-account" class="button submit" @click="showCreateForm">Create account</button>
@@ -31,11 +42,15 @@
 
 <script lang="ts">
 import Vue, { VueConstructor } from 'vue'
+import axios from 'axios'
 
 export default Vue.extend({
     data () {
         return {
-            isCreating: false
+            isCreating: false,
+
+            loginName: '',
+            loginPassword: ''
         }
     },
     methods: {
@@ -48,7 +63,10 @@ export default Vue.extend({
         },
 
         loginSubmit: function () {
-
+            // TODO: Temp method
+            axios.post('/internal/authenticate/create-token', {
+                username: this.loginName
+            })
         },
 
         showCreateForm: function () {
