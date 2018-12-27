@@ -7,12 +7,12 @@ import { CreateUserDto } from './create-user.dto';
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
-    @Get()
+    @Get('get')
     async findAll(): Promise<User[]> {
         return this.userService.findAll();
     }
 
-    @Get('/:name')
+    @Get('/get/:name')
     async find(@Param('name') name: string): Promise<User> {
         const response = await this.userService.findByName(name);
 
@@ -23,13 +23,13 @@ export class UserController {
         }
     }
 
-    @Post()
+    @Post('/create')
     async create(@Body() user: CreateUserDto): Promise<User> {
         return await this.userService.create(user);
     }
 
-    @Delete('/:name')
-    async delete(@Param('name') name: string): Promise<User> {
-        return await this.userService.delete(name);
-    }
+    // @Delete('/:name')
+    // async delete(@Param('name') name: string): Promise<User> {
+    //     return await this.userService.delete(name);
+    // }
 }

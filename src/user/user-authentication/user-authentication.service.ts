@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user.service';
 import { JwtPayload } from './jwt.interface';
 import { User } from '../user.entity';
+import { CreateAccountDto } from './create-account.dto';
 
 // User authentication service. It does what it says.
 // This one's fairly important. It'll have to handle passwords, auth tokens,
@@ -16,6 +17,7 @@ export class UserAuthenticationService {
         private readonly jwtService: JwtService
     ) {}
 
+    // Create a JWT for a given user. This is for API access, which we'll add soon.
     async createToken(user: JwtPayload) {
         // TODO: temp method
         // const user = await this.userService.findByName(username);
@@ -32,5 +34,11 @@ export class UserAuthenticationService {
 
     async validateUser(payload: JwtPayload): Promise<any> {
         // TODO: temp method
+    }
+
+    // Create a new account. Note that this is for authentication first.
+    // We'll also have to create the user, but this method can do both.
+    async createAccount(account: CreateAccountDto) {
+
     }
 }
