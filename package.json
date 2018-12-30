@@ -35,10 +35,12 @@
     "rimraf": "^2.6.2",
     "rxjs": "^6.2.2",
     "sqlite3": "^4.0.4",
+    "store": "^2.0.12",
     "typeorm": "^0.2.9",
     "typescript": "^3.2.2",
     "uuid": "^3.3.2",
-    "vue": "^2.5.19"
+    "vue": "^2.5.19",
+    "vue-warehouse": "^1.0.1"
   },
   "devDependencies": {
     "@nestjs/testing": "^5.5.0",
@@ -48,6 +50,7 @@
     "@types/jest": "^23.3.10",
     "@types/node": "^10.12.12",
     "@types/passport-jwt": "^3.0.1",
+    "@types/store": "^2.0.1",
     "@types/supertest": "^2.0.7",
     "@types/uuid": "^3.4.4",
     "css-loader": "^1.0.1",
