@@ -3,6 +3,7 @@
         <section class="groups-pane pane">
             <header>
                 <h1>All known groups</h1>
+                <button class="align-right">Create new group</button>
             </header>
 
             <group-list class="groups-list-container"
@@ -10,7 +11,9 @@
             />
 
             <footer>
-                <button>Create new group</button>
+                <button>Settings</button>
+                <span class="logged-in align-right">Logged in as 
+                    <strong><span class="username">{{userName}}</span></strong></span>
             </footer>
         </section>
 
@@ -35,6 +38,7 @@
 
         <section class="current-post pane">
             {{currentPostText}}
+
         </section>
         </div>
     </div>
@@ -56,6 +60,7 @@ export default Vue.extend({
             currentPostText: "",
         }
     },
+    props: ['userName'],
     computed: {
 
     },
@@ -89,6 +94,7 @@ export default Vue.extend({
         align-items: stretch;
         width: 100%;
         height: 100%;
+        min-height: 100%;
     }
 
     .three-pane-view .vertical.container {
@@ -137,4 +143,19 @@ export default Vue.extend({
     .current-post {
         flex-grow: 1;
     }
+
+    .groups-pane header {
+        display: flex;
+        align-items: center;
+        padding-right: 2em;
+    }
+
+    .align-right {
+        margin-left: auto;
+    }
+
+    .logged-in {
+        margin-left: 2em;
+    }
+
 </style>

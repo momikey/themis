@@ -20,6 +20,7 @@
                     <br />
                     <button id="login-submit" class="button login" @click="loginSubmit">Log in</button>
                     <button id="create-new-account" class="button submit" @click="showCreateForm">Create account</button>
+                    <p id="login-invalid" v-if="invalidLogin">Invalid username or password</p>
                 </div>
                 <div class="new-account" v-if="isCreating" key="new">
                     <input
@@ -81,6 +82,8 @@ export default Vue.extend({
                 password: '',
             },
             retypePassword: '',
+
+            invalidLogin: false
         }
     },
     computed: {
@@ -148,18 +151,29 @@ export default Vue.extend({
         },
 
         loginSubmit: function () {
-            // TODO: Temp method
-            // axios.post('/internal/authenticate/create-token', {
-            //     username: this.loginName
-            // })
-            // .then(response => console.log(response.data.accessToken))
-            // .catch(error => console.log(error));
             axios.post('/internal/authenticate/login', {
                 username: this.loginName,
                 password: this.loginPassword
             })
-            .then(response => console.log(response.data))
-            .catch(error => console.log(error));
+            .then(response => {
+                this.$warehouse.set('themis_login_token', response.data.accessToken);
+                this.$warehouse.set('themis_login_user', this.loginName);
+                this.invalidLogin = false;
+
+                // Very hacky, but I don't want to set up a whole router just for this,
+                // and the back end is giving me trouble.
+                axios.get('/internal/authenticate/post-login', {
+                    headers: { "Authorization": `Bearer ${this.$warehouse.get('themis_login_token')}` }
+                })
+                .then(response => location.assign(response.data))
+                .catch(error => console.log(error.response));
+            })
+            .catch(error => {               
+                if (error.response.status === 403) {
+                    // 403 Forbidden
+                    this.invalidLogin = true;
+                }
+            });
         },
 
         showCreateForm: function () {
@@ -207,4 +221,5 @@ export default Vue.extend({
     .account-invalid {
         color: darkred;
     }
+
 </style>

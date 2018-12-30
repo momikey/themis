@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,6 +9,8 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { UserAuthenticationController } from './user-authentication/user-authentication.controller';
 import { UserAuthentication } from './user-authentication/user-authentication.entity';
+import { JwtStrategy } from './user-authentication/jwt.strategy';
+import passport = require('passport');
 
 @Module({
   imports: [
@@ -18,12 +20,21 @@ import { UserAuthentication } from './user-authentication/user-authentication.en
       // TODO: change these for production
       secretOrPrivateKey: 'secretKey',
       signOptions: {
-        expiresIn: 3600
+        expiresIn: 3600 * 24
       }
     })
   ],
-  providers: [UserService, UserAuthenticationService],
+  providers: [UserService, UserAuthenticationService, JwtStrategy],
   controllers: [UserController, UserAuthenticationController],
   exports: [UserService, UserAuthenticationService]
 })
-export class UserModule {}
+export class UserModule implements NestModule {
+    public configure(consumer: MiddlewareConsumer) {
+      consumer
+        .apply(passport.authenticate('jwt', {
+          session: false,
+          // successRedirect: '/web',
+        }))
+        .forRoutes('internal/authenticate/post-login');
+    }
+}

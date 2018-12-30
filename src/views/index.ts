@@ -1,7 +1,6 @@
 import Vue from "vue";
 import ThemisFrontPage from './components/FrontPage.vue';
 import VueWarehouse from "vue-warehouse";
-import Store from "store/dist/store.modern";
 
 Vue.use(VueWarehouse, {
     store: require("store/dist/store.modern")

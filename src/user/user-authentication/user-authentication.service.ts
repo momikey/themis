@@ -44,8 +44,32 @@ export class UserAuthenticationService {
         }
     }
 
+    async createLoginToken(login: LoginDto) {
+        const user = await this.userService.findByName(login.username);
+        const auth = await this.authRepository.findOneOrFail({ user: user });
+
+        const token: JwtPayload = {
+            username: user.name,
+            email: auth.email
+        }
+
+        return {
+            expiresIn: 3600 * 24,
+            accessToken: this.jwtService.sign(token)
+        }
+    }
+
     async validateUser(payload: JwtPayload): Promise<any> {
-        // TODO: temp method
+        const user = await this.userService.findByName(payload.username);
+        
+        if (user) {
+            const auth = await this.authRepository.findOne({ user: user });
+
+            return (auth && user.name === payload.username && auth.email === payload.email);
+        } else {
+            return false;
+        }
+
     }
 
     async validateAccount(account: CreateAccountDto): Promise<boolean> {

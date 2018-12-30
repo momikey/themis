@@ -1,8 +1,9 @@
-import { Controller, Post, Body, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Res, UnauthorizedException } from '@nestjs/common';
 import { UserAuthenticationService } from './user-authentication.service';
 import { JwtPayload } from './jwt.interface';
 import { CreateAccountDto } from './create-account.dto';
 import { LoginDto } from './login.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('internal/authenticate')
 export class UserAuthenticationController {
@@ -29,9 +30,14 @@ export class UserAuthenticationController {
     @Post('login')
     async verifyLogin(@Body() user: LoginDto): Promise<any> {
         if (await this.authService.validateLogin(user)) {
-            return "Login successful";
+            return this.authService.createLoginToken(user);
         } else {
-            throw new ForbiddenException;
+            throw new UnauthorizedException("Invalid username or password");
         }
+    }
+
+    @Get('post-login')
+    postLogin() {
+        return '/web';
     }
 }
