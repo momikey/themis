@@ -51,6 +51,7 @@
                     <br />
                     <button id="new-account-submit" class="button submit" @click="createAccount">Create account</button>
                     <button id="new-account-cancel" class="button cancel" @click="cancelCreate">Cancel</button>
+                    <p id="new-account-invalid-reason" :class="isAccountValid">{{validateAccount().reason}}</p>
                 </div>
             </transition>
             </section>
@@ -79,17 +80,17 @@ export default Vue.extend({
                 email: '',
                 password: '',
             },
-            passwordsMatch: false
+            retypePassword: '',
         }
     },
     computed: {
-        retypePassword: {
-            get: function () {
+        passwordsMatch: function () {
+            return this.newAccount.password && 
+                this.newAccount.password === this.retypePassword;
+        },
 
-            },
-            set: function (newValue) {
-                this.passwordsMatch = (newValue === this.newAccount.password);
-            }
+        isAccountValid: function () {
+            return (this.validateAccount().isValid ? "account-valid" : "account-invalid");
         }
     },
     methods: {
@@ -104,20 +105,27 @@ export default Vue.extend({
             // of what, if anything, went wrong.
             const result = {
                 isValid: false,
-                reason: "No validation has been performed"
-            }
-
-            if (!this.newAccount.email.includes('@')) {
-                result.reason = "Email address is not valid (doesn't contain @)"
-                return result;
+                reason: ''
             }
 
             if (!this.passwordsMatch) {
-                result.reason = "Passwords don't match (retype password correctly)"
-                return result;
+                result.reason = "Passwords don't match (retype password correctly)";
             }
 
-            result.isValid = true;
+            if (!this.newAccount.password) {
+                result.reason = "You must enter a password";
+            }
+
+            if (!this.newAccount.email.includes('@')) {
+                result.reason = "Email address is not valid (doesn't contain @)";
+            }
+
+            if (!result.reason) {
+                // We made it here without errors, so we must be okay.
+                result.isValid = true;
+                result.reason = "You're good to go";
+            }
+
             return result;
         },
 
@@ -129,7 +137,9 @@ export default Vue.extend({
                 console.log(validationResult.reason);
             } else {
                 // Looks like we're good. The back end can handle it from here.
-                console.log(`Success! Account for ${this.newAccount.username} created!`);
+                axios.post('/internal/authenticate/create-account', this.newAccount)
+                .then(response => console.log(response.data))
+                .catch(error => console.log(error));
             }
         },
 
@@ -139,10 +149,16 @@ export default Vue.extend({
 
         loginSubmit: function () {
             // TODO: Temp method
-            axios.post('/internal/authenticate/create-token', {
-                username: this.loginName
+            // axios.post('/internal/authenticate/create-token', {
+            //     username: this.loginName
+            // })
+            // .then(response => console.log(response.data.accessToken))
+            // .catch(error => console.log(error));
+            axios.post('/internal/authenticate/login', {
+                username: this.loginName,
+                password: this.loginPassword
             })
-            .then(response => console.log(response.data.accessToken))
+            .then(response => console.log(response.data))
             .catch(error => console.log(error));
         },
 
@@ -184,4 +200,11 @@ export default Vue.extend({
         opacity: 0;
     }
 
+    .account-valid {
+        color: darkgreen;
+    }
+
+    .account-invalid {
+        color: darkred;
+    }
 </style>

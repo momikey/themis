@@ -15,14 +15,30 @@ export class UserService {
 
     async create(user: CreateUserDto): Promise<User> {
         const userEntity = this.userRepository.create({
-        name: user.name,
-        server: user.server || this.configService.serverAddress,
-        displayName: user.displayName,
-        summary: user.summary || '',
-        icon: user.iconUrl || ''
-    });
+            name: user.name,
+            server: user.server || this.configService.serverAddress,
+            displayName: user.displayName,
+            summary: user.summary || '',
+            icon: user.iconUrl || ''
+        });
 
-        return await this.userRepository.save(userEntity);
+        return this.userRepository.save(userEntity);
+    }
+
+    async createEmptyUserEntry(username: string): Promise<User> {
+        if (await this.findByName(username)) {
+            throw new Error(`Username ${username} already in database`);
+        }
+
+        const userEntity = this.userRepository.create({
+            name: username,
+            server: this.configService.serverAddress,
+            displayName: '',
+            summary: '',
+            icon: ''
+        });
+
+        return this.userRepository.save(userEntity);
     }
 
     async delete(name: string): Promise<User> {

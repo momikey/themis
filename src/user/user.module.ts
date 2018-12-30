@@ -8,10 +8,11 @@ import { UserAuthenticationService } from './user-authentication/user-authentica
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { UserAuthenticationController } from './user-authentication/user-authentication.controller';
+import { UserAuthentication } from './user-authentication/user-authentication.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, UserAuthentication]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       // TODO: change these for production
@@ -23,6 +24,6 @@ import { UserAuthenticationController } from './user-authentication/user-authent
   ],
   providers: [UserService, UserAuthenticationService],
   controllers: [UserController, UserAuthenticationController],
-  exports: [UserService]
+  exports: [UserService, UserAuthenticationService]
 })
 export class UserModule {}
