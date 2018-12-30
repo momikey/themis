@@ -22,10 +22,32 @@
                     <button id="create-new-account" class="button submit" @click="showCreateForm">Create account</button>
                 </div>
                 <div class="new-account" v-if="isCreating" key="new">
-                    <input id="new-name" name="new-name" placeholder="Username" />
-                    <input id="new-email" name="new-email" placeholder="Email address" />
-                    <input id="new-password" name="new-password" type="password" placeholder="Password" />
-                    <input id="new-retype" name="new-retype" type="password" placeholder="Retype password" />
+                    <input
+                        id="new-name"
+                        name="new-name"
+                        placeholder="Username"
+                        v-model="newAccount.username"
+                    />
+                    <input
+                        id="new-email"
+                        name="new-email"
+                        placeholder="Email address"
+                        v-model="newAccount.email"
+                    />
+                    <input
+                        id="new-password"
+                        name="new-password"
+                        type="password"
+                        placeholder="Password"
+                        v-model="newAccount.password"
+                    />
+                    <input
+                        id="new-retype"
+                        name="new-retype"
+                        type="password"
+                        placeholder="Retype password"
+                        v-model="retypePassword"
+                    />
                     <br />
                     <button id="new-account-submit" class="button submit" @click="createAccount">Create account</button>
                     <button id="new-account-cancel" class="button cancel" @click="cancelCreate">Cancel</button>
@@ -50,12 +72,65 @@ export default Vue.extend({
             isCreating: false,
 
             loginName: '',
-            loginPassword: ''
+            loginPassword: '',
+
+            newAccount: {
+                username: '',
+                email: '',
+                password: '',
+            },
+            passwordsMatch: false
+        }
+    },
+    computed: {
+        retypePassword: {
+            get: function () {
+
+            },
+            set: function (newValue) {
+                this.passwordsMatch = (newValue === this.newAccount.password);
+            }
         }
     },
     methods: {
-        createAccount: function () {
+        validateAccount: function () {
+            // A potential account must have all parts valid.
+            // Of course, we'll eventually need to do a lot of checking to see
+            // if e.g., passwords are secure, the username isn't duplicated,
+            // and all those things like that.
 
+            // A number of things can go wrong here, so we'll use an object
+            // to hold both the positive/negative result and an explanation
+            // of what, if anything, went wrong.
+            const result = {
+                isValid: false,
+                reason: "No validation has been performed"
+            }
+
+            if (!this.newAccount.email.includes('@')) {
+                result.reason = "Email address is not valid (doesn't contain @)"
+                return result;
+            }
+
+            if (!this.passwordsMatch) {
+                result.reason = "Passwords don't match (retype password correctly)"
+                return result;
+            }
+
+            result.isValid = true;
+            return result;
+        },
+
+        createAccount: function () {
+            const validationResult = this.validateAccount();
+
+            if (!validationResult.isValid) {
+                // Something went wrong, so let the user know.
+                console.log(validationResult.reason);
+            } else {
+                // Looks like we're good. The back end can handle it from here.
+                console.log(`Success! Account for ${this.newAccount.username} created!`);
+            }
         },
 
         cancelCreate: function () {
