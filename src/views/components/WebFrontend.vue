@@ -37,8 +37,11 @@
         </section>
 
         <section class="current-post pane">
-            {{currentPostText}}
-
+            <post-editor v-if="isComposingPost"
+                @post-submitted="submitPost"
+                @post-canceled="cancelPost"
+            />
+            <p v-else>{{currentPostText}}</p>
         </section>
         </div>
     </div>
@@ -46,8 +49,11 @@
 
 <script lang="ts">
 import Vue, { VueConstructor } from 'vue'
+import axios from 'axios'
+
 import GroupList from './GroupList.vue'
 import ThreadList from './ThreadList.vue'
+import PostEditor from './PostEditor.vue'
 
 export default Vue.extend({
     data () {
@@ -58,6 +64,8 @@ export default Vue.extend({
 
             noGroupSelectedText: "No group selected",
             currentPostText: "",
+
+            isComposingPost: false
         }
     },
     props: ['userName'],
@@ -70,12 +78,30 @@ export default Vue.extend({
         },
         threadSelected (thread) {
             this.currentThread = thread;
+
+            // TODO: temp
+            this.currentPostText = this.currentThread.content;
         },
         postSelected (post) {
             this.currentPost = post;
         },
         createPost () {
+            if (this.currentGroup) {
+                this.isComposingPost = true;
+            } else {
+                console.log("No group selected!");
+            }
+        },
+        submitPost (post) {
+            post.group = this.currentGroup.id;
+            post.sender = this.userName;
 
+            axios.post('/internal/posts/new-thread', post)
+            .then(response => console.log(response.data))
+            .catch(error => console.log(error.response));
+        },
+        cancelPost () {
+            this.isComposingPost = false;
         },
         replyToPost () {
 
@@ -84,6 +110,7 @@ export default Vue.extend({
     components: {
         GroupList,
         ThreadList,
+        PostEditor
     }
 })
 </script>
@@ -133,10 +160,10 @@ export default Vue.extend({
 
     .thread-list header {
         display: flex;
-        justify-items: stretch;
+        align-items: center;
     }
 
-    .thread-list header button {
+    .thread-list header button:nth-of-type(1) {
         margin-left: auto;
     }
 
@@ -157,5 +184,4 @@ export default Vue.extend({
     .logged-in {
         margin-left: 2em;
     }
-
 </style>

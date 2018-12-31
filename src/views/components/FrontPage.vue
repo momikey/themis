@@ -155,7 +155,7 @@ export default Vue.extend({
                 username: this.loginName,
                 password: this.loginPassword
             })
-            .then(response => {
+            .then(response => {                
                 this.$warehouse.set('themis_login_token', response.data.accessToken);
                 this.$warehouse.set('themis_login_user', this.loginName);
                 this.invalidLogin = false;

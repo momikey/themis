@@ -1,6 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToMany } from 'typeorm';
+import { Post } from '../post/post.entity';
 
-@Entity()
+// Note that we have to change the table name because "group" is a reserved word in SQL.
+@Entity("groups")
 export class Group {
     @PrimaryGeneratedColumn()
     id: number;
@@ -29,6 +31,10 @@ export class Group {
     @Column('text', { nullable: true })
     summary: string;
 
+    // Collection of posts in this group. Mostly used for easier DB access.
+    @ManyToMany(type => Post, post => post.groups)
+    posts: Post[];
+    
     // We'll also store the date the group was created.
     // This isn't as necessary as for users, but it might come in handy.
     @CreateDateColumn({readonly: true })

@@ -29,7 +29,7 @@ export class GroupService {
     }
 
     async findAll(): Promise<Group[]> {
-        return await this.groupRepository.find();
+        return this.groupRepository.find();
     }
 
     async find(id: number): Promise<Group> {
@@ -37,6 +37,12 @@ export class GroupService {
     }
 
     async findByName(name: string): Promise<Group> {
-        return await this.groupRepository.findOne({ name: name });
+        const response = await this.groupRepository.findOne({ name: name });
+
+        return response;
+    }
+
+    async findByIds(ids: number[]): Promise<Group[]> {
+        return this.groupRepository.findByIds(ids);
     }
 }

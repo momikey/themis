@@ -3,10 +3,11 @@ import { Repository, getRepository, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './post.entity';
 import { CreatePostDto } from './create-post.dto';
-import { ConfigService } from 'src/config/config.service';
+import { ConfigService } from '../config/config.service';
 import * as uuidv5 from 'uuid/v5';
-import { User } from 'src/user/user.entity';
-import { UserService } from 'src/user/user.service';
+import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
+import { GroupService } from '../group/group.service';
 
 @Injectable()
 export class PostService {
@@ -14,22 +15,51 @@ export class PostService {
         @InjectRepository(Post)
         private readonly postRepository: Repository<Post>,
         private readonly configService: ConfigService,
-        private readonly userService: UserService
+        private readonly userService: UserService,
+        private readonly groupService: GroupService
     ) {}
 
     async create(post: CreatePostDto) {
         const postEntity = this.postRepository.create({
-            uuid: uuidv5(this.configService.serverAddress, uuidv5.DNS),
+            uuid: this.createNewUuid(post.subject + post.content + post.sender),
             sender: await this.userService.findByName(post.sender),
             server: post.server,
             subject: post.subject,
-            parent: post.parent,
+            parentUri: post.parent,
             groups: [post.primaryGroup].concat(post.ccGroups),
             content: post.content,
             source: post.source
         });
 
         return await this.postRepository.save(postEntity);
+    }
+
+    // Create a new top-level (parent-less) post.
+    // TODO: Work out the type object
+    async createTopLevel(post: any): Promise<Post> {
+        const user = await this.userService.findByName(post.sender);
+
+        // TODO: Handle crossposting
+        const postedGroups = await this.groupService.findByIds([post.group]);
+
+        const postEntity = new Post();
+
+        postEntity.sender = user;
+        postEntity.groups = postedGroups;
+        postEntity.subject = post.subject;
+        postEntity.content = post.body;
+
+        postEntity.parentUri = '';
+        postEntity.timestamp = (new Date()).toJSON();
+        // TODO: Handle federation
+        postEntity.server = this.configService.serverAddress;
+        postEntity.uuid = this.createNewUuid(post.subject + post.body + post.sender);
+        postEntity.uri = this.uriFromLocalPost(postEntity);
+
+        // TODO: Handle post deletion, tombstones, etc.
+        postEntity.deleted = false;
+
+        return this.postRepository.save(postEntity);
     }
 
     async delete(uuid: string): Promise<Post> {
@@ -51,14 +81,43 @@ export class PostService {
     }
 
     async findByGroup(group: string): Promise<Post[]> {
-        const response = await this.postRepository.find({
-            relations: ["sender"],
-            where: [
-                { group: Like(`%${group},%`) },
-                { group: Like(`%${group}`)}
-            ]
-        })
+        const groupEntity = await this.groupService.findByName(group);
+
+        const response = await this.postRepository
+            .createQueryBuilder("post")
+            .leftJoinAndSelect("post.groups", "groups")
+            .leftJoinAndSelect("post.sender", "sender")
+            .where("groups.id = :id", { id: groupEntity.id })
+            .getMany();
 
         return response;
+    }
+
+    uriFromLocalPost(post: Post): string {
+        const server = this.configService.serverAddress;
+
+        if (post.uri) {
+            // We already have a URI, so just return that
+            return post.uri;
+        } else if (post.server === server) {
+            // It's a local post, so we can make a URI
+            return this.uriFromUuid(post.uuid);
+        } else {
+            // We don't really know what to do
+            throw new Error(`No URI found for post ${post.uuid}`);
+        }
+    }
+
+    uriFromUuid(uuid: string): string {
+        const server = this.configService.serverAddress;
+
+        return `https://${server}/posts/${uuid}`;
+    }
+
+    createNewUuid(data: any): string {
+        const server = this.configService.serverAddress;
+        const namespace = uuidv5(server, uuidv5.DNS);
+
+        return uuidv5(Date.now().toString() + data.toString(), namespace);
     }
 }

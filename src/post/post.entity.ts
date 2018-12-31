@@ -1,7 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, Tree, TreeChildren, TreeParent, ManyToMany, JoinTable } from "typeorm";
 import { User } from "../user/user.entity";
+import { Group } from "../group/group.entity";
 
 @Entity()
+@Tree('materialized-path')
 export class Post {
     @PrimaryGeneratedColumn()
     id: number;
@@ -13,7 +15,8 @@ export class Post {
     uuid: string;
 
     // `origin` is the server where this post originated.
-    // We can store "foreign" posts for caching purposes, to ease network load.
+    // We will store "foreign" posts for multiple reasons. One, for caching purposes,
+    // to ease network load. Two, because we'll need references to them.
     @Column('text')
     server: string;
 
@@ -21,16 +24,23 @@ export class Post {
     @ManyToOne(type => User, user => user.posts)
     sender: User;
 
-    // `parent` is the URI of the post that is this post's direct parent.
+    // 'uri' is the URI of this post. For foreign posts, this should be delivered
+    // by the sending server. For local posts, we can generate it on the fly.
+    @Column('text')
+    uri: string;
+
+    // `parentUri` is the URI of the post that is this post's direct parent.
     // Note that we do *not* use a DB relation here, because AP actually
     // needs the URI of the post, and that may be harder to retrieve.
+    // We will use the DB relation (TypeORM's tree type) below, for easo of use.
     @Column('text')
-    parent: string;
+    parentUri: string;
 
     // `groups` is a list of the groups this post is directed to.
     // Themis allows cross-posting, so we can't simply store a single entry.
-    @Column('simple-array')
-    groups: string[];
+    @ManyToMany(type => Group, groups => groups.posts)
+    @JoinTable()
+    groups: Group[];
 
     // `subject` is the post's subject.
     // Some AP implementations may use this as the text for a CW
@@ -61,4 +71,12 @@ export class Post {
     // Themis will use this to create an AP Tombstone or HTTP error 451.
     @Column('boolean')
     deleted: boolean;
+
+    // These two columns set up our tree relation for posts.
+    // Remember that a post can have any number of children, but only one parent.
+    @TreeChildren()
+    children: Post[];
+
+    @TreeParent()
+    parent: Post;
 }

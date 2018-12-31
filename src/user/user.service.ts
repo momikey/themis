@@ -33,7 +33,7 @@ export class UserService {
         const userEntity = this.userRepository.create({
             name: username,
             server: this.configService.serverAddress,
-            displayName: '',
+            displayName: username,
             summary: '',
             icon: ''
         });
