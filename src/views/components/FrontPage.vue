@@ -1,16 +1,22 @@
 <template>
-    <div class="front-page-container">
+    <!-- <div class="front-page-container"> -->
+    <v-container fluid><v-layout justify-start row fill-height>
+        <v-flex xs3>
         <div class="front-column login">
-            <section class="account-box">
-            <transition name="slide-left" mode="out-in">
-                <div class="existing-account" v-if="!isCreating" key="existing">
-                    <input 
+            <v-container fluid><v-layout justify-start column fill-height>
+                <v-window
+                    class="login-or-create"
+                    v-model="isCreating"
+                >
+                    <v-window-item :value="false" reverse="true">
+                    <div class="existing-account" v-if="!isCreating" key="existing">
+                    <v-text-field 
                         id="login-name" 
                         name="login-name" 
                         placeholder="Username" 
                         v-model="loginName"
                     />
-                    <input 
+                    <v-text-field 
                         id="login-password" 
                         name="login-password" 
                         type="password" 
@@ -18,50 +24,78 @@
                         v-model="loginPassword"
                     />
                     <br />
-                    <button id="login-submit" class="button login" @click="loginSubmit">Log in</button>
-                    <button id="create-new-account" class="button submit" @click="showCreateForm">Create account</button>
+                    <v-btn color="blue darken-4"
+                        id="login-submit"
+                        class="button login"
+                        @click="loginSubmit">
+                        Log in
+                    </v-btn>
+                    <v-btn
+                        id="create-new-account"
+                        class="button submit"
+                        @click="showCreateForm">
+                        Create account
+                    </v-btn>
                     <p id="login-invalid" v-if="invalidLogin">Invalid username or password</p>
-                </div>
-                <div class="new-account" v-if="isCreating" key="new">
-                    <input
-                        id="new-name"
-                        name="new-name"
-                        placeholder="Username"
-                        v-model="newAccount.username"
-                    />
-                    <input
-                        id="new-email"
-                        name="new-email"
-                        placeholder="Email address"
-                        v-model="newAccount.email"
-                    />
-                    <input
-                        id="new-password"
-                        name="new-password"
-                        type="password"
-                        placeholder="Password"
-                        v-model="newAccount.password"
-                    />
-                    <input
-                        id="new-retype"
-                        name="new-retype"
-                        type="password"
-                        placeholder="Retype password"
-                        v-model="retypePassword"
-                    />
-                    <br />
-                    <button id="new-account-submit" class="button submit" @click="createAccount">Create account</button>
-                    <button id="new-account-cancel" class="button cancel" @click="cancelCreate">Cancel</button>
-                    <p id="new-account-invalid-reason" :class="isAccountValid">{{validateAccount().reason}}</p>
-                </div>
-            </transition>
-            </section>
-        </div>
+                    </div>
+                    </v-window-item>
 
+                    <v-window-item :value="true">
+                    <div class="new-account" v-if="isCreating" key="new">
+                        <v-text-field
+                            id="new-name"
+                            name="new-name"
+                            placeholder="Username"
+                            v-model="newAccount.username"
+                        />
+                        <v-text-field
+                            id="new-email"
+                            name="new-email"
+                            placeholder="Email address"
+                            v-model="newAccount.email"
+                        />
+                        <v-text-field
+                            id="new-password"
+                            name="new-password"
+                            type="password"
+                            placeholder="Password"
+                            v-model="newAccount.password"
+                        />
+                        <v-text-field
+                            id="new-retype"
+                            name="new-retype"
+                            type="password"
+                            placeholder="Retype password"
+                            v-model="retypePassword"
+                        />
+                        <br />
+                        <v-btn color="blue darken-4"
+                            id="new-account-submit"
+                            class="button submit"
+                            @click="createAccount">
+                            Create account
+                        </v-btn>
+                        <v-btn
+                            id="new-account-cancel"
+                            class="button cancel"
+                            @click="cancelCreate">
+                            Cancel
+                        </v-btn>
+                        <p id="new-account-invalid-reason" :class="isAccountValid">{{validateAccount().reason}}</p>
+                    </div>
+                    </v-window-item>
+                </v-window>
+            </v-layout></v-container>
+        </div>
+        </v-flex>
+
+        <v-flex xs9 pl-2>
         <div class="front-column site-info">
             <p>Put your site's info here...</p>
         </div>
-    </div>
+        </v-flex>
+    <!-- </div> -->
+    </v-layout></v-container>
 </template>
 
 <script lang="ts">
@@ -184,7 +218,7 @@ export default Vue.extend({
 </script>
 
 <style>
-    .front-page-container {
+    /* .front-page-container {
         display: flex;
     }
 
@@ -220,6 +254,6 @@ export default Vue.extend({
 
     .account-invalid {
         color: darkred;
-    }
+    } */
 
 </style>
