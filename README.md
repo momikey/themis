@@ -2,7 +2,7 @@
 
 **Themis** is a decentralized, federated discussion network based on the [ActivityPub](https://www.w3.org/TR/activitypub/) standard.
 
-Note: Right now, this project is in its design stages. Watch this space for more information.
+Note: Right now, this project is in a very, very early alpha stage. Not every feature is implemented, and almost everything is still broken. Watch this space for more information.
 
 ## Goal
 
@@ -10,7 +10,7 @@ The goal of Themis is to create a platform for discussion, debate, and communica
 
 ## Installation and Usage
 
-*TODO* (I'll fill this in once there's actual code. Same for Contributing and other sections.)
+*TODO* (I'll fill this in once there's something worth installing. Same for Contributing and other sections.)
 
 ## License
 
