@@ -12,7 +12,6 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, './public'),
-        publicPath: '/public/',
         filename: '[name].build.js'
     },
     module: {
@@ -56,6 +55,14 @@ module.exports = {
                     'vue-style-loader',
                     'css-loader'
                 ]
+            },
+            {
+                test: /\.(eot|woff|ttf|woff2)$/,
+                loader: 'file-loader',
+                options: {
+                    name: '[name].[ext]',
+                    outputPath: 'fonts/'
+                }
             }
         ]
     },
