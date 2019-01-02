@@ -1,9 +1,23 @@
 import Vue from "vue";
-import Vuetify from "vuetify";
-import ThemisFrontPage from './components/FrontPage.vue';
+import VueRouter from "vue-router";
 import VueWarehouse from "vue-warehouse";
 
+import ThemisFrontPage from './components/FrontPage.vue';
+import WebFrontend from './components/WebFrontend.vue';
+
 import "vuetify/dist/vuetify.min.css";
+import "./stylus/main.styl";
+
+Vue.use(VueRouter);
+
+const routes = [
+    { path: '/', component: ThemisFrontPage },
+    { path: '/web', component: WebFrontend }
+];
+
+const router = new VueRouter({
+    routes
+});
 
 Vue.use(require("vuetify"));
 
@@ -12,13 +26,15 @@ Vue.use(VueWarehouse, {
 })
 
 let v = new Vue({
-    el: "#app",
-    template: `<v-app dark><themis-front-page class="themis-front-page" app/></v-app>`,
+    router,
     data: {
     },
     components: {
-        ThemisFrontPage
+        ThemisFrontPage,
+        WebFrontend
     },
     mounted () {
     }
 });
+
+v.$mount("#app");

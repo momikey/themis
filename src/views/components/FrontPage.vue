@@ -199,7 +199,8 @@ export default Vue.extend({
                 axios.get('/internal/authenticate/post-login', {
                     headers: { "Authorization": `Bearer ${this.$warehouse.get('themis_login_token')}` }
                 })
-                .then(response => location.assign(response.data))
+                // .then(response => location.assign(response.data))
+                .then(response => this.$router.push('web'))
                 .catch(error => console.log(error.response));
             })
             .catch(error => {               
