@@ -1,19 +1,19 @@
 <template>
-    <div class="group-list-container">
-        <ul v-if="groups.length">
-            <li class="group-entry" 
+    <v-list class="group-list-container">
+        <template v-if="groups.length">
+            <v-list-tile class="group-entry" 
                 v-for="group in groups" 
                 :key="group.id"
                 @click="$emit('group-selected', group)"
             >
                 <span class="display-name">{{group.displayName}}</span> 
                 <span class="internal-name">({{formatGroupName(group)}})</span>
-            </li>
-        </ul>
+            </v-list-tile>
+        </template>
         <p v-else>
             {{noGroupsText}}
         </p>
-    </div>
+    </v-list>
 </template>
 
 <script lang="ts">
@@ -44,12 +44,5 @@ export default Vue.extend({
 </script>
 
 <style>
-    .group-list-container ul {
-        list-style-type: none;
-    }
 
-    .group-entry {
-        padding-top: 0.5em;
-        padding-bottom: 0.5em;
-    }
 </style>

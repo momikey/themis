@@ -1,9 +1,24 @@
 <template>
-    <div class="three-pane-view">
-        <section class="groups-pane pane">
+    <v-container fluid class="three-pane-view"><v-layout justify-start row fill-height wrap>
+        <v-flex xs3>
+        <section class="groups-pane">
             <header>
-                <h1>All known groups</h1>
-                <button class="align-right">Create new group</button>
+                <v-toolbar dense dark color="primary darken-4">
+                <v-toolbar-title>All known groups</v-toolbar-title>
+
+                <v-spacer></v-spacer>
+
+                <v-tooltip>
+                <v-btn icon dark slot="activator"
+                    class="create-group"
+                >
+                    <!-- Create new group -->
+                    <v-icon>add</v-icon>
+                </v-btn>
+                <span>Create new group</span>
+                </v-tooltip>
+
+                </v-toolbar>
             </header>
 
             <group-list class="groups-list-container"
@@ -12,39 +27,73 @@
 
             <footer>
                 <button>Settings</button>
-                <span class="logged-in align-right">Logged in as 
+                <span class="logged-in">Logged in as 
                     <strong><span class="username">{{userName}}</span></strong></span>
             </footer>
         </section>
+        </v-flex>
 
-        <div class="vertical container">
-        <section class="thread-list pane">
-            <header>
-                <h1 v-if="currentGroup">Posts in group 
-                    <span class="group-name">{{currentGroup.name}}</span>
-                </h1>
-                <h1 v-else>{{noGroupSelectedText}}</h1>
+        <v-flex xs9>
+            <v-layout column fill-height>
+            
+            <v-flex d-flex>
+            <section class="thread-list">
+                <header>
+                    <v-toolbar dense dark color="primary darken-4">
 
-                <button class="create-post" @click="createPost">New Post</button>
-                <button v-if="currentThread" class="create-reply" @click="replyToPost">Reply</button>
-            </header>
+                    <v-toolbar-title v-if="currentGroup">
+                        Posts in group <span class="group-name">{{currentGroup.name}}</span>
+                    </v-toolbar-title>
+                    <v-toolbar-title v-else>{{noGroupSelectedText}}</v-toolbar-title>
 
-            <thread-list class="thread-list-container"
-                @thread-selected="threadSelected"
-                @post-selected="postSelected"
-                :group="currentGroup"
-            />
-        </section>
+                    <v-spacer></v-spacer>
 
-        <section class="current-post pane">
-            <post-editor v-if="isComposingPost"
-                @post-submitted="submitPost"
-                @post-canceled="cancelPost"
-            />
-            <p v-else>{{currentPostText}}</p>
-        </section>
-        </div>
-    </div>
+                    <v-tooltip>
+                    <v-btn icon dark slot="activator"
+                        class="create-post"
+                        @click="createPost"
+                    >
+                        <!-- New Post -->
+                        <v-icon dark>create</v-icon>
+                    </v-btn>
+                    <span>New post</span>
+                    </v-tooltip>
+
+                    <v-tooltip>
+                    <v-btn icon dark slot="activator"
+                        v-if="currentThread"
+                        class="create-reply"
+                        @click="replyToPost"
+                    >
+                        <!-- Reply -->
+                        <v-icon dark>reply</v-icon>
+                    </v-btn>
+                    <span>Reply</span>
+                    </v-tooltip>
+
+                    </v-toolbar>
+                </header>
+
+                <thread-list class="thread-list-container"
+                    @thread-selected="threadSelected"
+                    @post-selected="postSelected"
+                    :group="currentGroup"
+                />
+            </section>
+            </v-flex>
+
+            <v-flex d-flex>
+            <section class="current-post">
+                <post-editor v-if="isComposingPost"
+                    @post-submitted="submitPost"
+                    @post-canceled="cancelPost"
+                />
+                <p v-else>{{currentPostText}}</p>
+            </section>
+            </v-flex>
+            </v-layout>
+        </v-flex>
+    </v-layout></v-container>
 </template>
 
 <script lang="ts">
@@ -58,6 +107,7 @@ import PostEditor from './PostEditor.vue'
 export default Vue.extend({
     data () {
         return {
+            userName: null,
             currentGroup: null,
             currentThread: null,
             currentPost: null,
@@ -68,12 +118,15 @@ export default Vue.extend({
             isComposingPost: false
         }
     },
-    props: ['userName'],
     computed: {
 
     },
     methods: {
         groupSelected (group) {
+            if (group !== this.currentGroup) {
+                this.currentThread = null;
+            }
+
             this.currentGroup = group;
         },
         threadSelected (thread) {
@@ -111,12 +164,19 @@ export default Vue.extend({
         GroupList,
         ThreadList,
         PostEditor
+    },
+    mounted () {
+        const user = this.$warehouse.get("themis_login_user");
+
+        if (user) {
+            this.userName = user;
+        }
     }
 })
 </script>
 
 <style>
-    .three-pane-view {
+    /* .three-pane-view {
         display: flex;
         align-items: stretch;
         width: 100%;
@@ -183,5 +243,5 @@ export default Vue.extend({
 
     .logged-in {
         margin-left: 2em;
-    }
+    } */
 </style>

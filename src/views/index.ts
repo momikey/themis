@@ -7,17 +7,9 @@ import WebFrontend from './components/WebFrontend.vue';
 
 import "vuetify/dist/vuetify.min.css";
 import "./stylus/main.styl";
+import "material-design-icons-iconfont/dist/material-design-icons.css";
 
-Vue.use(VueRouter);
-
-const routes = [
-    { path: '/', component: ThemisFrontPage },
-    { path: '/web', component: WebFrontend }
-];
-
-const router = new VueRouter({
-    routes
-});
+import router from "./router";
 
 Vue.use(require("vuetify"));
 

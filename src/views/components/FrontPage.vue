@@ -1,6 +1,6 @@
 <template>
     <!-- <div class="front-page-container"> -->
-    <v-container fluid><v-layout justify-start row fill-height>
+    <v-container fluid><v-layout justify-start row fill-height wrap>
         <v-flex xs3>
         <div class="front-column login">
             <v-container fluid><v-layout justify-start column fill-height>
@@ -219,42 +219,5 @@ export default Vue.extend({
 </script>
 
 <style>
-    /* .front-page-container {
-        display: flex;
-    }
-
-    .front-column.login {
-        width: 33%;
-    }
-
-    .front-column.site-info {
-        flex-grow: 1;
-    }
-
-    .slide-left-enter-active, .slide-right-enter-active {
-        transition: all .1s linear;
-    }
-
-    .slide-left-leave-active, .slide-right-leave-active {
-        transition: all .1s linear;
-    }
-
-    .slide-left-enter, .slide-left-leave-to {
-        transform: translateX(-100px);
-        opacity: 0;
-    }
-
-    .slide-right-enter, .slide-right-leave-to {
-        transform: translateX(100px);
-        opacity: 0;
-    }
-
-    .account-valid {
-        color: darkgreen;
-    }
-
-    .account-invalid {
-        color: darkred;
-    } */
 
 </style>

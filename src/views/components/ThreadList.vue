@@ -1,6 +1,21 @@
 <template>
-    <div class="thread-list-container">
-        <ul v-if="threads.length">
+    <v-treeview
+        class="thread-list-container"
+        v-model="tree"
+        :items="threads"
+        item-text="subject"
+        activatable
+        :active.sync="active"
+    >
+        <template slot="prepend" slot-scope="{ item }">
+            <span>{{item.timestamp}}</span>
+        </template>
+
+        <template slot="append" slot-scope="{ item }">
+            <span v-html="formatSender(item.sender)"></span>
+        </template>
+
+        <!-- <ul v-if="threads.length">
             <li class="thread-entry"
                 v-for="thread in threads"
                 :key="thread.id"
@@ -13,8 +28,8 @@
         </ul>
         <p v-else>
             {{noThreadsText}}
-        </p>
-    </div>
+        </p> -->
+    </v-treeview>
 </template>
 
 <script lang="ts">
@@ -24,8 +39,9 @@ import axios from 'axios'
 export default Vue.extend({
     data () {
         return {
-            allPosts: [],
             threads: [],
+            tree: [],
+            _active: null,
             noThreadsText: "No posts in this group. Create one or choose another group."
         }
     },
@@ -33,22 +49,35 @@ export default Vue.extend({
         'group'
     ],
     computed: {
-        visibleThreads: function () {
+        visibleThreads () {
             // TODO: add filtering, etc.
             return this.threads;
+        },
+        active: {
+            get: function () {
+                return this._active;
+            },
+            set: function (ids) {
+                if (ids.length) {
+                    this._active = ids[0];
+
+                    const post = this.threads.find(e => e.id === ids[0]);
+                    this.$emit('thread-selected', post);
+                }
+            }
         }
     },
     watch: {
-        group: function (newVal, oldVal) {
+        group (newVal, oldVal) {
             this.retrievePosts();
         }
     },
     methods: {
-        formatSender: function (sender) {
+        formatSender (sender) {
             // TODO: add formatting, like with groups
             return `by <span class="display-name">${sender.displayName}</span><span class="internal-name">(${sender.name})</span>`;
         },
-        retrievePosts: function () {
+        retrievePosts () {
             if (this.group) {
                 axios.get(`/internal/posts/by-group/${this.group.name}`)
                     .then(response => this.threads = response.data)
