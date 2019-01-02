@@ -28,6 +28,10 @@ module.exports = {
                 }
             },
             {
+                test: /\.styl$/,
+                use: ['vue-style-loader', 'css-loader', 'stylus-loader']
+            },
+            {
                 test: /\.tsx?$/,
                 loader: 'ts-loader',
                 include: [
@@ -56,7 +60,7 @@ module.exports = {
         ]
     },
     resolve: {
-        extensions: ['.ts', '.js', '.vue', '.json'],
+        extensions: ['.ts', '.js', '.vue', '.json', '.styl'],
         alias: {
             'vue$': 'vue/dist/vue.esm.js'
         }
