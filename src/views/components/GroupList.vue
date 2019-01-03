@@ -1,13 +1,38 @@
 <template>
-    <v-list class="group-list-container">
+    <v-list class="group-list-container" two-line subheader>
+        <v-subheader>
+            <v-layout>
+                <v-flex>
+                {{groupSubheader}}
+                </v-flex>
+
+                <v-spacer></v-spacer>
+
+                <v-tooltip bottom>
+                    <v-icon slot="activator">filter_list</v-icon>
+                    <span>Filter</span>
+                </v-tooltip>
+
+                <!-- <v-flex xs1 align-self-center>
+                <v-tooltip bottom v-if="canCreateGroups">
+                    <v-icon small slot="activator">add</v-icon>
+                    <span>Create new group</span>
+                </v-tooltip>
+                </v-flex> -->
+            </v-layout>
+        </v-subheader>
+
         <template v-if="groups.length">
             <v-list-tile class="group-entry" 
                 v-for="group in groups" 
                 :key="group.id"
-                @click="$emit('group-selected', group)"
+                @click="selectGroup(group)"
+                :value="currentGroup && group.id === currentGroup.id"
             >
-                <span class="display-name">{{group.displayName}}</span> 
-                <span class="internal-name">({{formatGroupName(group)}})</span>
+                <v-list-tile-content>
+                <v-list-tile-title class="display-name">{{group.displayName}}</v-list-tile-title> 
+                <v-list-tile-sub-title class="internal-name">({{formatGroupName(group)}})</v-list-tile-sub-title>
+                </v-list-tile-content>
             </v-list-tile>
         </template>
         <p v-else>
@@ -24,7 +49,17 @@ export default Vue.extend({
     data () {
         return {
             groups: [],
-            noGroupsText: "No known groups on this server. Create one to get started."
+            isFiltered: false,
+            currentGroup: null,
+            noGroupsText: "No known groups on this server. Create one to get started.",
+
+            // TODO: Make this a prop that gets passed in from server config
+            canCreateGroups: true
+        }
+    },
+    computed: {
+        groupSubheader () {
+            return (this.isFiltered) ? "Filtered groups" : "All groups";
         }
     },
     methods: {
@@ -35,6 +70,10 @@ export default Vue.extend({
             axios.get("/internal/groups")
                 .then(response => (this.groups = response.data))
                 .catch(error => console.log(error));
+        },
+        selectGroup (group) {
+            this.currentGroup = group;
+            this.$emit('group-selected', group);
         }
     },
     mounted () {

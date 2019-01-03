@@ -1,36 +1,26 @@
 <template>
     <v-container fluid class="three-pane-view"><v-layout justify-start row fill-height wrap>
         <v-flex xs3>
-        <section class="groups-pane">
-            <header>
-                <v-toolbar dense dark color="primary darken-4">
-                <v-toolbar-title>All known groups</v-toolbar-title>
+            <v-toolbar dense dark color="primary darken-4">
+            <v-toolbar-side-icon @click.stop="drawerClicked"></v-toolbar-side-icon>
+            <v-toolbar-title>@{{userName}}</v-toolbar-title>
+            </v-toolbar>
 
-                <v-spacer></v-spacer>
+            <v-layout column fill-height>
 
-                <v-tooltip>
-                <v-btn icon dark slot="activator"
-                    class="create-group"
-                >
-                    <!-- Create new group -->
-                    <v-icon>add</v-icon>
-                </v-btn>
-                <span>Create new group</span>
-                </v-tooltip>
-
-                </v-toolbar>
-            </header>
-
-            <group-list class="groups-list-container"
+            <v-flex xs1>
+            <group-list
                 @group-selected="groupSelected"
             />
+            </v-flex>
 
-            <footer>
-                <button>Settings</button>
-                <span class="logged-in">Logged in as 
-                    <strong><span class="username">{{userName}}</span></strong></span>
-            </footer>
-        </section>
+            <v-flex>
+            <v-btn dark color="primary darken-4">
+                <v-icon right>add_new</v-icon>
+               Create new group
+            </v-btn>
+            </v-flex>
+            </v-layout>
         </v-flex>
 
         <v-flex xs9>
@@ -115,7 +105,9 @@ export default Vue.extend({
             noGroupSelectedText: "No group selected",
             currentPostText: "",
 
-            isComposingPost: false
+            isComposingPost: false,
+
+            drawer: false
         }
     },
     computed: {
@@ -158,6 +150,14 @@ export default Vue.extend({
         },
         replyToPost () {
 
+        },
+        drawerClicked () {
+            // TODO: Open the navigation drawer.
+            // (Oh, and actually *make* a navigation drawer!)
+            this.drawer = !this.drawer;
+
+            console.log(this.drawer);
+            
         }
     },
     components: {
