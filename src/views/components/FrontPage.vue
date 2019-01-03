@@ -9,22 +9,22 @@
                     v-model="isCreating"
                 >
                     <v-window-item :value="false" reverse="true">
-                    <div class="existing-account" v-if="!isCreating" key="existing">
+                    <v-form class="existing-account" v-if="!isCreating" key="existing">
                     <v-text-field 
                         id="login-name" 
                         name="login-name" 
-                        placeholder="Username" 
+                        label="Username" 
                         v-model="loginName"
                     />
                     <v-text-field 
                         id="login-password" 
                         name="login-password" 
                         type="password" 
-                        placeholder="Password" 
+                        label="Password" 
                         v-model="loginPassword"
                     />
                     <br />
-                    <v-btn color="blue darken-4"
+                    <v-btn color="orange darken-4"
                         id="login-submit"
                         class="button login"
                         @click="loginSubmit">
@@ -37,39 +37,43 @@
                         Create account
                     </v-btn>
                     <p id="login-invalid" v-if="invalidLogin">Invalid username or password</p>
-                    </div>
+                    </v-form>
                     </v-window-item>
 
                     <v-window-item :value="true">
-                    <div class="new-account" v-if="isCreating" key="new">
+                    <v-form class="new-account" v-if="isCreating" key="new">
                         <v-text-field
                             id="new-name"
                             name="new-name"
-                            placeholder="Username"
+                            label="Username"
                             v-model="newAccount.username"
+                            :rules="newAccountRules.name"
                         />
                         <v-text-field
                             id="new-email"
                             name="new-email"
-                            placeholder="Email address"
+                            label="Email address"
                             v-model="newAccount.email"
+                            :rules="newAccountRules.email"
                         />
                         <v-text-field
                             id="new-password"
                             name="new-password"
                             type="password"
-                            placeholder="Password"
+                            label="Password"
                             v-model="newAccount.password"
+                            :rules="newAccountRules.password"
                         />
                         <v-text-field
                             id="new-retype"
                             name="new-retype"
                             type="password"
-                            placeholder="Retype password"
+                            label="Retype password"
                             v-model="retypePassword"
+                            :rules="newAccountRules.retype"
                         />
                         <br />
-                        <v-btn color="blue darken-4"
+                        <v-btn color="orange darken-4"
                             id="new-account-submit"
                             class="button submit"
                             @click="createAccount">
@@ -82,7 +86,7 @@
                             Cancel
                         </v-btn>
                         <p id="new-account-invalid-reason" :class="isAccountValid">{{validateAccount().reason}}</p>
-                    </div>
+                    </v-form>
                     </v-window-item>
                 </v-window>
             </v-layout></v-container>
@@ -117,7 +121,7 @@ export default Vue.extend({
             },
             retypePassword: '',
 
-            invalidLogin: false
+            invalidLogin: false,
         }
     },
     computed: {
@@ -128,6 +132,32 @@ export default Vue.extend({
 
         isAccountValid: function () {
             return (this.validateAccount().isValid ? "account-valid" : "account-invalid");
+        },
+
+        newAccountRules () {
+            return {
+                name: [
+                    // TODO: Make real validation logic here,
+                    // most likely pulling something from the server.
+                    v => !!v || "Username is required",
+                    v => !/[^A-Za-z0-9_-]/.test(v) || "Only alphanumeric characters, -, and _ are allowed"
+                ],
+                email: [
+                    // TODO: Don't even get me started on email validation...
+                    v => !!v || "Email address is required",
+                    v => /.+@.+/.test(v) || "Email address must be valid"
+                ],
+                password: [
+                    // TODO: Real password verification, with server rules,
+                    // strength checking, and all that fun stuff.
+                    v => !!v || "You must provide a password",
+                    v => v.length >= 6 || "Password must be at least 6 characters"
+                ],
+                retype: [
+                    v => this.newAccount.password && 
+                    this.newAccount.password === this.retypePassword || "Passwords must match"
+                ]
+            }
         }
     },
     methods: {
