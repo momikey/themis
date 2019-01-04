@@ -30,8 +30,17 @@
                 :value="currentGroup && group.id === currentGroup.id"
             >
                 <v-list-tile-content>
-                <v-list-tile-title class="display-name">{{group.displayName}}</v-list-tile-title> 
-                <v-list-tile-sub-title class="internal-name">({{formatGroupName(group)}})</v-list-tile-sub-title>
+                <v-list-tile-title
+                    class="display-name"
+                >
+                    {{group.displayName}}
+                </v-list-tile-title> 
+
+                <v-list-tile-sub-title
+                    class="internal-name caption"
+                >
+                    ({{formatGroupName(group)}})
+                </v-list-tile-sub-title>
                 </v-list-tile-content>
             </v-list-tile>
         </template>

@@ -7,34 +7,35 @@
         activatable
         :active.sync="active"
     >
+        <template slot="label" slot-scope="{ item }">
+            <v-layout row justify-space-between>
+                <v-flex xs8>
+                <span>{{item.subject}}</span>
+                </v-flex>
+
+                <v-flex xs2>
+                <span>{{formatSender(item.sender)}}</span>
+                </v-flex>
+
+                <v-flex xs2>
+                <span>{{formatDate(item.timestamp)}}</span>
+                </v-flex>
+            </v-layout>
+        </template>
         <template slot="prepend" slot-scope="{ item }">
-            <span>{{item.timestamp}}</span>
+           
         </template>
 
         <template slot="append" slot-scope="{ item }">
-            <span v-html="formatSender(item.sender)"></span>
+           
         </template>
-
-        <!-- <ul v-if="threads.length">
-            <li class="thread-entry"
-                v-for="thread in threads"
-                :key="thread.id"
-                @click="$emit('thread-selected', thread)"
-            >
-                <span class="post-subject">{{thread.subject}}</span>
-                <span class="post-sender" v-html="formatSender(thread.sender)"></span>
-                <span class="post-date">{{thread.date}}</span>
-            </li>
-        </ul>
-        <p v-else>
-            {{noThreadsText}}
-        </p> -->
     </v-treeview>
 </template>
 
 <script lang="ts">
 import Vue, { VueConstructor } from 'vue'
 import axios from 'axios'
+import { distanceInWordsToNow, parse } from 'date-fns';
 
 export default Vue.extend({
     data () {
@@ -75,7 +76,7 @@ export default Vue.extend({
     methods: {
         formatSender (sender) {
             // TODO: add formatting, like with groups
-            return `by <span class="display-name">${sender.displayName}</span><span class="internal-name">(${sender.name})</span>`;
+            return `${sender.displayName || sender.name}`;
         },
         retrievePosts () {
             if (this.group) {
@@ -83,6 +84,9 @@ export default Vue.extend({
                     .then(response => this.threads = response.data)
                     .catch(error => console.log(error));
             }
+        },
+        formatDate (date) {
+            return distanceInWordsToNow(parse(date));
         }
     },
     mounted () {

@@ -38,7 +38,7 @@
 
                     <v-spacer></v-spacer>
 
-                    <v-tooltip>
+                    <v-tooltip v-if="currentGroup">
                     <v-btn icon dark slot="activator"
                         class="create-post"
                         @click="createPost"
@@ -47,18 +47,6 @@
                         <v-icon dark>create</v-icon>
                     </v-btn>
                     <span>New post</span>
-                    </v-tooltip>
-
-                    <v-tooltip>
-                    <v-btn icon dark slot="activator"
-                        v-if="currentThread"
-                        class="create-reply"
-                        @click="replyToPost"
-                    >
-                        <!-- Reply -->
-                        <v-icon dark>reply</v-icon>
-                    </v-btn>
-                    <span>Reply</span>
                     </v-tooltip>
 
                     </v-toolbar>
@@ -78,7 +66,10 @@
                     @post-submitted="submitPost"
                     @post-canceled="cancelPost"
                 />
-                <p v-else>{{currentPostText}}</p>
+                <post-view v-else-if="currentPost"
+                    :post="currentPost"
+                />
+                <div v-else></div>
             </section>
             </v-flex>
             </v-layout>
@@ -93,6 +84,7 @@ import axios from 'axios'
 import GroupList from './GroupList.vue'
 import ThreadList from './ThreadList.vue'
 import PostEditor from './PostEditor.vue'
+import PostView from './PostView.vue'
 
 export default Vue.extend({
     data () {
@@ -117,6 +109,7 @@ export default Vue.extend({
         groupSelected (group) {
             if (group !== this.currentGroup) {
                 this.currentThread = null;
+                this.currentPost = null;
             }
 
             this.currentGroup = group;
@@ -124,8 +117,7 @@ export default Vue.extend({
         threadSelected (thread) {
             this.currentThread = thread;
 
-            // TODO: temp
-            this.currentPostText = this.currentThread.content;
+            this.postSelected(thread);
         },
         postSelected (post) {
             this.currentPost = post;
@@ -163,7 +155,8 @@ export default Vue.extend({
     components: {
         GroupList,
         ThreadList,
-        PostEditor
+        PostEditor,
+        PostView
     },
     mounted () {
         const user = this.$warehouse.get("themis_login_user");
@@ -176,72 +169,5 @@ export default Vue.extend({
 </script>
 
 <style>
-    /* .three-pane-view {
-        display: flex;
-        align-items: stretch;
-        width: 100%;
-        height: 100%;
-        min-height: 100%;
-    }
 
-    .three-pane-view .vertical.container {
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
-        align-items: stretch;
-    }
-
-    .groups-pane {
-        width: 30%;
-        overflow-y: auto;
-        overflow-x: hidden;
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .groups-list-container {
-        flex-grow: 1;
-    }
-
-    .pane > footer {
-        padding-bottom: 1em;
-    }
-
-    .pane > header, .pane > .groups-list-container, .pane > footer {
-        flex-shrink: 0;
-    }
-
-    .thread-list {
-        min-height: 40%;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-
-    .thread-list header {
-        display: flex;
-        align-items: center;
-    }
-
-    .thread-list header button:nth-of-type(1) {
-        margin-left: auto;
-    }
-
-    .current-post {
-        flex-grow: 1;
-    }
-
-    .groups-pane header {
-        display: flex;
-        align-items: center;
-        padding-right: 2em;
-    }
-
-    .align-right {
-        margin-left: auto;
-    }
-
-    .logged-in {
-        margin-left: 2em;
-    } */
 </style>
