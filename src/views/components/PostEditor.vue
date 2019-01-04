@@ -1,28 +1,36 @@
 <template>
-    <div class="post-editor">
-        <header>
-            <p class="post-info"></p>
-        </header>
+    <v-card class="post-editor">
+        <v-text-field
+            class="editor-subject"
+            v-model="postSubject"
+            label="Subject"
+            autofocus
+            clearable
+        >
+        </v-text-field>
 
-        <section>
-            <input
-                class="editor-subject"
-                v-model="postSubject"
-                :placeholder="subjectPlaceholder"
-            />
-            <textarea class="editor-window"
-                v-model="postText"
-                rows="10" cols="72"
-                :placeholder="bodyPlaceholder"
-            >
-            </textarea>
-        </section>
+        <v-textarea box class="editor-window"
+            v-model="postText"
+            placeholder="What do you want to say?"
+            no-resize
+        >
+        </v-textarea>
 
-        <footer>
-            <button @click="cancelPost">Cancel</button>
-            <button @click="submitPost">Post</button>
-        </footer>
-    </div>
+        <v-card-actions>
+        <v-btn round dark color="primary darken-4"
+            @click="submitPost"
+        >
+            <v-icon dark left>send</v-icon>
+            Post
+        </v-btn>
+        <v-btn round dark
+            @click="cancelPost"
+        >
+            <v-icon dark left>cancel</v-icon>
+            Cancel
+        </v-btn>
+        </v-card-actions>
+    </v-card>
 </template>
 
 <script lang="ts">
@@ -61,36 +69,5 @@ export default Vue.extend({
 </script>
 
 <style>
-    .post-editor {
-        display: flex;
-        flex-direction: column;
-        justify-content: stretch;
-    }
-
-    .post-editor header, .post-editor section, .post-editor footer {
-        flex-shrink: 0;
-    }
-
-    .post-editor header {
-
-    }
-
-    .post-editor section {
-        flex-grow: 1;
-        min-height: 50%;
-        overflow-y: auto;
-        align-items: stretch;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .post-editor footer {
-        display: flex;
-        align-items: stretch;
-    }
-
-    .post-editor footer button:first-child {
-        margin-left: auto;
-    }
 
 </style>

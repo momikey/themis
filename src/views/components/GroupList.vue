@@ -2,14 +2,16 @@
     <v-list class="group-list-container" two-line subheader>
         <v-subheader>
             <v-layout>
-                <v-flex>
+                <v-flex align-self-center>
                 {{groupSubheader}}
                 </v-flex>
 
                 <v-spacer></v-spacer>
 
                 <v-tooltip bottom>
-                    <v-icon slot="activator">filter_list</v-icon>
+                    <v-btn icon slot="activator">
+                        <v-icon dark>filter_list</v-icon>
+                    </v-btn>
                     <span>Filter</span>
                 </v-tooltip>
 

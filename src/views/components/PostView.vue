@@ -1,71 +1,60 @@
 <template>
-    <v-layout column fill-height>
-        <v-flex>
-            <!-- Post metadata and actions -->
-            <v-card>
-            </v-card>
-        </v-flex>
+    <v-card>
+        <v-layout>
+        <v-card-title primary-title>
+            <v-layout column>
+                <v-flex>
+                <div class="headline">{{post.subject}}</div>
+                </v-flex>
 
-        <v-flex>
-            <!-- Post body -->
-            <v-card>
-                <v-layout>
-                <v-card-title primary-title>
-                    <v-layout column>
-                        <v-flex>
-                        <div class="headline">{{post.subject}}</div>
-                        </v-flex>
+                <v-tooltip right>
+                <v-flex slot="activator">
+                <div class="caption">by {{post.sender.displayName || post.sender.name}}</div>
+                </v-flex>
 
-                        <v-tooltip right>
-                        <v-flex slot="activator">
-                        <div class="caption">by {{post.sender.displayName || post.sender.name}}</div>
-                        </v-flex>
+                <span>{{formatSender(post.sender)}}</span>
+                </v-tooltip>
 
-                        <span>{{formatSender(post.sender)}}</span>
-                        </v-tooltip>
+                <v-tooltip right>
+                <v-flex slot="activator">
+                    <div class="caption">{{formatDate(post.timestamp)}}</div>
+                </v-flex>
 
-                        <v-tooltip right>
-                        <v-flex slot="activator">
-                            <div class="caption">{{formatDate(post.timestamp)}}</div>
-                        </v-flex>
+                <span>{{rawDate(post.timestamp)}}</span>
+                </v-tooltip>
+            </v-layout>
+        </v-card-title>
 
-                        <span>{{rawDate(post.timestamp)}}</span>
-                        </v-tooltip>
-                    </v-layout>
-                </v-card-title>
+        <v-spacer></v-spacer>
 
-                <v-spacer></v-spacer>
+        <v-card-actions>
+            <v-tooltip bottom>
+            <v-btn icon dark slot="activator"
+                class="create-reply"
+            >
+                <!-- Reply -->
+                <v-icon dark>reply</v-icon>
+            </v-btn>
+            <span>Reply</span>
+            </v-tooltip>
 
-                <v-card-actions>
-                    <v-tooltip bottom>
-                    <v-btn icon dark slot="activator"
-                        class="create-reply"
-                    >
-                        <!-- Reply -->
-                        <v-icon dark>reply</v-icon>
-                    </v-btn>
-                    <span>Reply</span>
-                    </v-tooltip>
+            <v-tooltip bottom>
+            <v-btn icon dark slot="activator"
+                class="post-options"
+            >
+                <!-- Post options -->
+                <v-icon>more_vert</v-icon>
+            </v-btn>
+            <span>Post options</span>
+            </v-tooltip>
+        </v-card-actions>
+        </v-layout>
 
-                    <v-tooltip bottom>
-                    <v-btn icon dark slot="activator"
-                        class="post-options"
-                    >
-                        <!-- Post options -->
-                        <v-icon>more_vert</v-icon>
-                    </v-btn>
-                    <span>Post options</span>
-                    </v-tooltip>
-                </v-card-actions>
-                </v-layout>
+        <v-card-text>
+            {{post.content}}
+        </v-card-text>
 
-                <v-card-text>
-                    {{post.content}}
-                </v-card-text>
-
-            </v-card>
-        </v-flex>
-    </v-layout>
+    </v-card>
 </template>
 
 <script lang="ts">

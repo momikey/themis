@@ -26,42 +26,37 @@
         <v-flex xs9>
             <v-layout column fill-height>
             
+            <v-toolbar dense dark color="primary darken-4" class="mx-3">
+
+            <v-toolbar-title v-if="currentGroup">
+                Posts in group <span class="group-name">{{currentGroup.name}}</span>
+            </v-toolbar-title>
+            <v-toolbar-title v-else>{{noGroupSelectedText}}</v-toolbar-title>
+
+            <v-spacer></v-spacer>
+
+            <v-tooltip v-if="currentGroup">
+            <v-btn icon dark slot="activator"
+                class="create-post"
+                @click="createPost"
+            >
+                <!-- New Post -->
+                <v-icon dark>create</v-icon>
+            </v-btn>
+            <span>New post</span>
+            </v-tooltip>
+
+            </v-toolbar>
+
             <v-flex d-flex>
-            <section class="thread-list">
-                <header>
-                    <v-toolbar dense dark color="primary darken-4">
-
-                    <v-toolbar-title v-if="currentGroup">
-                        Posts in group <span class="group-name">{{currentGroup.name}}</span>
-                    </v-toolbar-title>
-                    <v-toolbar-title v-else>{{noGroupSelectedText}}</v-toolbar-title>
-
-                    <v-spacer></v-spacer>
-
-                    <v-tooltip v-if="currentGroup">
-                    <v-btn icon dark slot="activator"
-                        class="create-post"
-                        @click="createPost"
-                    >
-                        <!-- New Post -->
-                        <v-icon dark>create</v-icon>
-                    </v-btn>
-                    <span>New post</span>
-                    </v-tooltip>
-
-                    </v-toolbar>
-                </header>
-
                 <thread-list class="thread-list-container"
                     @thread-selected="threadSelected"
                     @post-selected="postSelected"
                     :group="currentGroup"
                 />
-            </section>
             </v-flex>
 
-            <v-flex d-flex>
-            <section class="current-post">
+            <v-flex d-flex grow class="ml-3">
                 <post-editor v-if="isComposingPost"
                     @post-submitted="submitPost"
                     @post-canceled="cancelPost"
@@ -70,7 +65,6 @@
                     :post="currentPost"
                 />
                 <div v-else></div>
-            </section>
             </v-flex>
             </v-layout>
         </v-flex>
@@ -110,17 +104,24 @@ export default Vue.extend({
             if (group !== this.currentGroup) {
                 this.currentThread = null;
                 this.currentPost = null;
+                this.isComposingPost = false;
             }
 
             this.currentGroup = group;
         },
         threadSelected (thread) {
-            this.currentThread = thread;
+            if (thread !== this.currentThread) {
+                this.isComposingPost = false;
+                this.currentThread = thread;
+            }
 
             this.postSelected(thread);
         },
         postSelected (post) {
-            this.currentPost = post;
+            if (post !== this.currentPost) {
+                this.isComposingPost = false;
+                this.currentPost = post;
+            }
         },
         createPost () {
             if (this.currentGroup) {
