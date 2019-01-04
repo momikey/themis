@@ -15,9 +15,9 @@
             </v-flex>
 
             <v-flex>
-            <v-btn dark color="primary darken-4">
-                <v-icon right>add_new</v-icon>
-               Create new group
+            <v-btn block dark class="mt-0" color="primary darken-4">
+                <v-icon left>add</v-icon>
+                <span>Create new group</span>
             </v-btn>
             </v-flex>
             </v-layout>
