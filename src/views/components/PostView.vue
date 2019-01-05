@@ -31,11 +31,22 @@
             <v-tooltip bottom>
             <v-btn icon dark slot="activator"
                 class="create-reply"
+                @click="reply"
             >
                 <!-- Reply -->
                 <v-icon dark>reply</v-icon>
             </v-btn>
             <span>Reply</span>
+            </v-tooltip>
+
+            <v-tooltip bottom>
+            <v-btn icon dark slot="activator"
+                class="like-post"
+            >
+                <!-- Like -->
+                <v-icon dark>star_border</v-icon>
+            </v-btn>
+            <span>Like</span>
             </v-tooltip>
 
             <v-tooltip bottom>
@@ -51,7 +62,7 @@
         </v-layout>
 
         <v-card-text>
-            {{post.content}}
+                {{post.content}}
         </v-card-text>
 
     </v-card>
@@ -87,10 +98,14 @@ export default Vue.extend({
                 parse(date),
                 "MMM D, YYYY, HH:mm"
             );
+        },
+        reply () {
+            this.$emit('reply-clicked');
         }
     },
     mounted () {
-    }
+
+    },
 })
 </script>
 

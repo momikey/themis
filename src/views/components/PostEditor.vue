@@ -46,7 +46,8 @@ export default Vue.extend({
         }
     },
     props: [
-        'replyText'
+        'replyText',
+        'initialSubject'
     ],
     methods: {
         submitPost () {
@@ -63,6 +64,10 @@ export default Vue.extend({
     mounted () {
         if (this.replyText) {
             this.postText = '> ' + this.replyText + '\n';
+        }
+
+        if (this.initialSubject) {
+            this.postSubject = this.initialSubject;
         }
     }
 })

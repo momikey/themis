@@ -22,13 +22,6 @@
                 </v-flex>
             </v-layout>
         </template>
-        <template slot="prepend" slot-scope="{ item }">
-           
-        </template>
-
-        <template slot="append" slot-scope="{ item }">
-           
-        </template>
     </v-treeview>
 </template>
 

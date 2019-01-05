@@ -61,9 +61,29 @@
                     @post-submitted="submitPost"
                     @post-canceled="cancelPost"
                 />
-                <post-view v-else-if="currentPost"
-                    :post="currentPost"
-                />
+                <v-layout v-else-if="currentPost" row>
+                    <v-flex d-flex xs6 grow>                    
+                    <post-view
+                        :post="currentPost"
+                        @reply-clicked="startReply"
+                        @reply-submitted="submitReply"
+                        @reply-canceled="cancelReply"
+                    />
+                    </v-flex>
+
+                    <v-slide-x-transition>
+                    <v-flex d-flex xs6 grow class="ml-1"
+                        v-if="isComposingReply"
+                        origin="center right"
+                    >
+                    <post-editor class="px-2 pt-2"
+                        :initial-subject="replySubject"
+                        @post-submitted="submitReply"
+                        @post-canceled="cancelReply"
+                    />
+                    </v-flex>
+                    </v-slide-x-transition>
+                </v-layout>
                 <div v-else></div>
             </v-flex>
             </v-layout>
@@ -92,6 +112,8 @@ export default Vue.extend({
             currentPostText: "",
 
             isComposingPost: false,
+            isComposingReply: false,
+            replySubject: null,
 
             drawer: false
         }
@@ -113,6 +135,8 @@ export default Vue.extend({
             if (thread !== this.currentThread) {
                 this.isComposingPost = false;
                 this.currentThread = thread;
+
+                this.cancelReply();
             }
 
             this.postSelected(thread);
@@ -121,6 +145,8 @@ export default Vue.extend({
             if (post !== this.currentPost) {
                 this.isComposingPost = false;
                 this.currentPost = post;
+
+                this.cancelReply();
             }
         },
         createPost () {
@@ -141,8 +167,22 @@ export default Vue.extend({
         cancelPost () {
             this.isComposingPost = false;
         },
-        replyToPost () {
-
+        startReply() {
+            this.isComposingReply = true;
+            this.replySubject = this.currentPost.subject;
+        },
+        submitReply (reply) {
+            // TODO
+            reply.group = this.currentGroup.id;
+            reply.sender = this.userName;
+            reply.parent = this.currentPost.id;
+            console.log(reply);
+            
+        },
+        cancelReply () {
+            // TODO
+            this.isComposingReply = false;
+            this.replySubject = null;
         },
         drawerClicked () {
             // TODO: Open the navigation drawer.
