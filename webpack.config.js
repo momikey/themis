@@ -7,8 +7,6 @@ module.exports = {
     mode: 'development',
     entry: {
         index:   './src/views/index.ts',
-        admin:   './src/views/admin.ts',
-        web:     './src/views/web.ts',
     },
     output: {
         path: path.resolve(__dirname, './public'),
