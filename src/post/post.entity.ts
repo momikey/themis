@@ -32,7 +32,7 @@ export class Post {
     // `parentUri` is the URI of the post that is this post's direct parent.
     // Note that we do *not* use a DB relation here, because AP actually
     // needs the URI of the post, and that may be harder to retrieve.
-    // We will use the DB relation (TypeORM's tree type) below, for easo of use.
+    // We will use the DB relation (TypeORM's tree type) below, for ease of use.
     @Column('text')
     parentUri: string;
 
