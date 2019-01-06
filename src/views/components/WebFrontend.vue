@@ -1,5 +1,6 @@
 <template>
-    <v-container fluid class="three-pane-view"><v-layout justify-start row fill-height wrap>
+    <v-container fluid class="three-pane-view">
+        <v-layout justify-start row fill-height wrap>
         <v-flex xs3>
             <v-toolbar dense dark color="primary darken-4">
             <v-toolbar-side-icon @click.stop="drawerClicked"></v-toolbar-side-icon>
@@ -88,7 +89,58 @@
             </v-flex>
             </v-layout>
         </v-flex>
-    </v-layout></v-container>
+        </v-layout>
+    
+        <v-navigation-drawer
+            v-model="drawer"
+            dark
+            absolute
+            temporary
+        >
+            <v-toolbar flat>
+                <v-list class="pa-0">
+                    <v-list-tile avatar>
+                        <!-- Avatar goes here -->
+
+                        <v-list-tile-content>
+                            <v-list-tile-title>@{{userName}}</v-list-tile-title>
+                        </v-list-tile-content>
+                    </v-list-tile>
+                </v-list>
+            </v-toolbar>
+
+            <v-list class="pt-0" dense>
+                <v-divider></v-divider>
+
+                <v-list-tile
+                    v-for="item in actions"
+                    :key="item.title"
+                    @click="navigate(item.action)"
+                >
+                    <v-list-tile-action>
+                        <v-icon dark>{{item.icon}}</v-icon>
+                    </v-list-tile-action>
+
+                    <v-list-tile-content>
+                        <v-list-tile-title>{{item.title}}</v-list-tile-title>
+                    </v-list-tile-content>
+                </v-list-tile>
+
+                <v-divider></v-divider>
+
+                <v-list-tile @click="logout">
+                    <v-list-tile-action>
+                        <v-icon dark>power_settings_new</v-icon>
+                    </v-list-tile-action>
+
+                    <v-list-tile-content>
+                        <v-list-tile-title>Log out</v-list-tile-title>
+                    </v-list-tile-content>
+                </v-list-tile>
+            
+            </v-list>
+        </v-navigation-drawer>
+    </v-container>
 </template>
 
 <script lang="ts">
@@ -115,7 +167,15 @@ export default Vue.extend({
             isComposingReply: false,
             replySubject: null,
 
-            drawer: false
+            drawer: false,
+
+            actions: [
+                { title: 'Home', icon: 'dashboard', action: 'home'},
+                { title: 'Profile', icon: 'person', action: 'profile' },
+                { title: 'Favorites', icon: 'star', action: 'favorites' },
+                { title: 'Filters', icon: 'filter_list', action: 'filters' },
+                { title: 'Preferences', icon: 'settings', action: 'preferences' },
+            ],
         }
     },
     computed: {
@@ -176,8 +236,8 @@ export default Vue.extend({
             reply.group = this.currentGroup.id;
             reply.sender = this.userName;
             reply.parent = this.currentPost.id;
-            console.log(reply);
-            
+
+            // TODO: Submit the post to the server
         },
         cancelReply () {
             // TODO
@@ -188,9 +248,13 @@ export default Vue.extend({
             // TODO: Open the navigation drawer.
             // (Oh, and actually *make* a navigation drawer!)
             this.drawer = !this.drawer;
-
-            console.log(this.drawer);
-            
+        },
+    
+        navigate (loc) {
+            // TODO            
+        },
+        logout () {
+            // TODO
         }
     },
     components: {
