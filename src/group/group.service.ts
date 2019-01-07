@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, FindOperator } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Group } from './group.entity';
 import { CreateGroupDto } from './create-group.dto';
+import { Post } from 'src/post/post.entity';
 
 @Injectable()
 export class GroupService {
@@ -44,5 +45,31 @@ export class GroupService {
 
     async findByIds(ids: number[]): Promise<Group[]> {
         return this.groupRepository.findByIds(ids);
+    }
+
+    // Get all "top-level" posts in a group (i.e., those without a parent).
+    // We can do this by either database ID or group name.
+    async getTopLevelPosts(group: string | number): Promise<Post[]> {
+        // const groupEntity = await (typeof group === 'number'
+        //     ? this.find(group)
+        //     : this.findByName(group)
+        // );
+
+        const groupId = (typeof group === 'number'
+            ? group
+            : (await this.findByName(group)).id
+        );
+
+        const response = await this.groupRepository
+            .createQueryBuilder('groups')
+            .leftJoin('groups.posts', 'post')
+            .leftJoin('post.sender', 'sender')
+            .select(['groups', 'post.id', 'post.subject', 'sender', 'post.timestamp', 'post.uuid'])
+            // .leftJoinAndSelect('groups.posts', 'post')
+            .where('groups.id = :id', { id: groupId })
+            .andWhere('post.parentId is null')
+            .getOne();
+
+        return response.posts;
     }
 }
