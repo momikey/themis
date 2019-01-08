@@ -21,7 +21,7 @@ export class Post {
     server: string;
 
     // `sender` is the user who sent this post.
-    @ManyToOne(type => User, user => user.posts)
+    @ManyToOne(type => User, user => user.posts, { eager: true })
     sender: User;
 
     // 'uri' is the URI of this post. For foreign posts, this should be delivered
@@ -38,7 +38,7 @@ export class Post {
 
     // `groups` is a list of the groups this post is directed to.
     // Themis allows cross-posting, so we can't simply store a single entry.
-    @ManyToMany(type => Group, groups => groups.posts)
+    @ManyToMany(type => Group, groups => groups.posts, { eager: true })
     @JoinTable()
     groups: Group[];
 

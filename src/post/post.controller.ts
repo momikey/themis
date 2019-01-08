@@ -22,8 +22,17 @@ export class PostController {
 
     @Get('/by-group/:group')
     async findByGroup(@Param('group') group: string) {
-        const response = await this.postService.findByGroup(group);
+        // const response = await this.postService.findByGroup(group);
+        const response = await this.postService.findTopLevelByGroup(group);
         
+        return response;
+    }
+
+    @Get('/get-children/:uuid')
+    async findChildren(@Param('uuid') parent: string) {
+        const entity = await this.postService.findByUuid(parent);
+        const response = await this.postService.findChildren(entity);
+
         return response;
     }
 
@@ -44,8 +53,12 @@ export class PostController {
     // Reply to an existing post.
     // TODO: Figure out the type for the object
     @HttpPost('/reply-to/:uuid')
-    async replyTo(@Param('uuid') uuid: string) {
-        throw new NotImplementedException();
+    async replyTo(@Body() post: any, @Param('uuid') parent: string) {
+        try {
+            return this.postService.createReply(post, parent);
+        } catch (error) {
+            throw error;
+        }
     }
 
     @Delete('/get/:uuid')
