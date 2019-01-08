@@ -201,8 +201,19 @@ export default Vue.extend({
 
             this.postSelected(thread);
         },
-        postSelected (post) {
+        async postSelected (post) {            
             if (post !== this.currentPost) {
+
+                if (post.content === undefined) {
+                    const response = await axios.get(`/internal/posts/get/${post.uuid}`);
+
+                    if (response) {
+                        post = response.data;
+                    } else {
+                        // TODO: Error handling
+                    }
+                }
+                
                 this.isComposingPost = false;
                 this.currentPost = post;
 
@@ -232,12 +243,13 @@ export default Vue.extend({
             this.replySubject = this.currentPost.subject;
         },
         submitReply (reply) {
-            // TODO
             reply.group = this.currentGroup.id;
             reply.sender = this.userName;
             reply.parent = this.currentPost.id;
 
-            // TODO: Submit the post to the server
+            axios.post(`/internal/posts/reply-to/${this.currentPost.uuid}`, reply)
+            .then(response => console.log(response.data))
+            .catch(error => console.log(error.response));
         },
         cancelReply () {
             // TODO
