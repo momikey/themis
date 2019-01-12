@@ -1,9 +1,9 @@
 import Vue from "vue";
-import VueRouter from "vue-router";
 import VueWarehouse from "vue-warehouse";
 
 import ThemisFrontPage from './components/FrontPage.vue';
 import WebFrontend from './components/WebFrontend.vue';
+import AdminControlPanel from './components/AdminControlPanel.vue';
 
 import "vuetify/dist/vuetify.min.css";
 import "./stylus/main.styl";
@@ -23,7 +23,8 @@ let v = new Vue({
     },
     components: {
         ThemisFrontPage,
-        WebFrontend
+        WebFrontend,
+        AdminControlPanel
     },
     mounted () {
     }
