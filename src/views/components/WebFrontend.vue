@@ -49,7 +49,7 @@
 
             </v-toolbar>
 
-            <v-flex d-flex>
+            <v-flex d-flex style="overflow: auto; height: 36vh">
                 <thread-list class="thread-list-container"
                     @thread-selected="threadSelected"
                     @post-selected="postSelected"
@@ -57,7 +57,7 @@
                 />
             </v-flex>
 
-            <v-flex d-flex grow class="ml-3">
+            <v-flex d-flex class="ml-3 mt-3" style="height: 52vh">
                 <post-editor v-if="isComposingPost"
                     @post-submitted="submitPost"
                     @post-canceled="cancelPost"
@@ -69,6 +69,7 @@
                         @reply-clicked="startReply"
                         @reply-submitted="submitReply"
                         @reply-canceled="cancelReply"
+                        style="overflow: auto"
                     />
                     </v-flex>
 
