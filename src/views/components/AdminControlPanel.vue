@@ -20,7 +20,7 @@
                     <v-list-tile
                         v-for="item in panelItems"
                         :key="item.title"
-                        @click="navigate(item.action)"
+                        @click="navigate(item)"
                     >
                         <v-list-tile-action>
                             <v-icon>{{item.icon}}</v-icon>
@@ -45,6 +45,8 @@
 <script lang="ts">
 import Vue, { VueConstructor } from 'vue'
 
+import AdminGroupList from './AdminGroupList.vue'
+
 export default Vue.extend({
     data () {
         return {
@@ -52,7 +54,7 @@ export default Vue.extend({
 
             panelItems: [
                 { title: 'Users', icon: 'people', action: 'users' },
-                { title: 'Groups', icon: 'category', action: 'groups' },
+                { title: 'Groups', icon: 'category', action: 'groups', component: 'AdminGroupList' },
                 { title: 'Site Preferences', icon: 'settings', action: 'prefs' },
                 { title: 'Log out', icon: 'power_settings_new', action: 'logout' }
             ]
@@ -61,9 +63,11 @@ export default Vue.extend({
     methods: {
         navigate (loc) {
             // TODO
-            console.log(loc);
-            
+            this.currentComponent = loc.component;
         },
+    },
+    components: {
+        AdminGroupList
     }
 })
 
