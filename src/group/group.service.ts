@@ -3,19 +3,21 @@ import { Repository, FindOperator } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Group } from './group.entity';
 import { CreateGroupDto } from './create-group.dto';
-import { Post } from 'src/post/post.entity';
+import { Post } from '../post/post.entity';
+import { ConfigService } from '../config/config.service';
 
 @Injectable()
 export class GroupService {
     constructor(
         @InjectRepository(Group)
-        private readonly groupRepository: Repository<Group>
+        private readonly groupRepository: Repository<Group>,
+        private readonly configService: ConfigService
     ) {}
 
     async create(group: CreateGroupDto): Promise<Group> {
         const groupEntity = this.groupRepository.create({
             name: group.name,
-            server: group.server,
+            server: group.server || this.configService.serverAddress,
             displayName: group.displayName,
             summary: group.summary
         });
