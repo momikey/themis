@@ -49,14 +49,15 @@ import Vue, { VueConstructor } from 'vue'
 export default Vue.extend({
     data () {
         return {
-            name: '',
-            displayName: '',
-            summary: '',
+            name: (this.group && this.group.name) || '',
+            displayName: (this.group && this.group.displayName) || '',
+            summary: (this.group && this.group.summary) || '',
 
             // TODO: Add validation?
             valid: true
         }
     },
+    props: [ 'group' ],
     methods: {
         create () {
             this.$emit('confirm-create-group', {

@@ -35,7 +35,11 @@
                     </v-card-text>
                     <v-card-actions>
                         <v-btn flat>View posts</v-btn>
-                        <v-btn flat>Edit</v-btn>
+                        <v-btn flat
+                            @click="requestUpdateGroup(group)"
+                        >
+                            Edit
+                        </v-btn>
                         <v-btn flat
                             @click="requestDeleteGroup(group)"
                         >
@@ -46,6 +50,7 @@
             </v-expansion-panel-content>
         </v-expansion-panel>
 
+        <!-- Group delete dialog -->
         <v-dialog v-model="showConfirmDeleteDialog" max-width="300px" v-if="deletingGroup">
             <v-card>
                 <v-card-title class="headline">Delete group {{deletingGroup.name}}?</v-card-title>
@@ -55,6 +60,15 @@
                     <v-btn flat @click="clearDeleteDialog">Cancel</v-btn>
                 </v-card-actions>
             </v-card>
+        </v-dialog>
+
+        <!-- Group edit dialog -->
+        <v-dialog v-model="showEditDialog" max-width="600px" v-if="updatingGroup">
+            <create-group-dialog
+                @confirm-create-group="updateGroup"
+                @cancel-create-group="clearEditDialog"
+                :group="updatingGroup"
+            />
         </v-dialog>
     </v-layout>
 </template>
@@ -71,6 +85,8 @@ export default Vue.extend({
             groups: [],
             showCreateDialog: false,
             showConfirmDeleteDialog: false,
+            showEditDialog: false,
+            updatingGroup: null,
             deletingGroup: null
         }
     },
@@ -86,6 +102,10 @@ export default Vue.extend({
             this.showConfirmDeleteDialog = false;
             this.deletingGroup = null;
         },
+        clearEditDialog () {
+            this.showEditDialog = false;
+            this.updatingGroup = null;
+        },
         confirmDeleteGroup () {
             this.deleteGroup(this.deletingGroup);
             
@@ -95,10 +115,28 @@ export default Vue.extend({
             this.deletingGroup = group;
             this.showConfirmDeleteDialog = true;
         },
+        requestUpdateGroup (group) {
+            this.updatingGroup = group;
+            this.showEditDialog = true;
+        },
         getAllGroups () {
             axios.get('/internal/groups')
             .then(response => (this.groups = response.data))
             .catch(error => console.log(error));
+        },
+        updateGroup (group) {
+            const newGroup = Object.assign(this.updatingGroup, group);
+            
+            if (newGroup) {
+                axios.put(`/internal/groups/update-group/${newGroup.id}`, newGroup)
+                .then(response => {
+                    this.getAllGroups();
+                    return response;
+                })
+                .catch(error => console.log(error));
+            }
+
+            this.clearEditDialog();
         },
         deleteGroup (group) {
             if (group) {

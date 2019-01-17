@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, MethodNotAllowedException } from '@nestjs/common';
 import { Repository, FindOperator } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Group } from './group.entity';
 import { CreateGroupDto } from './create-group.dto';
 import { Post } from '../post/post.entity';
 import { ConfigService } from '../config/config.service';
+import { UpdateGroupDto } from './update-group.dto';
 
 @Injectable()
 export class GroupService {
@@ -23,6 +24,19 @@ export class GroupService {
         });
 
         return await this.groupRepository.save(groupEntity);
+    }
+
+    // TODO: Get a real type object
+    async update(group: UpdateGroupDto): Promise<Group> {
+        const hasOldGroup = (await this.groupRepository.count({ id: group.id })) > 0;
+
+        if (hasOldGroup) {
+            // This is an update, so actually update the entry
+            return this.groupRepository.save(group);
+        } else {
+            // You can't update something that's not there
+            return Promise.reject(new MethodNotAllowedException());
+        }
     }
 
     async delete(id: number): Promise<Group> {
