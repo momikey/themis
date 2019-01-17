@@ -2,7 +2,7 @@
     <v-layout column>
         <!-- Controls -->
         <v-flex align-self-center>
-        <v-dialog v-model="dialog" max-width="600px">
+        <v-dialog v-model="showCreateDialog" max-width="600px">
             <!-- Activator button -->
             <v-btn slot="activator" large dark color="primary darken-4"
             >
@@ -13,7 +13,7 @@
             <!-- Dialog componoent -->
             <create-group-dialog
                 @confirm-create-group="createNewGroup"
-                @cancel-create-group="dialog = false"
+                @cancel-create-group="showCreateDialog = false"
             />
         </v-dialog>
         </v-flex>
@@ -36,11 +36,26 @@
                     <v-card-actions>
                         <v-btn flat>View posts</v-btn>
                         <v-btn flat>Edit</v-btn>
-                        <v-btn flat>Delete</v-btn>
+                        <v-btn flat
+                            @click="requestDeleteGroup(group)"
+                        >
+                            Delete
+                        </v-btn>
                     </v-card-actions>
                 </v-card>
             </v-expansion-panel-content>
         </v-expansion-panel>
+
+        <v-dialog v-model="showConfirmDeleteDialog" max-width="300px" v-if="deletingGroup">
+            <v-card>
+                <v-card-title class="headline">Delete group {{deletingGroup.name}}?</v-card-title>
+                <v-card-text>This action will remove the group from the database.</v-card-text>
+                <v-card-actions>
+                    <v-btn flat @click="confirmDeleteGroup">Delete</v-btn>
+                    <v-btn flat @click="clearDeleteDialog">Cancel</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </v-layout>
 </template>
 
@@ -54,7 +69,9 @@ export default Vue.extend({
     data () {
         return {
             groups: [],
-            dialog: false,            
+            showCreateDialog: false,
+            showConfirmDeleteDialog: false,
+            deletingGroup: null
         }
     },
     methods: {
@@ -63,13 +80,40 @@ export default Vue.extend({
             .then(response => console.log(response.data))
             .catch(error => console.log(error.response));
             
-            this.dialog = false;
+            this.showCreateDialog = false;
+        },
+        clearDeleteDialog () {
+            this.showConfirmDeleteDialog = false;
+            this.deletingGroup = null;
+        },
+        confirmDeleteGroup () {
+            this.deleteGroup(this.deletingGroup);
+            
+            this.clearDeleteDialog();
+        },
+        requestDeleteGroup (group) {
+            this.deletingGroup = group;
+            this.showConfirmDeleteDialog = true;
+        },
+        getAllGroups () {
+            axios.get('/internal/groups')
+            .then(response => (this.groups = response.data))
+            .catch(error => console.log(error));
+        },
+        deleteGroup (group) {
+            if (group) {
+                axios.delete(`/internal/groups/delete-group/${group.id}`)
+                .then(response => {
+                    console.log(response.data);
+                    this.getAllGroups();
+                    return response;
+                })
+                .catch(error => console.log(error));
+            }
         }
     },
     mounted () {
-        axios.get("/internal/groups")
-            .then(response => (this.groups = response.data))
-            .catch(error => console.log(error));
+        this.getAllGroups();
     },
     components: {
         CreateGroupDialog

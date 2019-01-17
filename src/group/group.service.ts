@@ -25,8 +25,8 @@ export class GroupService {
         return await this.groupRepository.save(groupEntity);
     }
 
-    async delete(name: string): Promise<Group> {
-        const group = await this.groupRepository.findOne({ name: name });
+    async delete(id: number): Promise<Group> {
+        const group = await this.groupRepository.findOne(id);
 
         return await this.groupRepository.remove(group);
     }

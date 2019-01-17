@@ -41,8 +41,9 @@ export class GroupController {
         return await this.groupService.create(group);
     }
 
-    // @Delete('/:name')
-    // async delete(@Param('name') name: string): Promise<Group> {
-    //     return await this.groupService.delete(name);
-    // }
+    // TODO: Authentication
+    @Delete('/delete-group/:id')
+    async delete(@Param('id') id: number): Promise<Group> {
+        return this.groupService.delete(id);
+    }
 }
