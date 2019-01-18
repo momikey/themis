@@ -28,6 +28,13 @@ export class PostController {
         return response;
     }
 
+    @Get('/all-in-group/:id')
+    async findAllInGroup(@Param('id') id: number) {
+        const response = await this.postService.findByGroupId(id);
+
+        return response;
+    }
+
     @Get('/get-children/:uuid')
     async findChildren(@Param('uuid') parent: string) {
         const entity = await this.postService.findByUuid(parent);

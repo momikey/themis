@@ -107,6 +107,17 @@ export class PostService {
         return response;
     }
 
+    async findByGroupId(id: number): Promise<Post[]> {
+        const response = await this.postRepository
+            .createQueryBuilder("post")
+            .leftJoinAndSelect("post.groups", "groups")
+            .leftJoinAndSelect("post.sender", "sender")
+            .where("groups.id = :id", { id })
+            .getMany();
+
+        return response;
+    }
+
     async findTopLevelByGroup(group: string): Promise<Post[]> {
         const groupEntity = await this.groupService.findByName(group);
 
