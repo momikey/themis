@@ -1,4 +1,8 @@
 <template>
+    <!-- Wrapper window to allow transitioning -->
+    <v-window v-model="window">
+
+    <v-window-item>
     <v-layout column>
         <!-- Controls -->
         <v-flex align-self-center>
@@ -34,7 +38,11 @@
                         {{group.summary}}
                     </v-card-text>
                     <v-card-actions>
-                        <v-btn flat>View posts</v-btn>
+                        <v-btn flat
+                            @click="showPostsInGroup(group)"
+                        >
+                            View posts
+                        </v-btn>
                         <v-btn flat
                             @click="requestUpdateGroup(group)"
                         >
@@ -71,6 +79,23 @@
             />
         </v-dialog>
     </v-layout>
+    </v-window-item>
+
+    <!-- Group post view -->
+    <v-window-item>
+        <v-btn flat class="primary--text"
+            @click="window = 0"
+        >
+            <v-icon left>arrow_back</v-icon>
+            Back
+        </v-btn>
+        
+        <admin-group-posts-list
+            v-if="window > 0"
+            :group="postsGroup"
+        />
+    </v-window-item>
+    </v-window>
 </template>
 
 <script lang="ts">
@@ -78,6 +103,7 @@ import Vue, { VueConstructor } from 'vue'
 import axios from 'axios'
 
 import CreateGroupDialog from './CreateGroupDialog.vue'
+import AdminGroupPostsList from './AdminGroupPostsList.vue'
 
 export default Vue.extend({
     data () {
@@ -87,7 +113,10 @@ export default Vue.extend({
             showConfirmDeleteDialog: false,
             showEditDialog: false,
             updatingGroup: null,
-            deletingGroup: null
+            deletingGroup: null,
+
+            window: 0,
+            postsGroup: null
         }
     },
     methods: {
@@ -148,13 +177,19 @@ export default Vue.extend({
                 })
                 .catch(error => console.log(error));
             }
+        },
+        showPostsInGroup (group) {
+            this.postsGroup = group;
+            
+            this.window = 1;
         }
     },
     mounted () {
         this.getAllGroups();
     },
     components: {
-        CreateGroupDialog
+        CreateGroupDialog,
+        AdminGroupPostsList
     }
 })
 </script>
