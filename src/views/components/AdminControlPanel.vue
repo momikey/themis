@@ -63,8 +63,11 @@ export default Vue.extend({
     },
     methods: {
         navigate (loc) {
-            // TODO
-            this.currentComponent = loc.component;
+            if (loc.action === 'logout') {
+                this.$router.back();
+            } else {
+                this.currentComponent = loc.component;
+            }
         },
     },
     components: {
