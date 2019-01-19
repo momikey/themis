@@ -28,6 +28,13 @@ export class PostController {
         return response;
     }
 
+    @Get('/all-by-user/:id')
+    async findAllByUser(@Param('id') id: number) {
+        const response = await this.postService.findByUserId(id);
+
+        return response;
+    }
+
     @Get('/all-in-group/:id')
     async findAllInGroup(@Param('id') id: number) {
         const response = await this.postService.findByGroupId(id);
