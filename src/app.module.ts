@@ -9,9 +9,10 @@ import { PostModule } from './post/post.module';
 import { ActivitypubModule } from './activitypub/activitypub.module';
 import { ConfigModule } from './config/config.module';
 import { MetaModule } from './meta/meta.module';
+import { FilterModule } from './filter/filter.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(), UserModule, GroupModule, PostModule, ActivitypubModule, ConfigModule, MetaModule],
+  imports: [TypeOrmModule.forRoot(), UserModule, GroupModule, PostModule, ActivitypubModule, ConfigModule, MetaModule, FilterModule],
   controllers: [AppController],
   providers: [AppService],
 })
