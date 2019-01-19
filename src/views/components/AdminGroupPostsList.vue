@@ -12,20 +12,28 @@
 
         <template slot="items" slot-scope="props">
             <tr @click="props.expanded = !props.expanded">
-                <td>{{ props.item.id }}</td>
-                <td>{{ props.item.sender && props.item.sender.name}}</td>
-                <td>{{ props.item.server}}</td>
-                <td>{{ props.item.subject }}</td>
-                <td>{{ props.item.timestamp }}</td>
-                <td>{{ props.item.deleted }}</td>
-                <td v-if="props.item.content.length < 50">{{ props.item.content }}</td>
-                <td v-else><span class="primary--text text--lighten-3">{Click to show full post}</span></td>
+                    <td>{{ props.item.id }}</td>
+                    <td>{{ props.item.sender && props.item.sender.name}}</td>
+                    <td>{{ props.item.server}}</td>
+                    <td>{{ props.item.subject }}</td>
+                    <td>{{ props.item.timestamp }}</td>
+                    <td>{{ props.item.deleted }}</td>
+                    <td v-if="props.item.content.length < 50">{{ props.item.content }}</td>
+                    <td v-else><span class="primary--text text--lighten-3">{Click to show full post}</span></td>
             </tr>
         </template>
 
         <template slot="expand" slot-scope="props">
             <v-card flat>
                 <v-card-text>{{ props.item.content }}</v-card-text>
+
+                <v-card-actions>
+                    <v-btn flat
+                    >
+                        <v-icon left >remove_circle_outline</v-icon>
+                        Delete this post
+                    </v-btn>
+                </v-card-actions>
             </v-card>
         </template>
     </v-data-table>
