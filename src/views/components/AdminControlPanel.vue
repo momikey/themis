@@ -45,6 +45,7 @@
 <script lang="ts">
 import Vue, { VueConstructor } from 'vue'
 
+import AdminUserList from './AdminUserList.vue'
 import AdminGroupList from './AdminGroupList.vue'
 
 export default Vue.extend({
@@ -53,7 +54,7 @@ export default Vue.extend({
             currentComponent: null,
 
             panelItems: [
-                { title: 'Users', icon: 'people', action: 'users' },
+                { title: 'Users', icon: 'people', action: 'users', component: 'AdminUserList' },
                 { title: 'Groups', icon: 'category', action: 'groups', component: 'AdminGroupList' },
                 { title: 'Site Preferences', icon: 'settings', action: 'prefs' },
                 { title: 'Log out', icon: 'power_settings_new', action: 'logout' }
@@ -67,6 +68,7 @@ export default Vue.extend({
         },
     },
     components: {
+        AdminUserList,
         AdminGroupList
     }
 })
