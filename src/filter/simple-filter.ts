@@ -4,8 +4,6 @@
     functions that can be passed to Array.filter.
 */
 
-export class SimpleFilter {}
-
 // All filters create a  generic function, taking an object of
 //  a specific type and returning a boolean that indicates whether
 //  the value meets the filter's criteria. 
@@ -52,4 +50,54 @@ export function notEqualTo<T>(predicate: T): FilterFunction<T> {
 // Accepts only inputs that have a specific property, given as a string.
 export function hasProperty<T extends object>(predicate: string): FilterFunction<T> {
     return (v) => v instanceof Object && predicate in v;
+}
+
+/*
+    Number comparison filters: these operate only on numbers, so they
+    are not generic, but instead return FilterFunction<number>. All
+    take a target value taht works the same as the binary functions above.
+*/
+
+// Accpets only numerical inputs that are greater than that given.
+export function greaterThan(target: number): FilterFunction<number> {
+    return (v) => v > target;
+}
+
+// Accepts only numerical inputs that are less than that given.
+export function lessThan(target: number): FilterFunction<number> {
+    return (v) => v < target;
+}
+
+/*
+    String filters: these operate only on strings (obviously), and
+    most of them don't really need any complicated regex stuff.
+*/
+
+// Accepts only inputs that contain a given substring.
+export function includes(substring: string): FilterFunction<string> {
+    return (v) => v.includes(substring);
+}
+
+// Synonym for "includes". The ECMAScript standard uses the "includes",
+// but "Contains" more closely matches expectations, IMO.
+export { includes as contains };
+
+// Accepts only inputs that match a regex.
+export function matches(re: RegExp): FilterFunction<string> {
+    return (v) => re.test(v);
+}
+
+/*
+    Helper functions
+*/
+
+// Adapts a filter function to operate on a property of an object.
+export function propertyFilter<T>(prop: string, func: FilterFunction<T>) : FilterFunction<object> {
+    return (obj: object) => {
+        if (prop !in obj) {
+            throw new Error(`Object does not have property ${prop}`);
+        }
+
+        return func(obj[prop]);
+    }
 }
