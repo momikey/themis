@@ -9,7 +9,7 @@ export class Group {
 
     // `name` is the canonical name for the group.
     // It's required, and it is local to the server.
-    // TODO: What is a good length for this. We don't want it to be too long,
+    // TODO: What is a good length for this? We don't want it to be too long,
     // since it's used to generate @-names. We'll start with 60 for now.
     @Column('varchar', { length: 60 })
     name: string;
