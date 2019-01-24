@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Group } from 'src/group/group.entity';
+import { Group } from '../group/group.entity';
 import { FilterFunction } from './simple-filter';
 
 // Definition for a specific entry in the list of group filters to be executed.
@@ -23,7 +23,6 @@ export class GroupFilterEntry {
 }
 
 
-@Injectable()
 export class GroupFilter {
     constructor(private entries: GroupFilterEntry[]) {
 
