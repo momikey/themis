@@ -12,7 +12,7 @@ export type FilterFunction<T> = (value: T) => boolean;
 /* Unary filter functions: these require only a single value. */
 
 // The simplest filter: always reeturns true, no matter what is passed.
-export function all<T>(): FilterFunction<T> {
+export function always<T>(): FilterFunction<T> {
     return (v) => true;
 }
 
@@ -87,6 +87,16 @@ export function matches(re: RegExp): FilterFunction<string> {
     return (v) => re.test(v);
 }
 
+// Accepts inputs that start with a given substring.
+export function startsWith(substring: string): FilterFunction<string> {
+    return (v) => v.startsWith(substring);
+}
+
+// Accepts inputs that end with a given substring
+export function endsWith(substring: string): FilterFunction<string>{
+    return (v) => v.endsWith(substring);
+}
+
 /*
     Helper functions
 */
@@ -94,7 +104,7 @@ export function matches(re: RegExp): FilterFunction<string> {
 // Adapts a filter function to operate on a property of an object.
 export function propertyFilter<T>(prop: string, func: FilterFunction<T>) : FilterFunction<object> {
     return (obj: object) => {
-        if (prop !in obj) {
+        if (!(prop in obj)) {
             throw new Error(`Object does not have property ${prop}`);
         }
 

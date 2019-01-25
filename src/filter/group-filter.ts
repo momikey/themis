@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Group } from '../group/group.entity';
-import { FilterFunction } from './simple-filter';
+import { FilterFunction, propertyFilter, equalTo, notEqualTo, contains, startsWith, endsWith, matches } from './simple-filter';
 
 // Definition for a specific entry in the list of group filters to be executed.
 export class GroupFilterEntry {
@@ -12,7 +12,7 @@ export class GroupFilterEntry {
 
     // The relation operator to use.
     // At the moment, allowed values are:
-    // 'equals', 'doesNotEqual', 'contains', 'startsWith', 'endsWith'
+    // 'equals', 'doesNotEqual', 'contains', 'startsWith', 'endsWith', 'regExp'
     // We may add more later, which is why this is a general string.
     relation: string;
 
@@ -29,12 +29,66 @@ export class GroupFilter {
     }
 
     execute(groupList: Group[]): Group[] {
-        // TODO: Lots of map/reduce/filter stuff
-        return groupList;
+        const result = this.entries.reduce(
+            (acc, fn) => acc.filter(this.filterFromEntry(fn)),
+            groupList,
+        );
+        return result;
     }
 
     filterFromEntry(entry: GroupFilterEntry): FilterFunction<Group> {
-        // TODO: create a filter function
+        const fn = propertyFilter(entry.property, this.parseEntry(entry));
         return (v) => true;
+    }
+
+    private parseEntry(entry: GroupFilterEntry): FilterFunction<string> {
+        let fn: FilterFunction<string>;
+
+        switch (entry.relation) {
+            case 'equals':
+                fn = equalTo(entry.target);
+                break;
+        
+            case 'doesNotEqual':
+                fn = notEqualTo(entry.target);
+                break;
+            
+            case 'contains':
+                if (typeof entry.target === 'string') {
+                    fn = contains(entry.target);
+                } else {
+                    throw new Error('Unable to create filter');
+                }
+                break;
+            
+            case 'startsWith':
+                if (typeof entry.target === 'string') {
+                    fn = startsWith(entry.target);
+                } else {
+                    throw new Error('Unable to create filter');
+                }
+                break;
+
+            case 'endsWith':
+                if (typeof entry.target === 'string') {
+                    fn = endsWith(entry.target);
+                } else {
+                    throw new Error('Unable to create filter');
+                }
+                break;
+
+            case 'regExp':
+                if (typeof entry.target !== 'string') {
+                    fn = matches(entry.target);
+                } else {
+                    throw new Error('Unable to create filter');
+                }
+                break;
+
+            default:
+                throw new Error(`Invalid filter relation ${entry.relation}`);
+        }
+
+        return fn;
     }
 }
