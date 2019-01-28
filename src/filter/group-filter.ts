@@ -1,14 +1,15 @@
-import { Injectable } from '@nestjs/common';
 import { Group } from '../group/group.entity';
 import { FilterFunction, propertyFilter, equalTo, notEqualTo, contains, startsWith, endsWith, matches } from './simple-filter';
 
+// These are the properties of a Group entity that we can filter on.
+export type FilterProperty = 'name' |  'server' | 'displayName' | 'summary';
 // Definition for a specific entry in the list of group filters to be executed.
 export class GroupFilterEntry {
     // The property of the group can be any of these.
     // Other fields don't really work. Creation dates aren't shown,
     // while filtering the list of posts based on the list of posts
     // makes no sense.
-    property: 'name' |  'server' | 'displayName' | 'summary';
+    property: FilterProperty;
 
     // The relation operator to use.
     // At the moment, allowed values are:
@@ -38,7 +39,7 @@ export class GroupFilter {
 
     filterFromEntry(entry: GroupFilterEntry): FilterFunction<Group> {
         const fn = propertyFilter(entry.property, this.parseEntry(entry));
-        return (v) => true;
+        return fn;
     }
 
     private parseEntry(entry: GroupFilterEntry): FilterFunction<string> {
