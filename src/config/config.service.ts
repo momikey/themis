@@ -6,7 +6,6 @@ export interface EnvConfig {
     [key: string]: string;
 }
 
-@Injectable()
 export class ConfigService {
     private readonly envConfig: EnvConfig;
 
