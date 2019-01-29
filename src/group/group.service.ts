@@ -6,6 +6,7 @@ import { CreateGroupDto } from './create-group.dto';
 import { Post } from '../post/post.entity';
 import { ConfigService } from '../config/config.service';
 import { UpdateGroupDto } from './update-group.dto';
+import { GroupFilterEntry, GroupFilter } from '../filter/group-filter';
 
 @Injectable()
 export class GroupService {
@@ -87,5 +88,12 @@ export class GroupService {
             .getOne();
 
         return response.posts;
+    }
+
+    // Run a set of filters on a group list.
+    filterGroups(groups: Group[], filters: GroupFilterEntry[]): Group[] {
+        const filterRunner = new GroupFilter(filters);
+
+        return filterRunner.execute(groups);
     }
 }
