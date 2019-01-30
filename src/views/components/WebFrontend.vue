@@ -116,7 +116,7 @@
                 <v-list-tile
                     v-for="item in actions"
                     :key="item.title"
-                    @click="navigate(item.action)"
+                    @click="navigate(item)"
                 >
                     <v-list-tile-action>
                         <v-icon dark>{{item.icon}}</v-icon>
@@ -171,11 +171,11 @@ export default Vue.extend({
             drawer: false,
 
             actions: [
-                { title: 'Home', icon: 'dashboard', action: 'home'},
-                { title: 'Profile', icon: 'person', action: 'profile' },
-                { title: 'Favorites', icon: 'star', action: 'favorites' },
-                { title: 'Filters', icon: 'filter_list', action: 'filters' },
-                { title: 'Preferences', icon: 'settings', action: 'preferences' },
+                { title: 'Home', icon: 'dashboard', route: ''},     // TODO
+                { title: 'Profile', icon: 'person', route: 'settings/profile' },
+                { title: 'Favorites', icon: 'star', route: '' },    // TODO
+                { title: 'Filters', icon: 'filter_list', route: 'settings/filters' },
+                { title: 'Preferences', icon: 'settings', route: 'settings/preferences' },
             ],
         }
     },
@@ -264,7 +264,9 @@ export default Vue.extend({
         },
     
         navigate (loc) {
-            // TODO            
+            if (loc.route) {
+                this.$router.push(loc.route);
+            }
         },
         logout () {
             // TODO
