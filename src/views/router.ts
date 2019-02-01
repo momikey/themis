@@ -5,6 +5,7 @@ import FrontPage from "./components/FrontPage.vue";
 import WebFrontend from "./components/WebFrontend.vue";
 import AdminControlPanel from "./components/AdminControlPanel.vue";
 import SettingsPanel from "./components/SettingsPanel.vue";
+import FilterSettingsContainer from './components/FilterSettingsContainer.vue';
 
 Vue.use(VueRouter);
 
@@ -37,7 +38,8 @@ let router = new VueRouter({
                     path: 'preferences'
                 },
                 {
-                    path: 'filters'
+                    path: 'filters',
+                    component: FilterSettingsContainer
                 },
                 {
                     path: 'exit',

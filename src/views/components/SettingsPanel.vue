@@ -54,13 +54,21 @@ export default Vue.extend({
                 { text: 'Prefernences', route: 'preferences', icon: 'settings' },
                 { text: 'Filters', route: 'filters', icon: 'filter_list' },
                 { text: 'Exit', route: 'exit', icon: 'arrow_back' }
-            ]
+            ],
+
+            userName: null
         }
     },
-    props: ['userName'],
     methods: {
         navigate (target) {
             this.$router.push(`/settings/${target.route}`);
+        }
+    },
+    mounted () {
+        const user = this.$warehouse.get("themis_login_user");
+
+        if (user) {
+            this.userName = user;
         }
     }
 })

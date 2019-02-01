@@ -31,6 +31,7 @@
                 <v-flex>
                     <v-text-field
                         label="Text to accept"
+                        v-model="filterValue"
                     />
                 </v-flex>
             </v-layout>
@@ -81,7 +82,7 @@ export default Vue.extend({
         save () {
             const filter = {
                 property: this.filterProperty,
-                relation: this.filterRelation,
+                relation: this.filterRelation.type,
                 target: this.filterValue
             }
 
