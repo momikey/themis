@@ -23,11 +23,20 @@ export class BaseFilter<Entity extends Object, Filter extends FilterEntry> {
 
     // Execute each filtering function in turn on the entries list.
     // The returned result will be a new collection containing only
-    // those entries which fulfill all the filter conditions.
-    execute(groupList: Entity[]): Entity[] {
+    // those entries which satisfy all the filter conditions.
+    //
+    // NOTE: We invert the logic in *this* function, because of how
+    // the filtering is intended to work. That is, a Themis filter
+    // should block entities that satisfy the given conditions, not
+    // pass them through. For the sake of readability elsewhere,
+    // however, we'll restrict the logic to this one method.
+    execute(entityList: Entity[]): Entity[] {
+        const negate = function (fn: FilterFunction<Entity>): FilterFunction<Entity> {
+            return (_) => !(fn(_));
+        }
         const result = this.entries.reduce(
-            (acc, fn) => acc.filter(this.filterFromEntry(fn)),
-            groupList,
+            (acc, fn) => acc.filter(negate(this.filterFromEntry(fn))),
+            entityList,
         );
         return result;
     }

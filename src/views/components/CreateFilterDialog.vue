@@ -10,7 +10,7 @@
         >
             <v-layout column>
                 <v-flex>
-                    <v-subheader>Show {{ type }} whose</v-subheader>
+                    <v-subheader>Hide {{ type }} whose</v-subheader>
                     <v-select
                         v-model="filter.property"
                         :items="properties"

@@ -71,7 +71,7 @@ describe('UserFilter', () => {
 
       const filterFunctions = [
         { property: 'name' as FilterProperty, relation: 'contains', target: 'a' },
-        { property: 'server' as FilterProperty, relation: 'startsWith', target: 'example' }
+        { property: 'server' as FilterProperty, relation: 'endsWith', target: 'com' }
       ];
 
       const userFilter = new UserFilter(filterFunctions);
@@ -80,8 +80,8 @@ describe('UserFilter', () => {
 
       expect(result).toBeDefined();
       expect(result).toHaveLength(1);
-      expect(result[0].id).toEqual(1);
-      expect(result[0].server).toEqual('example.com');
+      expect(result[0].id).toEqual(4);
+      expect(result[0].server).toEqual('example.invalid');
     });
   });
 });
