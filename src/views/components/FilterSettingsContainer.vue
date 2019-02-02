@@ -71,6 +71,8 @@ export default Vue.extend({
 
         updateFilter (filter, index) {
             this.filters[this.tabInfo[this.activeTab]].splice(index, 1, filter);
+
+            this.saveFilters();
         },
 
         saveFilters () {

@@ -12,26 +12,24 @@
                 <v-flex>
                     <v-subheader>Show {{ type }} whose</v-subheader>
                     <v-select
-                        v-model="filterProperty"
+                        v-model="filter.property"
                         :items="properties"
-                        return-object
                     ></v-select>
                 </v-flex>
 
                 <v-flex>
                     <v-select
-                        v-model="filterRelation"
+                        v-model="filter.relation"
                         :items="relations"
                         item-text="description"
                         item-value="type"
-                        return-object
                     ></v-select>
                 </v-flex>
 
                 <v-flex>
                     <v-text-field
                         label="Text to accept"
-                        v-model="filterValue"
+                        v-model="filter.target"
                     />
                 </v-flex>
             </v-layout>
@@ -72,27 +70,34 @@ export default Vue.extend({
                 { type: 'regExp', description: 'matches' }
             ],
 
-            filterProperty: (this.currentFilter && this.currentFilter.property) || '',
-            filterRelation: (this.currentFilter && this.currentFilter.relation) || '',
-            filterValue: (this.currentFilter && this.currentFilter.target) || '',
+            filter: {
+                property: (this.currentFilter && this.currentFilter.property) || '',
+                relation: (this.currentFilter && this.currentFilter.relation) || '',
+                target: (this.currentFilter && this.currentFilter.target) || '',
+            }
         }
     },
     props: ['type', 'properties', 'currentFilter'],
+    watch: {
+        currentFilter: function (newVal) {
+            if (newVal) {
+                this.filter.property = newVal.property;
+                this.filter.relation = newVal.relation;
+                this.filter.target = newVal.target;
+            } else {
+                this.filter.property = '';
+                this.filter.relation = '';
+                this.filter.target = '';
+            }
+        }
+    },
     methods: {
         save () {
-            const filter = {
-                property: this.filterProperty,
-                relation: this.filterRelation.type,
-                target: this.filterValue
-            }
-
-            this.$emit('save-filter', filter);
+            this.$emit('save-filter', this.filter);
         },
 
         cancel () {
             this.$emit('cancel-filter');
-            
-            this.$refs.form.reset();
         },
     },
     mounted () {
