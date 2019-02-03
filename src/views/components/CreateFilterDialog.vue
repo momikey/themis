@@ -10,10 +10,12 @@
         >
             <v-layout column>
                 <v-flex>
-                    <v-subheader>Hide {{ type }} whose</v-subheader>
+                    <v-subheader>Hide {{ type }} where</v-subheader>
                     <v-select
                         v-model="filter.property"
                         :items="properties"
+                        item-text="description"
+                        item-value="name"
                     ></v-select>
                 </v-flex>
 
@@ -84,10 +86,6 @@ export default Vue.extend({
                 this.filter.property = newVal.property;
                 this.filter.relation = newVal.relation;
                 this.filter.target = newVal.target;
-            } else {
-                this.filter.property = '';
-                this.filter.relation = '';
-                this.filter.target = '';
             }
         }
     },

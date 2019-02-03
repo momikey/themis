@@ -51,7 +51,12 @@ export default Vue.extend({
             tabInfo: ['groups', 'users'],
 
             // TODO: probably turn this into an API call or something
-            allowedProperties: ['name', 'displayName', 'server', 'summary'],
+            allowedProperties: [
+                { name: 'name', description: "User name" }, 
+                { name: 'displayName', description: "Displayed name" },
+                { name: 'server', description: "Server" }, 
+                { name: 'summary', description: "Summary" }
+            ],
 
             activeTab: null
         }
@@ -85,7 +90,8 @@ export default Vue.extend({
                 prefs.filters.users = this.filters.users;
             }
 
-            this.$warehouse.set('themis_client_preferences', prefs);        }
+            this.$warehouse.set('themis_client_preferences', prefs);
+        }
     },
     mounted () {
         const prefs = this.$warehouse.get('themis_client_preferences');

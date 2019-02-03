@@ -1,12 +1,20 @@
 <template>
     <v-card>
         <v-list v-if="filters.length">
+            <v-subheader>
+                Hide all {{ type }} where
+            </v-subheader>
+
             <v-list-tile
                 v-for="(filter, index) in filters"
                 :key="index"
             >
                 <v-list-tile-content>
-                    {{ filter }}
+                    <span>
+                    <em>{{ descriptionForProperty(filter.property) }}</em>
+                    {{ descriptionForRelation(filter.relation) }}
+                    "<strong>{{ filter.target }}</strong>"
+                    </span>
                 </v-list-tile-content>
 
                 <v-list-tile-action>
@@ -67,7 +75,18 @@ export default Vue.extend({
             showDialog: false,
             isEditingExisting: false,
             currentFilterIndex: -1,
-            currentFilter: null
+            currentFilter: null,
+
+            // This will have to be refactored.
+            // It's a direct copy from the dialog component.
+            relations: [
+                { type: 'equals', description: 'equals' },
+                { type: 'doesNotEqual', description: 'does not equal' },
+                { type: 'contains', description: 'contains' },
+                { type: 'startsWith', description: 'starts with' },
+                { type: 'endsWith', description: 'ends with' },
+                { type: 'regExp', description: 'matches' }
+            ],
         }
     },
     props: ['filters', 'type', 'properties'],
@@ -99,6 +118,14 @@ export default Vue.extend({
 
         deleteFilter (index) {
             this.$emit('delete-filter', index);
+        },
+
+        descriptionForProperty (name) {
+            return (this.properties.find((e) => (e.name === name))).description;
+        },
+
+        descriptionForRelation (name) {
+            return (this.relations.find((e) => (e.type === name))).description;
         }
     },
     components: {
