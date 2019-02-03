@@ -16,7 +16,11 @@ export class GroupController {
         return await this.groupService.findAll();
     }
 
-    @Get('/get-filtered-list')
+    // Note that this is a "getter" that uses a POST method.
+    // I'm doing this because I don't know the limit on GET
+    // param length, and a user can have an arbitrary number
+    // of filters. Maybe there's a better way to do this.
+    @HttpPost('/get-filtered-list')
     async getWithFilters(@Body() filters: GroupFilterEntry[]) {
         const response = await this.groupService.findAll();
 

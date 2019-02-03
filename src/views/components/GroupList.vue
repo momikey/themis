@@ -84,12 +84,24 @@
         <p v-else>
             {{noGroupsText}}
         </p>
+
+        <v-dialog v-model="showFilterDialog" width="50%" lazy>
+            <create-filter-dialog
+                :type="filterType"
+                :properties="allowedProperties"
+                :current-filter="currentEditingFilter"
+                @save-filter="saveFilter"
+                @cancel-filter="cancelFilterDialog"
+            />
+        </v-dialog>
     </v-list>
 </template>
 
 <script lang="ts">
 import Vue, { VueConstructor } from 'vue'
 import axios from 'axios'
+
+import CreateFilterDialog from './CreateFilterDialog.vue'
 
 export default Vue.extend({
     data () {
@@ -100,6 +112,16 @@ export default Vue.extend({
             isFiltered: false,
             currentGroup: null,
             noGroupsText: "No known groups on this server. Create one to get started.",
+
+            showFilterDialog: false,
+            filterType: 'groups',
+            currentEditingFilter: null,
+            allowedProperties: [
+                { name: 'name', description: "User name" }, 
+                { name: 'displayName', description: "Displayed name" },
+                { name: 'server', description: "Server" }, 
+                { name: 'summary', description: "Summary" }
+            ],
 
             // TODO: Make this a prop that gets passed in from server config
             canCreateGroups: true
@@ -122,9 +144,15 @@ export default Vue.extend({
             return `@group-${group.name}@${group.server}`;
         },
         retrieveGroupList () {
-            axios.get("/internal/groups")
-                .then(response => (this.groups = response.data))
-                .catch(error => console.log(error));
+            if (!this.isFiltered) {
+                axios.get('/internal/groups')
+                    .then(response => (this.groups = response.data))
+                    .catch(error => console.log(error));
+            } else {                
+                axios.post('/internal/groups/get-filtered-list', this.filters)
+                    .then(response => (this.groups = response.data))
+                    .catch(error => console.log(error));
+            }
         },
         selectGroup (group) {
             this.currentGroup = group;
@@ -141,6 +169,7 @@ export default Vue.extend({
         },
         showFilteredGroups () {
             this.isFiltered = !this.isFiltered;
+            this.retrieveGroupList();
         },
         readFilters () {
             const prefs = this.$warehouse.get('themis_client_preferences');
@@ -169,7 +198,12 @@ export default Vue.extend({
             this.$warehouse.set('themis_client_preferences', prefs);
         },
         addToFilters (group) {
-
+            this.currentEditingFilter = {
+                property: 'name',
+                relation: 'equals',
+                target: group.name
+            }
+            this.showFilterDialog = true;
         },
         hideGroup (group) {
             if (!this.hiddenGroups.includes(group.id)) {
@@ -182,9 +216,23 @@ export default Vue.extend({
                 this.hiddenGroups.splice(pos, 1);
             }
         },
+        saveFilter (filter) {
+            this.filters.push(filter);
+            this.writeFilters();
+            this.retrieveGroupList();
+            this.cancelFilterDialog();
+        },
+        cancelFilterDialog () {
+            this.showFilterDialog = false;
+            this.currentEditingFilter = null;
+        }
     },
     mounted () {
+        this.readFilters();
         this.retrieveGroupList();
+    },
+    components: {
+        CreateFilterDialog
     }
 })
 </script>
