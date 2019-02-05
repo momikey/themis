@@ -18,6 +18,7 @@ export class ConfigService {
     }
 
     get serverPort(): number {
+        // TODO: Real port stuff, including HTTPS.
         return Number.parseInt(this.envConfig.SERVER_PORT, 10) || 80;
     }
 }
