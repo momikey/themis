@@ -1,68 +1,140 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GroupService } from './group.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository } from 'typeorm/repository/Repository';
 import { Group } from './group.entity';
 import { ConfigService } from '../config/config.service';
 
 
 jest.mock('../config/config.service');
 const ConfigServiceMock = <jest.Mock<ConfigService>>ConfigService;
+ConfigServiceMock.mockImplementation(() => {
+  return {
+    serverAddress: 'example.com',
+    serverPort: 80
+  }
+});
+
+jest.mock('typeorm/repository/Repository');
 
 describe('GroupService', () => {
   let service: GroupService;
+  let repository: jest.Mocked<Repository<Group>>;
+  let configService: jest.Mocked<ConfigService>;
 
-  const mockRepository = {
-    data: [
+  const testData = [
       { id: 1, name: 'first', server: 'example.com', displayName: 'Testing', summary: '' },
       { id: 2, name: 'second', server: 'example.com', displayName: 'Testing', summary: '' },
       { id: 3, name: 'third', server: 'example.invalid', displayName: 'Foreign', summary: ''}
-    ],
-
-    count () { return this.data.length },
-    find () { return this.data },
-    findOne (id: number) { return this.data.find((e) => (e.id === id)) },
-    findByIds (ids: number[]) { return this.data.filter((e) => ids.find(e)); },
-    save (entity: Group) { return entity },
-    create (entity: Group) {return entity },
-    remove (entity: Group) { return entity }, 
-    createQueryBuilder () { /* ... */ }
-  }
+    ];
   
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GroupService,
-        { provide: getRepositoryToken(Group), useValue: mockRepository },
+        { provide: getRepositoryToken(Group), useClass: Repository },
         { provide: ConfigService, useClass: ConfigServiceMock },
       ],
     }).compile();
 
     service = module.get<GroupService>(GroupService);
-    let repository = module.get<Repository<Group>>(getRepositoryToken(Group));
+    repository = module.get<Repository<Group>>(getRepositoryToken(Group)) as jest.Mocked<Repository<Group>>;
+    configService = module.get<ConfigService>(ConfigService) as jest.Mocked<ConfigService>;
 
-    ConfigServiceMock.mockImplementation(() => {
-      return {
-        get serverAddress () { return 'example.com' },
-        get serverPort () { return 80; }
-      }
-    });
+    repository.count.mockImplementation(() => testData.length);
+    repository.find.mockImplementation(() => testData);
+    repository.save.mockImplementation((entity) => entity);
   });
+
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it('findAll method should return all entities', async () => {
-    const result = await service.findAll();
-
-    expect(result).toBeDefined();
-    expect(result.length).toEqual(3);
+  it('should have configuation values', () => {
+    expect(configService).toBeDefined();
+    expect(configService.serverAddress).toBeDefined();
+    expect(configService.serverAddress).toBe('example.com');
+    expect(configService.serverPort).toBeDefined();
+    expect(configService.serverPort).toBe(80);
   });
 
-  it('find should find a single entity', async () => {
-    const result = await service.find(1);    
+  describe('Method testing', () => {    
+    it('findAll method should return all entities', async () => {
+      const result = await service.findAll();
 
-    expect(result).toBeDefined();
-    expect(result.id).toEqual(1);
+      expect(result).toBeDefined();
+      expect(result.length).toEqual(3);
+    });
+
+    it('findByName should find a single entity', async () => {
+      repository.findOne.mockImplementation((o) => testData.find((_) => _.name === o.name));
+
+      const result = await service.findByName('first');
+
+      expect(result).toBeDefined();
+      expect(result).toBe(testData[0]);
+    });
+
+    it('find should find a single entity', async () => {
+      repository.findOne.mockImplementation((id) => testData.find((_) => _.id === id));
+
+      const result = await service.find(1);    
+
+      expect(result).toBeDefined();
+      expect(result.id).toEqual(1);
+    });
+
+    it('findByIds should get all entities whose IDs are in the given list', async () => {
+      repository.findByIds.mockImplementation((ids) => testData.filter((_) => ids.includes(_.id)));
+
+      const result = await service.findByIds([1,3]);
+
+      expect(result).toBeDefined();
+      expect(result.length).toBe(2);
+      expect(result.includes(testData[0] as Group)).toBeTruthy();
+      expect(result.includes(testData[1] as Group)).toBeFalsy();
+    });
+
+    it('delete should delete an entity from the DB and return it', async () => {
+      repository.remove.mockImplementation((entity) => entity);
+
+      const result = await service.delete(1);
+
+      expect(result).toBeDefined();
+      expect(result).toStrictEqual(testData[0]);
+    });
+
+    it('create should properly create a Group entity', async () => {
+      repository.create.mockImplementation((entity) => entity);
+      repository.save.mockImplementation((entity) => entity);
+
+      const result = await service.create({
+        name: 'second',
+        server: '',
+        displayName: 'Testing',
+        summary: ''
+      });
+
+
+      expect(result).toBeDefined();
+      expect(result.server).toBe(testData[1].server);
+    });
+
+    it('update should update an entity and return it', async () => {
+      repository.count.mockImplementation((o) => testData.filter((_) => o.id === _.id).length);
+      repository.save.mockImplementation((entity) => entity);
+
+      const result = await service.update({
+        id: 2,
+        name: 'second',
+        server: 'example.com',
+        displayName: 'Testing',
+        summary: '',
+        date: ''
+      });
+
+      expect(result).toBeDefined();
+      expect(result.id).toBe(2);
+    });
   });
 });
