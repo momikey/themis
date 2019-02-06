@@ -27,7 +27,6 @@ export class GroupService {
         return await this.groupRepository.save(groupEntity);
     }
 
-    // TODO: Get a real type object
     async update(group: UpdateGroupDto): Promise<Group> {
         const hasOldGroup = (await this.groupRepository.count({ id: group.id })) > 0;
 
