@@ -118,7 +118,7 @@ export class UserAuthenticationService {
 
             return result;
         } else {
-            throw new BadRequestException;
+            return Promise.reject('Could not create the account');
         }
     }
 }
