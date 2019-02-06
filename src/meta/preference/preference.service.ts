@@ -13,13 +13,17 @@ export class PreferenceService {
     async getPreference(name: string): Promise<string> {
         const pref = await this.preferenceRepository.findOne({name: name});
 
-        return pref.value;
+        if (pref) {
+            return pref.value;
+        } else {
+            return Promise.reject(`Preference ${name} does not exist`);
+        }
     }
 
     async setPrefercne(name: string, newValue: string): Promise<Preference> {
         const newPref = {
             name: name,
-            value: await this.getPreference(name)
+            value: newValue
         };
 
         return this.preferenceRepository.save(newPref);
