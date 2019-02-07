@@ -5,6 +5,7 @@ import { CreateAccountDto } from './create-account.dto';
 import { JwtPayload } from './jwt.interface';
 import { UserAuthentication } from './user-authentication.entity';
 import { LoginDto } from './login.dto';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 
 jest.mock('./user-authentication.service');
 
@@ -75,6 +76,90 @@ describe('UserAuthentication Controller', () => {
 
       expect(result).toBeDefined();
       expect(result).toMatchObject({ expiresIn: 1000, accessToken: 'secret'});
+    });
+  });
+
+  describe('Error handling', () => {
+    beforeAll(() => {
+
+    });
+
+    it('trying to create an existing account should fail with 400 Bad Request', async () => {
+      service.createAccount.mockImplementation((user: CreateAccountDto) => 
+        (user.username === 'good'
+          ? new UserAuthentication
+          : Promise.reject())
+      );
+
+      const goodData: CreateAccountDto = {
+        username: 'good',
+        email: 'user@example.com',
+        password: 'secret'
+      };
+
+      const badData: CreateAccountDto = {
+        username: 'bad',
+        email: 'user@example.com',
+        password: 'secret'
+      };
+
+      const goodResult = await controller.createAccount(goodData);
+      
+      expect(goodResult).toBeDefined();
+      expect(goodResult).toBeInstanceOf(UserAuthentication);
+
+      try {
+        const badResult = await controller.createAccount(badData);
+      } catch (e) {
+        expect(e).toBeDefined();
+        expect(e).toBeInstanceOf(BadRequestException);
+      }
+    });
+
+    it('incorrect login should fail with an appropriate status code', async () => {
+      service.validateLogin.mockImplementation((login: LoginDto) => 
+        (login.username === 'good' && login.password === 'secret'
+        ? Promise.resolve(true)
+        : Promise.reject(false)
+        )
+      );
+
+      service.createLoginToken.mockImplementation(() => {
+        return { expiresIn: 1000, accessToken: ''}
+      });
+
+      const goodData: LoginDto = {
+        username: 'good',
+        password: 'secret'
+      };
+
+      const badUsername: LoginDto = {
+        username: 'bad',
+        password: 'secret'
+      };
+
+      const badPassword: LoginDto = {
+        username: 'good',
+        password: '12345'
+      };
+
+      const goodResult = await controller.verifyLogin(goodData);
+      expect(goodResult).toBeDefined();
+      expect(goodResult).toMatchObject({ expiresIn: 1000, accessToken: ''});
+      
+      try {
+        const badResult1 = await controller.verifyLogin(badUsername);
+      } catch (e) {
+        expect(e).toBeDefined();
+        expect(e).toBeInstanceOf(UnauthorizedException);
+      }
+
+      try {
+        const badResult2 = await controller.verifyLogin(badPassword);
+      } catch (e) {
+        expect(e).toBeDefined();
+        expect(e).toBeInstanceOf(UnauthorizedException);
+      }
     });
   });
 });

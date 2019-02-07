@@ -42,9 +42,13 @@ export class UserService {
     }
 
     async delete(name: string): Promise<User> {
-        const user = await this.userRepository.findOne({ name: name });
+        try {
+            const user = await this.findByName(name);
 
-        return await this.userRepository.remove(user);
+            return await this.userRepository.remove(user);
+        } catch (e) {
+            throw new Error(`User ${name} does not exist`);
+        }
     }
 
     async findAll(): Promise<User[]> {
@@ -52,10 +56,10 @@ export class UserService {
     }
 
     async find(id: number): Promise<User> {
-        return await this.userRepository.findOne(id);
+        return this.userRepository.findOneOrFail(id);
     }
 
     async findByName(name: string): Promise<User> {
-        return await this.userRepository.findOne({ name: name });
+        return this.userRepository.findOne({ name: name });
     }
 }

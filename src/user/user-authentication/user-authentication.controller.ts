@@ -30,9 +30,14 @@ export class UserAuthenticationController {
 
     @Post('login')
     async verifyLogin(@Body() user: LoginDto): Promise<any> {
-        if (await this.authService.validateLogin(user)) {
-            return this.authService.createLoginToken(user);
-        } else {
+        try {
+            const isLoginValid = await this.authService.validateLogin(user);
+
+            if (isLoginValid) {
+                return this.authService.createLoginToken(user);
+            }
+        } catch (e) {
+            // TODO: 401 Unauthorized must include a WWW-Authenticate header.
             throw new UnauthorizedException("Invalid username or password");
         }
     }
