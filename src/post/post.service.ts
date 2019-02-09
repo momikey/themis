@@ -8,6 +8,8 @@ import * as uuidv5 from 'uuid/v5';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import { GroupService } from '../group/group.service';
+import { CreateTopLevelPostDto } from './create-top-level-post.dto';
+import { CreateReplyDto } from './create-reply.dto';
 
 @Injectable()
 export class PostService {
@@ -35,8 +37,7 @@ export class PostService {
     }
 
     // Create a new top-level (parent-less) post.
-    // TODO: Work out the type object
-    async createTopLevel(post: any): Promise<Post> {
+    async createTopLevel(post: CreateTopLevelPostDto): Promise<Post> {
         const postEntity = await this.createPostEntity(post);
 
         return this.postRepository.save(postEntity);
@@ -44,7 +45,7 @@ export class PostService {
 
     // Create a reply to the post with the given UUID.
     // TODO: Work out the type object
-    async createReply(post: any, parent: string): Promise<Post> {
+    async createReply(post: CreateReplyDto, parent: string): Promise<Post> {
         const user = await this.userService.findByName(post.sender);
         const parentPost = await this.postRepository.findOneOrFail({ uuid: parent });
 

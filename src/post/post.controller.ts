@@ -3,6 +3,8 @@ import { Post  as HttpPost } from '@nestjs/common';
 import { PostService } from './post.service';
 import { Post } from './post.entity';
 import { CreatePostDto } from './create-post.dto';
+import { CreateTopLevelPostDto } from './create-top-level-post.dto';
+import { CreateReplyDto } from './create-reply.dto';
 
 @Controller('internal/posts')
 export class PostController {
@@ -58,16 +60,15 @@ export class PostController {
     }
 
     // Create a top-level post.
-    // TODO: Figure out the type for the object
     @HttpPost('/new-thread')
-    async createTopLevel(@Body() post: any) {
+    async createTopLevel(@Body() post: CreateTopLevelPostDto) {
         return this.postService.createTopLevel(post);
     }
 
     // Reply to an existing post.
     // TODO: Figure out the type for the object
     @HttpPost('/reply-to/:uuid')
-    async replyTo(@Body() post: any, @Param('uuid') parent: string) {
+    async replyTo(@Body() post: CreateReplyDto, @Param('uuid') parent: string) {
         try {
             return this.postService.createReply(post, parent);
         } catch (error) {
