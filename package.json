@@ -33,6 +33,7 @@
     "material-design-icons-iconfont": "^4.0.4",
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^2.6.3",
     "rxjs": "^6.2.2",
