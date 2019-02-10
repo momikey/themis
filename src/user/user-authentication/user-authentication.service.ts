@@ -10,6 +10,7 @@ import { Repository, useContainer } from 'typeorm';
 import { ConfigService } from '../../config/config.service';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './login.dto';
+import { TokenDto } from './token.dto';
 
 // User authentication service. It does what it says.
 // This one's fairly important. It'll have to handle passwords, auth tokens,
@@ -30,7 +31,7 @@ export class UserAuthenticationService {
     saltRounds = 12;
 
     // Create a JWT for a given user. This is for API access, which we'll add soon.
-    async createToken(user: JwtPayload) {
+    async createToken(user: JwtPayload): Promise<TokenDto> {
         // TODO: temp method
         // const user = await this.userService.findByName(username);
         const token: JwtPayload = {
@@ -44,7 +45,7 @@ export class UserAuthenticationService {
         }
     }
 
-    async createLoginToken(login: LoginDto) {
+    async createLoginToken(login: LoginDto): Promise<TokenDto> {
         const user = await this.userService.findByName(login.username);
         const auth = await this.authRepository.findOneOrFail({ user: user });
 
@@ -59,7 +60,7 @@ export class UserAuthenticationService {
         }
     }
 
-    async validateUser(payload: JwtPayload): Promise<any> {
+    async validateUser(payload: JwtPayload): Promise<boolean> {
         const user = await this.userService.findByName(payload.username);
         
         if (user) {
