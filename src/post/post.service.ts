@@ -44,10 +44,9 @@ export class PostService {
     }
 
     // Create a reply to the post with the given UUID.
-    // TODO: Work out the type object
     async createReply(post: CreateReplyDto, parent: string): Promise<Post> {
         const user = await this.userService.findByName(post.sender);
-        const parentPost = await this.postRepository.findOneOrFail({ uuid: parent });
+        const parentPost = await this.postRepository.findOne({ uuid: parent });
 
         if (!parentPost) {
             // The given UUID isn't a valid post, which usually means something's wrong
@@ -78,6 +77,8 @@ export class PostService {
         return await this.postRepository.findOne(id);
     }
 
+    // TODO: Maybe consider changing to Flake or some other
+    // kind of temporally-sorted UUIDs?
     async findByUuid(uuid: string): Promise<Post> {
         const postEntity = await this.postRepository.findOne({
             where: { uuid },

@@ -7,6 +7,7 @@ import { User } from '../user/user.entity';
 import { CreatePostDto } from './create-post.dto';
 import { CreateTopLevelPostDto } from './create-top-level-post.dto';
 import { CreateReplyDto } from './create-reply.dto';
+import { Group } from '../group/group.entity';
 
 jest.mock('./post.service');
 
@@ -98,15 +99,109 @@ describe('Post Controller', () => {
     });
 
     it('find by group should return only top-level posts in that group', async () => {
-      
+      const exampleGroup: Group = {
+        id: 3,
+        name: 'group',
+        server: 'example.com',
+        displayName: 'A group',
+        summary: '',
+        date: '',
+        posts: []
+      };
+      const examplePost: Post = {
+        id: 1,
+        uuid: '00000000-0000-0000-0000-000000000000',
+        server: 'example.com',
+        sender: new User,
+        uri: '',
+        parentUri: '',
+        groups: [exampleGroup],
+        subject: '2nd Subject',
+        content: 'Different text',
+        source: '',
+        timestamp: '',
+        deleted: false,
+        children: [],
+        parent: undefined        
+      };
+      service.findTopLevelByGroup.mockReturnValueOnce([examplePost]);
+
+      const result = await controller.findByGroup('group');
+
+      expect(result).toBeDefined();
+      expect(result.length).toBe(1);
+      expect(result[0]).toMatchObject(examplePost);
     });
 
     it('find by user should return all posts by a user', async () => {
-      
+      const exampleUser: User = {
+        id: 4,
+        name: 'user',
+        server: 'example.com',
+        displayName: 'A user',
+        summary: '',
+        icon: '',
+        date: '',
+        posts: []
+      };
+      const examplePost: Post = {
+        id: 1,
+        uuid: '00000000-0000-0000-0000-000000000000',
+        server: 'example.com',
+        sender: exampleUser,
+        uri: '',
+        parentUri: '',
+        groups: [],
+        subject: '2nd Subject',
+        content: 'Different text',
+        source: '',
+        timestamp: '',
+        deleted: false,
+        children: [],
+        parent: undefined        
+      };
+      service.findByUserId.mockReturnValue([examplePost]);
+
+      const result = await controller.findAllByUser(4);
+
+      expect(result).toBeDefined();
+      expect(result.length).toBe(1);
+      expect(result[0]).toMatchObject(examplePost);
     });
 
     it('find all by group should return all posts in a group', async () => {
-      
+      const exampleGroup: Group = {
+        id: 3,
+        name: 'group',
+        server: 'example.com',
+        displayName: 'A group',
+        summary: '',
+        date: '',
+        posts: []
+      };
+      const examplePost: Post = {
+        id: 1,
+        uuid: '00000000-0000-0000-0000-000000000000',
+        server: 'example.com',
+        sender: new User,
+        uri: '',
+        parentUri: '',
+        groups: [exampleGroup],
+        subject: '2nd Subject',
+        content: 'Different text',
+        source: '',
+        timestamp: '',
+        deleted: false,
+        children: [],
+        parent: undefined        
+      };
+      service.findByGroupId.mockReturnValueOnce([examplePost]);
+
+      const result = await controller.findAllInGroup(3);
+
+      expect(result).toBeDefined();
+      expect(result.length).toBe(1);
+      expect(result[0]).toMatchObject(examplePost);      
     });
 
     it('create should return a new Post entity', async () => {
