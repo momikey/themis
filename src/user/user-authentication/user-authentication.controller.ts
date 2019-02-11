@@ -1,20 +1,25 @@
-import { Controller, Post, Body, Get, UseGuards, Res, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Res, UnauthorizedException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { UserAuthenticationService } from './user-authentication.service';
 import { JwtPayload } from './jwt.interface';
 import { CreateAccountDto } from './create-account.dto';
 import { LoginDto } from './login.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UserAuthentication } from './user-authentication.entity';
+import { TokenDto } from './token.dto';
 
 @Controller('internal/authenticate')
 export class UserAuthenticationController {
     constructor(private readonly authService: UserAuthenticationService) {}
 
     @Post('create-token')
-    async createToken(@Body() user: JwtPayload): Promise<any> {
-        const result = await this.authService.createToken(user);
+    async createToken(@Body() user: JwtPayload): Promise<TokenDto> {
+        try {
+            const result = await this.authService.createToken(user);
 
-        return result;
+            return result;
+        } catch (e) {
+            throw new InternalServerErrorException('Unable to create API token');
+        }
     }
 
     @Post('create-account')
@@ -29,16 +34,8 @@ export class UserAuthenticationController {
     }
 
     @Post('login')
-    async verifyLogin(@Body() user: LoginDto): Promise<any> {
-        try {
-            const isLoginValid = await this.authService.validateLogin(user);
-
-            if (isLoginValid) {
-                return this.authService.createLoginToken(user);
-            }
-        } catch (e) {
-            // TODO: 401 Unauthorized must include a WWW-Authenticate header.
-            throw new UnauthorizedException("Invalid username or password");
-        }
+    @UseGuards(AuthGuard('local'))
+    async verifyLogin(@Body() user: LoginDto): Promise<TokenDto> {
+        return this.authService.createLoginToken(user);
     }
 }

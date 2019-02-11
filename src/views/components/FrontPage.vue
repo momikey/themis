@@ -223,20 +223,22 @@ export default Vue.extend({
                 this.$warehouse.set('themis_login_token', response.data.accessToken);
                 this.$warehouse.set('themis_login_user', this.loginName);
                 this.invalidLogin = false;
+                this.$router.push('web');
 
-                // Very hacky, but I don't want to set up a whole router just for this,
-                // and the back end is giving me trouble.
-                axios.get('/internal/authenticate/post-login', {
-                    headers: { "Authorization": `Bearer ${this.$warehouse.get('themis_login_token')}` }
-                })
-                // .then(response => location.assign(response.data))
-                .then(response => this.$router.push('web'))
-                .catch(error => console.log(error.response));
+                // // Very hacky, but I don't want to set up a whole router just for this,
+                // // and the back end is giving me trouble.
+                // axios.get('/internal/authenticate/post-login', {
+                //     headers: { "Authorization": `Bearer ${this.$warehouse.get('themis_login_token')}` }
+                // })
+                // // .then(response => location.assign(response.data))
+                // .then(response => this.$router.push('web'))
+                // .catch(error => console.log(error.response));
             })
             .catch(error => {               
-                if (error.response.status === 403) {
-                    // 403 Forbidden
+                if (error.response.status === 401) {
+                    // 401 Unauthorized
                     this.invalidLogin = true;
+                    console.log(error.response.data);
                 }
             });
         },

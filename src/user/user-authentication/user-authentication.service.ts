@@ -85,15 +85,25 @@ export class UserAuthenticationService {
         return true;
     }
 
-    async validateLogin(login: LoginDto): Promise<boolean> {
+    async validateLogin(login: LoginDto): Promise<UserAuthentication> {
         const user = await this.userService.findByName(login.username);
 
         if (user) {
-            const auth = await this.authRepository.findOneOrFail({ user: user });
+            const auth = await this.authRepository.findOne({ user: user });
 
             if (auth) {
-                return bcrypt.compare(login.password, auth.password);
+                const isPasswordCorrect =  await bcrypt.compare(login.password, auth.password);
+
+                if (isPasswordCorrect) {
+                    return auth;
+                } else {
+                    return Promise.reject('Incorrect password');
+                }
+            } else {
+                return Promise.reject('User does not exist on this server');
             }
+        } else {
+            return Promise.reject('User does not exist on this server');
         }
     }
 

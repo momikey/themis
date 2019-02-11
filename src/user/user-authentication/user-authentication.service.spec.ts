@@ -160,7 +160,7 @@ describe('UserAuthenticationService', () => {
         const result = await service.validateLogin(login);
 
         expect(result).toBeDefined();
-        expect(result).toBe(true);
+        expect(result.id).toBe(1);
     });
 
     it('creating an account should return a new, valid authentication object', async () => {

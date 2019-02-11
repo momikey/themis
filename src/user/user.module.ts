@@ -11,6 +11,7 @@ import { UserAuthenticationController } from './user-authentication/user-authent
 import { UserAuthentication } from './user-authentication/user-authentication.entity';
 import { JwtStrategy } from './user-authentication/jwt.strategy';
 import passport = require('passport');
+import { LocalStrategy } from './user-authentication/local.strategy';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import passport = require('passport');
       }
     })
   ],
-  providers: [UserService, UserAuthenticationService, JwtStrategy],
+  providers: [UserService, UserAuthenticationService, JwtStrategy, LocalStrategy],
   controllers: [UserController, UserAuthenticationController],
   exports: [UserService, UserAuthenticationService]
 })
