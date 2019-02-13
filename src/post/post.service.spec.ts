@@ -15,7 +15,7 @@ import { Group } from '../group/group.entity';
 
 jest.mock('../user/user.service');
 jest.mock('../group/group.service');
-jest.mock('typeorm/repository/Repository');
+jest.mock('typeorm/repository/Repository'); 
 
 jest.mock('../config/config.service');
 const ConfigServiceMock = <jest.Mock<ConfigService>>ConfigService;

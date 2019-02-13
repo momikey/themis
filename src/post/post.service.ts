@@ -10,6 +10,8 @@ import { UserService } from '../user/user.service';
 import { GroupService } from '../group/group.service';
 import { CreateTopLevelPostDto } from './create-top-level-post.dto';
 import { CreateReplyDto } from './create-reply.dto';
+import { async } from 'rxjs/internal/scheduler/async';
+import { Group } from 'src/group/group.entity';
 
 @Injectable()
 export class PostService {
@@ -22,13 +24,17 @@ export class PostService {
     ) {}
 
     async create(post: CreatePostDto) {
+        const postedGroupNames: string[] = [post.primaryGroup].concat(post.ccGroups);
+        const postedGroups: Group[] = await Promise.all(postedGroupNames.map(
+            (e) => this.groupService.findByName(e)
+        ));
         const postEntity = this.postRepository.create({
             uuid: this.createNewUuid(post.subject + post.content + post.sender),
             sender: await this.userService.findByName(post.sender),
             server: post.server,
             subject: post.subject,
             parentUri: post.parent,
-            groups: [post.primaryGroup].concat(post.ccGroups),
+            groups: postedGroups,
             content: post.content,
             source: post.source
         });
