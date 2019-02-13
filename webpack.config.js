@@ -32,11 +32,13 @@ module.exports = {
                 test: /\.tsx?$/,
                 loader: 'ts-loader',
                 include: [
-                    path.resolve(__dirname, 'src/views')
+                    path.resolve(__dirname, 'src/'),
+                    // path.resolve(__dirname, 'src/shared')
                 ],
                 options: {
                     appendTsSuffixTo: [/\.vue$/],
-                    reportFiles: ['src/views/**/*.{ts,tsx}'],
+                    // reportFiles: ['src/views/**/*.{ts,tsx}'],
+                    reportFiles: ['src/**/*.{ts,tsx}'],
                     transpileOnly: true
                 }
             },
