@@ -219,12 +219,21 @@ export default Vue.extend({
                 username: this.loginName,
                 password: this.loginPassword
             })
-            .then(response => {                
+            .then(response => {
                 this.$warehouse.set('themis_login_token', response.data.accessToken);
                 this.$warehouse.set('themis_login_user', this.loginName);
                 this.invalidLogin = false;
-                this.$router.push('web');
+                // this.$router.push('web');
 
+                axios.get(`/internal/authenticate/user-role/${this.loginName}`, {
+                    headers: {'Authorization': `bearer ${response.data.accessToken}`}
+                })
+                .then(response => {
+                    this.$warehouse.set('themis_login_role', response.data)
+                    this.$router.push('web');
+                    return response;
+                })
+                .catch(error => console.log(error.response.data));
                 // // Very hacky, but I don't want to set up a whole router just for this,
                 // // and the back end is giving me trouble.
                 // axios.get('/internal/authenticate/post-login', {

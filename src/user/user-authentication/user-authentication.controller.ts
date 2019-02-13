@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards, Res, UnauthorizedException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Res, UnauthorizedException, BadRequestException, InternalServerErrorException, Param } from '@nestjs/common';
 import { UserAuthenticationService } from './user-authentication.service';
 import { JwtPayload } from './jwt.interface';
 import { CreateAccountDto } from './create-account.dto';
@@ -6,6 +6,7 @@ import { LoginDto } from './login.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UserAuthentication } from './user-authentication.entity';
 import { TokenDto } from './token.dto';
+import { UserRole } from './user-authentication.role';
 
 @Controller('internal/authenticate')
 export class UserAuthenticationController {
@@ -37,5 +38,11 @@ export class UserAuthenticationController {
     @UseGuards(AuthGuard('local'))
     async verifyLogin(@Body() user: LoginDto): Promise<TokenDto> {
         return this.authService.createLoginToken(user);
+    }
+
+    @Get('user-role/:name')
+    @UseGuards(AuthGuard('jwt'))
+    async getUserRole(@Param('name') name: string): Promise<UserRole> {
+        return this.authService.getUserRole(name);
     }
 }

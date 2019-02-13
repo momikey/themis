@@ -32,13 +32,13 @@ export class UserAuthentication {
 
     // JWT bearer token. I'm not sure if we're supposed to store this,
     // but it makes sense. After all, we'll be storing it on the *user* side.
-    @Column('text')
+    @Column('text', {nullable: true})
     token: string;
 
     // User role, such as "guest", "user", or "admin". This is used in 
     // the front end and some API calls. (Note that we're storing this
     // as a number rather than an enum, to better provide cross-DB compat.)
-    @Column('number', {default: UserRole.Guest})
+    @Column('integer', {default: UserRole.Guest})
     role: UserRole;
 
     // TODO: Do we need a date field here? Might be useful for password expiration.

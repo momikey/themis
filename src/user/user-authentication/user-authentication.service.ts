@@ -136,15 +136,14 @@ export class UserAuthenticationService {
     }
 
     async getUserRole(username: string): Promise<UserRole> {
-        const userEntity = await this.authRepository.findOne({
+        const user = await this.userService.findByName(username);
+        const auth = await this.authRepository.findOne({
             relations: ['user'],
-            where: {
-                user: { name: username }
-            }
+            where: { user }
         });
 
-        if (userEntity) {
-            return userEntity.role;
+        if (auth) {
+            return auth.role;
         } else {
             throw new Error('User does not exist');
         }

@@ -4,7 +4,10 @@
         <v-flex xs3>
             <v-toolbar dense dark color="primary darken-4">
             <v-toolbar-side-icon @click.stop="drawerClicked"></v-toolbar-side-icon>
-            <v-toolbar-title>@{{userName}}</v-toolbar-title>
+            <v-toolbar-title>
+                <span class="text-xs-left">@{{userName}}</span>
+                <span class="text-xs-right pl-5">{{userRoleText}}</span>
+            </v-toolbar-title>
             </v-toolbar>
 
             <v-layout column fill-height>
@@ -127,6 +130,18 @@
                     </v-list-tile-content>
                 </v-list-tile>
 
+                <template v-if="isAdmin">
+                    <v-list-tile @click="navigate({route: 'admin'})">
+                        <v-list-tile-action>
+                            <v-icon dark>build</v-icon>
+                        </v-list-tile-action>
+
+                        <v-list-tile-content>
+                            <v-list-tile-title>Admin</v-list-tile-title>
+                        </v-list-tile-content>
+                    </v-list-tile>
+                </template>
+
                 <v-divider></v-divider>
 
                 <v-list-tile @click="logout">
@@ -152,11 +167,13 @@ import GroupList from './GroupList.vue'
 import ThreadList from './ThreadList.vue'
 import PostEditor from './PostEditor.vue'
 import PostView from './PostView.vue'
+import { UserRole } from '../../user/user-authentication/user-authentication.role';
 
 export default Vue.extend({
     data () {
         return {
             userName: null,
+            userRole: null,
             currentGroup: null,
             currentThread: null,
             currentPost: null,
@@ -180,7 +197,19 @@ export default Vue.extend({
         }
     },
     computed: {
+        userRoleText: function () {
+            if (this.userRole !== null) {
+                return UserRole[this.userRole];
+            } else {
+                return '';
+            }
+        },
 
+        isAdmin: function () {
+            if (this.userRole === UserRole.Admin) {
+                return true;
+            }
+        }
     },
     methods: {
         groupSelected (group) {
@@ -258,8 +287,6 @@ export default Vue.extend({
             this.replySubject = null;
         },
         drawerClicked () {
-            // TODO: Open the navigation drawer.
-            // (Oh, and actually *make* a navigation drawer!)
             this.drawer = !this.drawer;
         },
     
@@ -269,7 +296,8 @@ export default Vue.extend({
             }
         },
         logout () {
-            // TODO
+            // TODO: Remove auth stuff, so we're *really* logged out
+            this.$router.push('/');
         }
     },
     components: {
@@ -279,12 +307,17 @@ export default Vue.extend({
         PostView
     },
     mounted () {
-        const user = this.$warehouse.get("themis_login_user");
+        const user = this.$warehouse.get('themis_login_user');
+        const role = this.$warehouse.get('themis_login_role');
 
         if (user) {
             this.userName = user;
         }
-    }
+
+        if (role !== null) {
+            this.userRole = role;
+        }
+    },
 })
 </script>
 
