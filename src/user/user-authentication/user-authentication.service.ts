@@ -11,6 +11,7 @@ import { ConfigService } from '../../config/config.service';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './login.dto';
 import { TokenDto } from './token.dto';
+import { UserRole } from './user-authentication.role';
 
 // User authentication service. It does what it says.
 // This one's fairly important. It'll have to handle passwords, auth tokens,
@@ -109,7 +110,7 @@ export class UserAuthenticationService {
 
     // Create a new account. Note that this is for authentication first.
     // We'll also have to create the user.
-    async createAccount(account: CreateAccountDto): Promise<UserAuthentication> {
+    async createAccount(account: CreateAccountDto, role?: UserRole): Promise<UserAuthentication> {
         if (await this.validateAccount(account)) {
             const newUser = await this.userService.createEmptyUserEntry(account.username);
             
@@ -119,7 +120,8 @@ export class UserAuthenticationService {
                         user: newUser,
                         email: account.email,
                         reset: false,
-                        password: hash
+                        password: hash,
+                        role: role || UserRole.User
                     });
 
                     this.authRepository.save(auth);
@@ -130,6 +132,21 @@ export class UserAuthenticationService {
             return result;
         } else {
             return Promise.reject('Could not create the account');
+        }
+    }
+
+    async getUserRole(username: string): Promise<UserRole> {
+        const userEntity = await this.authRepository.findOne({
+            relations: ['user'],
+            where: {
+                user: { name: username }
+            }
+        });
+
+        if (userEntity) {
+            return userEntity.role;
+        } else {
+            throw new Error('User does not exist');
         }
     }
 }

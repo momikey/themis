@@ -119,7 +119,7 @@ describe('UserAuthentication Controller', () => {
     it('incorrect login should fail with an appropriate status code', async () => {
       service.validateLogin.mockImplementation((login: LoginDto) => 
         (login.username === 'good' && login.password === 'secret'
-        ? Promise.resolve(true)
+        ? Promise.resolve(new UserAuthentication)
         : Promise.reject(false)
         )
       );

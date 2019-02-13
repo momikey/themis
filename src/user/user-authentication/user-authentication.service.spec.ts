@@ -12,6 +12,7 @@ import { LoginDto } from './login.dto';
 import { CreateAccountDto } from './create-account.dto';
 import { User } from '../user.entity';
 import * as bcrypt from 'bcrypt';
+import { UserRole } from './user-authentication.role';
 
 jest.mock('../user.service');
 jest.mock('@nestjs/jwt/dist/jwt.service');
@@ -109,6 +110,7 @@ describe('UserAuthenticationService', () => {
       password: 'secret',
       reset: false,
       token: '',
+      role: UserRole.User
     };
 
     beforeAll(() => {
@@ -176,6 +178,13 @@ describe('UserAuthenticationService', () => {
       expect(result).toBeDefined();
       expect(result).toBeInstanceOf(UserAuthentication);
       expect(result.email).toBe('user@example.com');
+    });
+
+    it("getting a user's role should return the proper value and type", async () => {
+      const result = await service.getUserRole('user');
+
+      expect(result).toBeDefined();
+      expect(result).toBe(UserRole.User);
     });
   });
 });

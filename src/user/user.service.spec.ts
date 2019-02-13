@@ -102,9 +102,9 @@ describe('UserService', () => {
 
       const result = await service.createEmptyUserEntry(username);
 
-      // expect(result).toBeDefined();
-      // expect(result).toBeInstanceOf(User);
-      // expect(result.server).toBe('example.com');
+      expect(result).toBeDefined();
+      expect(result).toBeInstanceOf(User);
+      expect(result.server).toBe('example.com');
     });
 
     it('delete should remove an entry from the DB and return it', async () => {
