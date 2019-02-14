@@ -23,6 +23,16 @@
                         <td>{{ props.item.server }}</td>
                         <td>{{ props.item.displayName }}</td>
                         <td>{{ props.item.date }}</td>
+                        <td>
+                            <v-tooltip bottom>
+                            <v-btn slot="activator" flat icon
+                                @click="showUserAuthentication(props.item)"
+                            >
+                                <v-icon>edit</v-icon>
+                            </v-btn>
+                            Edit
+                            </v-tooltip>
+                        </td>
                     </tr>
                 </template>
 
@@ -93,19 +103,96 @@
             </template>
         </v-data-table>
         </v-window-item>
+
+        <!-- User authentication and role -->
+        <v-window-item>
+        <v-btn flat class="primary--text"
+            @click="window = 0"
+        >
+            <v-icon left>arrow_back</v-icon>
+            Back
+        </v-btn>
+
+        <v-card>
+            <p class="title text-xs-center pt-5">
+                User {{ selectedUser.name }} (#{{ selectedUser.id }})
+            </p>
+
+            <v-list two-line>
+                <v-list-tile>
+                    <v-list-tile-sub-title>Internal name</v-list-tile-sub-title>
+                    <v-list-tile-title>{{selectedUser.name}}</v-list-tile-title>
+                </v-list-tile>
+
+                <v-list-tile>
+                    <v-list-tile-sub-title>Display name</v-list-tile-sub-title>
+                    <v-list-tile-title>{{selectedUser.displayName}}</v-list-tile-title>
+                </v-list-tile>
+
+                <v-list-tile>
+                    <v-list-tile-sub-title>Email address</v-list-tile-sub-title>
+                    <v-list-tile-title>{{selectedUserAuth.email}}</v-list-tile-title>
+                </v-list-tile>
+
+                <v-list-tile>
+                    <v-list-tile-sub-title>Role</v-list-tile-sub-title>
+                    <v-list-tile-title>{{roleForUser(selectedUserAuth)}}</v-list-tile-title>
+                </v-list-tile>
+
+                <v-list-tile>
+                    <v-list-tile-sub-title>Created on</v-list-tile-sub-title>
+                    <v-list-tile-title>{{formatDate(selectedUser.timestamp)}}</v-list-tile-title>
+                </v-list-tile>
+
+                <v-list-tile>
+                    <v-list-tile-sub-title>Last login</v-list-tile-sub-title>
+                    <v-list-tile-title>{{formatDate(selectedUserAuth.lastLoggedIn)}}</v-list-tile-title>
+                </v-list-tile>
+            </v-list>
+
+            <v-bottom-nav dark color="primary darken-4">
+                <v-btn
+                    v-for="action in userActions"
+                    :key="action.key"
+                    @click="adminUserAction(action)"
+                >
+                    {{ action.text }}
+                </v-btn>
+            </v-bottom-nav>
+        </v-card>
+        </v-window-item>
+
+        <v-dialog v-model="showChangeRole" max-width="300px">
+            <v-card>
+                <v-card-title>Change {{selectedUser.name}} to:</v-card-title>
+                <v-list>
+                    <v-list-tile
+                        v-for="role in userRoles"
+                        :key="role"
+                        @click="changeRole(role)"
+                    >
+                        {{role}}
+                    </v-list-tile>
+                </v-list>
+            </v-card>
+        </v-dialog>
     </v-window>
 </template>
 
 <script lang="ts">
 import Vue, { VueConstructor } from 'vue'
 import axios from 'axios'
+import { format, parse } from 'date-fns'
+
+import { UserRole } from '../../user/user-authentication/user-authentication.role';
 
 export default Vue.extend({
     data () {
         return {
             users: [],
             postsByUser: [],
-            selectedUser: null,
+            selectedUser: {},
+            selectedUserAuth: {},
             window: 0,
 
             userListHeaders: [
@@ -124,6 +211,15 @@ export default Vue.extend({
                 { text: 'Deleted?', value: 'deleted' },
                 { text: 'Content', value: 'content' }
             ],
+
+            userActions: [
+                { key: 'reset-password', text: 'Reset password' },
+                { key: 'change-role', text: 'Change user role' },
+                { key: 'delete-user', text: 'Delete this user' }
+            ],
+
+            showChangeRole: false,
+            userRoles: ['User', 'Moderator', 'Admin'],
         }
     },
     methods: {
@@ -135,6 +231,7 @@ export default Vue.extend({
             })
             .catch(error => console.log(error));
         },
+
         showPostsByUser (user) {
             this.selectedUser = user;
             this.window = 1;
@@ -146,8 +243,66 @@ export default Vue.extend({
             })
             .catch(error => console.log(error));
         },
+
         formatGroupList (groups) {
             return '[' + groups.map(e => `@${e.name}@${e.server}`).join(',') + ']';
+        },
+
+        formatDate (date) {
+            // TODO: Make this locale-aware
+            return format(
+                parse(date),
+                "MMM D, YYYY, HH:mm"
+            );
+        },
+
+        roleForUser (auth) {
+            return UserRole[auth.role];
+        },
+
+        changeRole (role) {
+            const token = this.$warehouse.get('themis_login_token');
+
+            axios.post(`/internal/authenticate/user-role-change`, {
+                username: this.selectedUser.name,
+                newRole: UserRole[role]
+            }, {
+                headers: {'Authorization': `bearer ${token}`}
+            })
+            .then(response => this.selectedUserAuth = response.data)
+            .catch(error => console.log(error.response));
+
+            this.showChangeRole = false;
+        },
+
+        showUserAuthentication (user) {
+            this.selectedUser = user;
+            this.window = 2;
+
+            const token = this.$warehouse.get('themis_login_token');
+
+            axios.get(`/internal/authenticate/user-authentication/${user.name}`, {
+                headers: {'Authorization': `bearer ${token}`}
+            })
+            .then(response => this.selectedUserAuth = response.data)
+            .catch(error => console.log(error.response));
+        },
+
+        adminUserAction (action) {
+            switch (action.key) {
+                case 'change-role':
+                    this.showChangeRole = true;
+                    break;
+
+                case 'reset-password':
+                    break;
+                
+                case 'delete-user':
+                    break;
+            
+                default:
+                    throw new Error('Invalid selection');
+            }
         }
     },
     mounted () {
