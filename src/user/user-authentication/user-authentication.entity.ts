@@ -41,5 +41,8 @@ export class UserAuthentication {
     @Column('integer', {default: UserRole.Guest})
     role: UserRole;
 
+    @Column()
+    lastLoggedIn: Date;
+
     // TODO: Do we need a date field here? Might be useful for password expiration.
 }
