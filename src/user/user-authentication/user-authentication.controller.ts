@@ -7,6 +7,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { UserAuthentication } from './user-authentication.entity';
 import { TokenDto } from './token.dto';
 import { UserRole } from './user-authentication.role';
+import { RoleDto } from './role.dto';
 
 @Controller('internal/authenticate')
 export class UserAuthenticationController {
@@ -44,5 +45,23 @@ export class UserAuthenticationController {
     @UseGuards(AuthGuard('jwt'))
     async getUserRole(@Param('name') name: string): Promise<UserRole> {
         return this.authService.getUserRole(name);
+    }
+
+    @Post('user-role-change')
+    @UseGuards(AuthGuard('jwt'))
+    async changeUserRole(@Body() role: RoleDto): Promise<UserAuthentication> {
+        const auth = await this.authService.findOne(role.username);
+        return this.authService.changeRole(auth, role.newRole);
+    }
+
+    @Get('user-authentication/:name')
+    @UseGuards(AuthGuard('jwt'))
+    async getUserAuthentication(@Param('name') name: string): Promise<UserAuthentication> {
+        try {
+            const auth = await this.authService.findOne(name);
+            return auth;
+        } catch (e) {
+            throw new BadRequestException(`Unable to retrieve data for user ${name}`);
+        }
     }
 }

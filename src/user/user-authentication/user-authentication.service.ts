@@ -31,6 +31,16 @@ export class UserAuthenticationService {
     // Number of salt rounds used for bcrypt
     saltRounds = 12;
 
+    // Get the authentication entry for a given user.
+    // Note that we don't return the password or token fields.
+    async findOne(name: string): Promise<UserAuthentication> {
+        const user = await this.userService.findByName(name);
+        return this.authRepository.findOneOrFail({
+            select: ['id', 'user', 'email', 'reset', 'role', 'lastLoggedIn'],
+            where: {user},
+        });
+    }
+
     // Create a JWT for a given user. This is for API access, which we'll add soon.
     async createToken(user: JwtPayload): Promise<TokenDto> {
         // TODO: temp method
@@ -96,6 +106,7 @@ export class UserAuthenticationService {
                 const isPasswordCorrect =  await bcrypt.compare(login.password, auth.password);
 
                 if (isPasswordCorrect) {
+                    this.updateLastLogin(auth);
                     return auth;
                 } else {
                     return Promise.reject('Incorrect password');
@@ -106,6 +117,22 @@ export class UserAuthenticationService {
         } else {
             return Promise.reject('User does not exist on this server');
         }
+    }
+
+    // Update the last logged-in datetime for a specific user.
+    // We can use this for stats, e.g., NodeInfo.
+    async updateLastLogin(auth: UserAuthentication): Promise<UserAuthentication> {
+        auth.lastLoggedIn = new Date();
+        this.authRepository.save(auth);
+        return auth;
+    }
+
+    // Change a user's role. This can upgrade or downgrade, but we'll
+    // leave it up to other layers to determine who is allowed to do this.
+    async changeRole(auth: UserAuthentication, newRole: UserRole): Promise<UserAuthentication> {
+        auth.role = newRole;
+        this.authRepository.save(auth);
+        return auth;
     }
 
     // Create a new account. Note that this is for authentication first.
