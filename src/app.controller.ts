@@ -11,13 +11,6 @@ export class AppController {
     return this.appService.root();
   }
 
-  // Returns some basic site info. (HT: Fedilab)
-  // We'll add to this later.
-  @Get('/api/info')
-  getSiteInfo() {
-    return this.appService.getSiteInfo();
-  }
-
   // We'll take this out later
   @Get('/admin')
   @Render('admin')

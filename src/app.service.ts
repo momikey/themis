@@ -6,11 +6,4 @@ export class AppService {
   root() {
     return {};
   }
-
-  getSiteInfo() {
-      return {
-      'software': 'Themis',
-      'version': pjson.version
-    }
-  }
 }
