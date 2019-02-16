@@ -13,6 +13,7 @@ import { GroupModule } from '../group/group.module';
     GroupModule
   ],
   controllers: [PostController],
-  providers: [PostService]
+  providers: [PostService],
+  exports: [PostService]
 })
 export class PostModule {}
