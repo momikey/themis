@@ -12,6 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from './login.dto';
 import { TokenDto } from './token.dto';
 import { UserRole } from './user-authentication.role';
+import { isAfter } from 'date-fns';
 
 // User authentication service. It does what it says.
 // This one's fairly important. It'll have to handle passwords, auth tokens,
@@ -174,5 +175,20 @@ export class UserAuthenticationService {
         } else {
             throw new Error('User does not exist');
         }
+    }
+
+
+    async count(): Promise<number> {
+        return this.authRepository.count();
+    }
+
+    async countActiveSince(date: Date): Promise<number> {
+        // TypeORM has a bug regarding date comparison in SQLite DBs.
+        // (typeorm/typeorm#2286)
+        //
+        // As a workaround, we pull in the login dates, then count them here.
+        const auth = await this.authRepository.find({ select: ['lastLoggedIn'] });
+
+        return auth.map((e) => isAfter(e.lastLoggedIn, date)).length;
     }
 }

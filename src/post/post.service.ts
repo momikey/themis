@@ -83,6 +83,16 @@ export class PostService {
         return await this.postRepository.findOne(id);
     }
 
+
+    /**
+     * Get a count of all posts on this server.
+     *
+     * @memberof PostService
+     */
+    async countLocal(): Promise<number> {
+        return this.postRepository.count({ server: this.configService.serverAddress });
+    }
+
     // TODO: Maybe consider changing to Flake or some other
     // kind of temporally-sorted UUIDs?
     async findByUuid(uuid: string): Promise<Post> {
