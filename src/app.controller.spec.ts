@@ -20,12 +20,4 @@ describe('AppController', () => {
   it('should be defined', () => {
     expect(appController).toBeDefined();
   });
-
-  it('site info endpoint should work', () => {
-    const result = appController.getSiteInfo();
-
-    expect(result).toBeDefined();
-    expect(result.software).toBe('Themis');
-    expect(result.version).toMatch(/\d+.\d+.\d+/);
-  });
 });
