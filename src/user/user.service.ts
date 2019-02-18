@@ -62,4 +62,25 @@ export class UserService {
     async findByName(name: string): Promise<User> {
         return this.userRepository.findOne({ name: name });
     }
+
+    /**
+     * Returns the User entity representing the user with the given name
+     * on this server.
+     *
+     * @param name The name of the user to retrieve
+     * @returns A User DB entity
+     * @memberof UserService
+     */
+    async findLocalByName(name: string): Promise<User> {
+        try {
+            const response = await this.userRepository.findOneOrFail({
+                name: name,
+                server: this.configService.serverAddress
+            });
+
+            return response;
+        } catch (e) {
+            Promise.reject(new Error(`User ${name} does not exist on this server`));
+        }
+    }
 }

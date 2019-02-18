@@ -59,6 +59,27 @@ export class GroupService {
         return response;
     }
 
+    /**
+     * Returns a Group entity representing the group with the given name
+     * on this server.
+     *
+     * @param name
+     * @returns
+     * @memberof GroupService
+     */
+    async findLocalByName(name: string): Promise<Group> {
+        try {
+            const response = await this.groupRepository.findOneOrFail({
+                name: name,
+                server: this.configService.serverAddress
+            });
+
+            return response;
+        } catch (e) {
+            Promise.reject(new Error(`Group ${name} does not exist on this server`));
+        }
+    }
+
     async findByIds(ids: number[]): Promise<Group[]> {
         return this.groupRepository.findByIds(ids);
     }
