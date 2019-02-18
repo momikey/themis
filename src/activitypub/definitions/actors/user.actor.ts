@@ -7,7 +7,7 @@
  * @class UserActor
  */
 export class UserActor {
-    readonly '@context': string | Array<string>;
+    readonly '@context': string | object | Array<string | object>;
     readonly id: string;
     readonly type: 'Person';
     readonly name: string;

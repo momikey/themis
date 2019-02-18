@@ -6,7 +6,7 @@
  * @class GroupActor
  */
 export class GroupActor {
-    readonly '@context': string | Array<string>;
+    readonly '@context': string | object | Array<string | object>;
     readonly id: string;
     readonly type: 'Group';
     readonly name: string;

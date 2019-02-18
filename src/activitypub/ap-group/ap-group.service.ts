@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { GroupService } from '../../group/group.service';
 import { Group } from 'src/group/group.entity';
-import { GroupActor } from '../definitions/group.actor';
+import { GroupActor } from '../definitions/actors/group.actor';
 import { AP } from '../definitions/constants';
 
 /**

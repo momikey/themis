@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserService } from '../..//user/user.service';
 import { User } from '../..//user/user.entity';
-import { UserActor } from '../definitions/user.actor';
+import { UserActor } from '../definitions/actors/user.actor';
 import { AP } from '../definitions/constants';
 
 /**
