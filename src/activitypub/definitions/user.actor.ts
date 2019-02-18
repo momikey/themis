@@ -1,20 +1,23 @@
 /**
- * The minimum structure of an ActivityPub actor object representing
- * a Themis group.
+ * The minimum structure for an ActivityPub actor representing
+ * a Themis user. This can be different from a group Actor,
+ * which is why we have a separate type definition for it.
  *
  * @export
- * @class GroupActor
+ * @class UserActor
  */
-export class GroupActor {
+export class UserActor {
     readonly '@context': string | Array<string>;
     readonly id: string;
-    readonly type: 'Group';
+    readonly type: 'Person';
     readonly name: string;
     readonly preferredUsername: string;
+    readonly summary: string;
+    readonly icon: string;
+
     readonly inbox: string;
     readonly outbox: string;
 
-    // Groups don't actually follow anyone, but they can *be* followed.
     readonly followers: string;
     readonly following: string;
 

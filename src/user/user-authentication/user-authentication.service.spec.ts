@@ -6,7 +6,6 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConfigService } from '../../config/config.service';
 import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 import { Repository } from 'typeorm/repository/Repository';
-import { async } from 'rxjs/internal/scheduler/async';
 import { JwtPayload } from './jwt.interface';
 import { LoginDto } from './login.dto';
 import { CreateAccountDto } from './create-account.dto';
@@ -110,7 +109,8 @@ describe('UserAuthenticationService', () => {
       password: 'secret',
       reset: false,
       token: '',
-      role: UserRole.User
+      role: UserRole.User,
+      lastLoggedIn: new Date
     };
 
     beforeAll(() => {
