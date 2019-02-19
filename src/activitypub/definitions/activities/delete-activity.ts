@@ -23,7 +23,7 @@ export class DeleteActivity {
     type: 'Delete';
 
     // The object (i.e., post) that is being deleted
-    object: string;
+    object: string | object;
 
     // The actor performing the deletion, which must be either
     // the original poster or an admin

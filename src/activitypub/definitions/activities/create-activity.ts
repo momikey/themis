@@ -1,3 +1,5 @@
+import { PostObject } from "./post-object";
+
 /**
  * An ActivityPub Create activity object, used for posts
  * and potentially other things.
@@ -17,42 +19,9 @@ export class CreateActivity {
     id: string;
     type: 'Create';
     actor: string | object;
-    object: CreateObject;
+    object: PostObject;
     published: string;
     to: string[];
-
-    [key: string]: any;
-}
-
-/**
- * An object to be attached to a Create activity.
- * 
- * As stated above, clients can send these bare, and it's up to us
- * to wrap them in the activity.
- * 
- *
- * @export
- * @class CreateObject
- */
-export class CreateObject {
-    '@context': string | Array<string>;
-    id: string;
-
-    // Themis posts will be of type "Article", but we may need others
-    type: string;
-
-    // The sender of the post
-    attributedTo: string | Array<object | string>;
-
-    // The parent of this post; if absent, then this is a top-level post
-    inReplyTo?: string | object;
-
-    // The post's subject (AP defines a "subject" property, but
-    // only for Relationships)
-    summary: string;
-
-    // The post text
-    content: string;
 
     [key: string]: any;
 }

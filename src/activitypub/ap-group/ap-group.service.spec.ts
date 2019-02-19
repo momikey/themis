@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ApGroupService } from './ap-group.service';
 import { GroupService } from '../../group/group.service';
 import { Group } from '../../group/group.entity';
-import { GroupActor } from '../definitions/group.actor';
+import { GroupActor } from '../definitions/actors/group.actor';
 import { AP } from '../definitions/constants';
 
 jest.mock('../../group/group.service');
