@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, CreateDateColumn, Column, OneToMany } from 'typeorm';
 import { Post } from '../post/post.entity';
+import { Activity } from '../activitypub/definitions/activities/activity.entity';
 
 @Entity()
 export class User {
@@ -34,6 +35,11 @@ export class User {
     // It's really only used to make the Post relation work.
     @OneToMany(type => Post, post => post.sender)
     posts: Post[];
+
+    // 'activities' is a list of all activities connected to this user.
+    // We use it for inbox generation, etc.
+    @OneToMany(type => Activity, activity => activity.users)
+    activities: Activity[];
 
     // We store the date the user's record was created, mostly for debugging,
     // but also so we can do the "date joined" thing on profile pages.

@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToMany, OneToMany } from 'typeorm';
 import { Post } from '../post/post.entity';
+import { Activity } from '../activitypub/definitions/activities/activity.entity';
 
 // Note that we have to change the table name because "group" is a reserved word in SQL.
 @Entity("groups")
@@ -34,6 +35,11 @@ export class Group {
     // Collection of posts in this group. Mostly used for easier DB access.
     @ManyToMany(type => Post, post => post.groups)
     posts: Post[];
+
+    // 'activities' is a list of all activities connected to this group.
+    // We use it for inbox generation, etc.
+    @OneToMany(type => Activity, activity => activity.groups)
+    activities: Activity[];
     
     // We'll also store the date the group was created.
     // This isn't as necessary as for users, but it might come in handy.

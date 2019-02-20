@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, Tree, TreeChildren, TreeParent, ManyToMany, JoinTable } from "typeorm";
 import { User } from "../user/user.entity";
 import { Group } from "../group/group.entity";
+import { Activity } from "../activitypub/definitions/activities/activity.entity";
 
 @Entity()
 @Tree('materialized-path')
@@ -79,4 +80,11 @@ export class Post {
 
     @TreeParent()
     parent: Post;
+
+    // 'activities' is a list of all activities connected to this post.
+    // These might be useful for AP threading, etc.
+    @OneToMany(type => Activity, activity => activity.posts)
+    activities: Activity[];
+
+
 }
