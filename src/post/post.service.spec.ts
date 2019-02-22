@@ -93,10 +93,10 @@ describe('PostService', () => {
     const data: Post[] = [
       {id: 1, uuid: sampleUuid, server: 'example.com', sender: new User, uri: '', parentUri: '',
         groups: [], subject: 'Subject', content: 'Content', source: '', timestamp: '',
-        deleted: false, children: [], parent: undefined },
+        deleted: false, children: [], parent: undefined, activities: [] },
       {id: 2, uuid: '00000000-1234-5678-987654321cafe', server: 'example.com', sender: new User, 
         uri: '', parentUri: '', groups: [], subject: 'Subject', content: 'Content', 
-        source: '', timestamp: '', deleted: false, children: [], parent: undefined }
+        source: '', timestamp: '', deleted: false, children: [], parent: undefined, activities: [] }
     ];
 
     beforeAll(() => {

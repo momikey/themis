@@ -51,9 +51,9 @@ describe('UserService', () => {
 
   describe('Method testing', () => {
     const data: User[] = [
-      { id: 1, name: 'user', displayName: 'Test User', server: 'example.com', summary: '', icon: '', date: '', posts: []},
-      { id: 2, name: 'other', displayName: 'Test User', server: 'example.invalid', summary: '', icon: '', date: '', posts: []},
-      { id: 3, name: 'another', displayName: 'Test User', server: 'local.local', summary: '', icon: '', date: '', posts: []},
+      { id: 1, name: 'user', displayName: 'Test User', server: 'example.com', summary: '', icon: '', date: '', posts: [], activities: []},
+      { id: 2, name: 'other', displayName: 'Test User', server: 'example.invalid', summary: '', icon: '', date: '', posts: [], activities: []},
+      { id: 3, name: 'another', displayName: 'Test User', server: 'local.local', summary: '', icon: '', date: '', posts: [], activities: []},
       ]
 
     beforeAll(() => {

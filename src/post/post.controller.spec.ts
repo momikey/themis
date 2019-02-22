@@ -106,7 +106,8 @@ describe('Post Controller', () => {
         displayName: 'A group',
         summary: '',
         date: '',
-        posts: []
+        posts: [],
+        activities: []
       };
       const examplePost: Post = {
         id: 1,
@@ -122,7 +123,8 @@ describe('Post Controller', () => {
         timestamp: '',
         deleted: false,
         children: [],
-        parent: undefined        
+        parent: undefined,
+        activities: []
       };
       service.findTopLevelByGroup.mockReturnValueOnce([examplePost]);
 
@@ -142,7 +144,8 @@ describe('Post Controller', () => {
         summary: '',
         icon: '',
         date: '',
-        posts: []
+        posts: [],
+        activities: []
       };
       const examplePost: Post = {
         id: 1,
@@ -158,7 +161,8 @@ describe('Post Controller', () => {
         timestamp: '',
         deleted: false,
         children: [],
-        parent: undefined        
+        parent: undefined,
+        activities: []
       };
       service.findByUserId.mockReturnValue([examplePost]);
 
@@ -177,7 +181,8 @@ describe('Post Controller', () => {
         displayName: 'A group',
         summary: '',
         date: '',
-        posts: []
+        posts: [],
+        activities: []
       };
       const examplePost: Post = {
         id: 1,
@@ -193,7 +198,8 @@ describe('Post Controller', () => {
         timestamp: '',
         deleted: false,
         children: [],
-        parent: undefined        
+        parent: undefined,
+        activities: []
       };
       service.findByGroupId.mockReturnValueOnce([examplePost]);
 
