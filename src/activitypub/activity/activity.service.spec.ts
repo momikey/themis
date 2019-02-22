@@ -55,4 +55,34 @@ describe('ActivityService', () => {
     expect(configService).toBeDefined();
     expect(repository).toBeDefined();
   });
+
+  describe('Method testing', () => {
+    beforeAll(() => {
+
+    });
+
+    it('parsing a URI should work', () => {
+      const uri = 'https://example.com/user/somebody';
+
+      const result = service.parseSender(uri);
+      
+      expect(result).toBeDefined();
+      expect(result.sender).toBe('somebody');
+      expect(result.server).toBe('example.com');
+    });
+
+    it('parsing a list of groups should work', () => {
+      const targets = [
+        'https://example.com/group/abc',
+        'https://example.com/group/def',
+        'https://example.com/user/somebody',
+        'https://foreign.invalid/group/whatever'
+      ];
+
+      const result = service.parseGroups(targets);
+
+      expect(result).toBeDefined();
+      expect(result.length).toBe(3);
+    });
+  });
 });

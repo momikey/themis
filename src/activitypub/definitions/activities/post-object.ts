@@ -9,16 +9,19 @@
  */
 export class PostObject {
     '@context': string | Array<string>;
-    id: string;
+
+    // The ID can be empty to start, since we'll wrap it later.
+    id?: string;
 
     // Themis posts will be of type "Article", but we may need others
     type: string;
 
     // The sender of the post
-    attributedTo: string | Array<object | string>;
+    // TODO: Don't know if we'll need to change the type for actor handling.
+    attributedTo: string;
 
     // The parent of this post; if absent, then this is a top-level post
-    inReplyTo?: string | object;
+    inReplyTo?: string;
 
     // The post's subject (AP defines a "subject" property, but
     // only for Relationships)
