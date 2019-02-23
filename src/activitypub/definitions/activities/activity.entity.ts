@@ -5,7 +5,7 @@ import { Post } from "../../../post/post.entity";
 
 /**
  * ActivityPub needs a way to access Activity objects, so it's only
- * natural if the server stores them. We do that here.
+ * natural that the server stores them. We do that here.
  *
  * @export
  * @class Activity

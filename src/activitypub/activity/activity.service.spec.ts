@@ -9,6 +9,7 @@ import { PostService } from '../../post/post.service';
 import { ConfigService } from '../../config/config.service';
 import { CreateActivity } from '../definitions/activities/create-activity';
 import { AP } from '../definitions/constants';
+import { ActorType } from '../definitions/actor.interface';
 
 jest.mock('../../group/group.service');
 jest.mock('../../user/user.service');
@@ -71,10 +72,15 @@ describe('ActivityService', () => {
         'https://foreign.invalid/group/whatever'
       ];
 
-      const result = service.parseGroups(targets);
+      const groups = service.parseActor(targets, ActorType.Group);
+      const users = service.parseActor(targets, ActorType.User);
 
-      expect(result).toBeDefined();
-      expect(result.length).toBe(3);
+      expect(groups).toBeDefined();
+      expect(users).toBeDefined();
+      expect(groups).toHaveLength(3);
+      expect(users).toHaveLength(1);
+      expect(groups[0].name).toBe('abc')
+      expect(users[0].name).toBe('somebody');
     });
 
     it('creating a new post object should work', () => {

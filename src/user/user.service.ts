@@ -80,7 +80,20 @@ export class UserService {
 
             return response;
         } catch (e) {
-            Promise.reject(new Error(`User ${name} does not exist on this server`));
+            return Promise.reject(new Error(`User ${name} does not exist on this server`));
+        }
+    }
+
+    async findGlobalByName(name: string, server: string): Promise<User> {
+        try {
+            const response = await this.userRepository.findOneOrFail({
+                name,
+                server
+            });
+
+            return response;
+        } catch (e) {
+            return Promise.reject(new Error(`Cannot find user ${name}@${server}`));
         }
     }
 }

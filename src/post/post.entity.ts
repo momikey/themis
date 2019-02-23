@@ -15,7 +15,7 @@ export class Post {
     @Column('text', { unique: true })
     uuid: string;
 
-    // `origin` is the server where this post originated.
+    // `server` is the server where this post originated.
     // We will store "foreign" posts for multiple reasons. One, for caching purposes,
     // to ease network load. Two, because we'll need references to them.
     @Column('text')
@@ -85,6 +85,4 @@ export class Post {
     // These might be useful for AP threading, etc.
     @OneToMany(type => Activity, activity => activity.posts)
     activities: Activity[];
-
-
 }

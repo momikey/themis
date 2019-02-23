@@ -27,7 +27,7 @@ export class ActivityService {
         const actor = this.getActorUri(activity.object.attributedTo);
 
         const { name, server } = fromUri(actor).actor;
-        const groups = this.parseGroups(activity.to);
+        const groups = this.parseActor(activity.to, ActorType.Group);
 
         const post = {
             sender: name,
@@ -57,21 +57,17 @@ export class ActivityService {
             sender: actor,
             subject: post.summary,
             content: post.content,
-            groups: this.parseGroups(activity.to),
+            groups: this.parseActor(activity.to, ActorType.Group),
             parent: post.inReplyTo || undefined,
-            source: post.source || undefined
+            source: post.source || undefined,
+            recipients: this.parseActor(activity.to, ActorType.User)
         }
     }
 
-    parseGroups(targets: string[]): Actor[] {
-        // return targets.map((t) => {
-        //     const pathElements = URI.parse(t).path.split('/');;
-        //     const isGroup = (pathElements[1] === 'group');
-        //     return (isGroup) ? pathElements[pathElements.length - 1] : '';
-        // }).filter((e) => e != '');
+    parseActor(targets: string[], desiredType: ActorType): Actor[] {
         return targets.map((t) => {
             const parsed = fromUri(t);
-            return (parsed.type === ActorType.Group) ? parsed.actor : undefined
+            return (parsed.type === desiredType) ? parsed.actor : undefined
         }).filter((e) => e != undefined);
     }
 

@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotImplementedException } from '@nestjs/common';
 import { Repository, getRepository, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './post.entity';
@@ -10,8 +10,9 @@ import { UserService } from '../user/user.service';
 import { GroupService } from '../group/group.service';
 import { CreateTopLevelPostDto } from './create-top-level-post.dto';
 import { CreateReplyDto } from './create-reply.dto';
-import { async } from 'rxjs/internal/scheduler/async';
-import { Group } from 'src/group/group.entity';
+import { Group } from '../group/group.entity';
+import { CreateGlobalPostDto } from './create-global-post.dto';
+import { Actor } from '../activitypub/definitions/actor.interface';
 
 @Injectable()
 export class PostService {
@@ -40,6 +41,106 @@ export class PostService {
         });
 
         return await this.postRepository.save(postEntity);
+    }
+
+    /**
+     * Create a new post from an AP Create activity. This uses the "global"
+     * post type, since there's no guarantee that the post originated on
+     * our server.
+     *
+     * @param post A post object, including all metadata
+     * @returns The newly-created database entity representing the post
+     * @memberof PostService
+     */
+    async createFromActivity(post: CreateGlobalPostDto): Promise<Post> {
+        const senderEntity = await this.findOrCreateUser(post.sender);
+        const targetGroupEntities = await Promise.all(post.groups.map((g) =>
+            this.findOrCreateGroup(g)));
+
+        if (post.parent) {
+            // This is a reply
+            // TODO: Handle that
+            throw new NotImplementedException();
+        } else {
+            const entity = this.postRepository.create({
+                sender: senderEntity,
+                server: post.sender.server,
+                groups: targetGroupEntities,
+                subject: post.subject,
+                content: post.content,
+                source: post.source || null,
+
+                uri: post.id || '',
+                parentUri: post.parent || '',
+
+                uuid: this.createNewUuid(post.sender + post.content),
+                timestamp: (new Date()).toJSON(),
+                deleted: false,
+            });
+
+            return this.postRepository.save(entity);
+        }
+    }
+
+    /**
+     * Find the database entry for a given user. If none exists,
+     * then create a new one and return it.
+     *
+     * @param user The name and server of the user
+     * @returns The database entity representing the user, possibly new
+     * @memberof PostService
+     */
+    async findOrCreateUser(user: Actor): Promise<User> {
+        try {
+            const entity = await this.userService.findGlobalByName(
+                user.name, user.server);
+            
+            // If this user already exists, return the entity
+            return entity;
+        } catch (e) {
+            // Find promise was rejected, meaning that the user
+            // doesn't exist in our DB yet. So we need to create
+            // a new entry for it.
+
+            // TODO: Handle fetching data, like avatars, etc.
+            return this.userService.create({
+                name: user.name,
+                server: user.server,
+                displayName: user.name,
+                summary: '',
+                iconUrl: ''
+            });
+        }
+    }
+
+    /**
+     * Find the database entry for a given group. If none exists,
+     * then create a new one and return it.
+     *
+     * @param group The name and server of the group to find
+     * @returns The database entity representing the group
+     * @memberof PostService
+     */
+    async findOrCreateGroup(group: Actor): Promise<Group> {
+        try {
+            const entity = await this.groupService.findGlobalByName(
+                group.name, group.server);
+            
+            // If this group exists, return the entity
+            return entity;
+        } catch (e) {
+            // Find promise was rejected, meaning that the group
+            // doesn't exist in our DB yet. So we need to create
+            // a new entry for it.
+
+            // TODO: Handle fetching metadata
+            return this.groupService.create({
+                name: group.name,
+                server: group.server,
+                displayName: group.name,
+                summary: ''
+            });
+        }
     }
 
     // Create a new top-level (parent-less) post.
@@ -82,7 +183,6 @@ export class PostService {
     async find(id: number): Promise<Post> {
         return await this.postRepository.findOne(id);
     }
-
 
     /**
      * Get a count of all posts on this server.

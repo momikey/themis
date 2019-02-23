@@ -1,4 +1,5 @@
 import { Actor } from "../activitypub/definitions/actor.interface";
+import { CreateActivity } from "src/activitypub/definitions/activities/create-activity";
 
 /**
  * A "global" post is one which can be addressed to any group
@@ -55,4 +56,27 @@ export class CreateGlobalPostDto {
      * @memberof CreateGlobalPostDto
      */
     readonly source?: string | undefined;
+
+    /**
+     * Non-group recipients, e.g., for private messages.
+     *
+     * @memberof CreateGlobalPostDto
+     */
+    readonly recipients: Actor[];
+
+    /**
+     * The identifying URI of this post. This will only be present
+     * for "foreign" posts. Local posts will fill it in as needed.
+     *
+     * @memberof CreateGlobalPostDto
+     */
+    readonly id?: string;
+
+    /**
+     * The creating activity for this post. Stored in the DB for
+     * later use.
+     *
+     * @memberof CreateGlobalPostDto
+     */
+    readonly activity?: CreateActivity;
 }
