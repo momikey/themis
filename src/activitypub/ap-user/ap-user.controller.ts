@@ -1,10 +1,12 @@
-import { Controller, Get, Param, NotImplementedException, Body, Post as HttpPost } from '@nestjs/common';
+import { Controller, Get, Param, NotImplementedException, Body, Post as HttpPost, MethodNotAllowedException } from '@nestjs/common';
 import { ApUserService } from './ap-user.service';
+import { ConfigService } from '../../config/config.service';
 
 @Controller('ap-user')
 export class ApUserController {
     constructor(
-        private readonly apUserService: ApUserService
+        private readonly apUserService: ApUserService,
+        private readonly configService: ConfigService
     ) {}
 
     @Get('/:name/inbox')
@@ -14,7 +16,11 @@ export class ApUserController {
 
     @HttpPost('/:name/inbox')
     async postToInbox(@Param('name') name: string, @Body() body) {
-        throw new NotImplementedException();
+        if (this.configService.isFederating) {
+            throw new NotImplementedException();
+        } else {
+            throw new MethodNotAllowedException();
+        }
     }
 
     @Get('/:name/outbox')

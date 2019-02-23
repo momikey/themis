@@ -7,6 +7,8 @@ import { GroupService } from '../../group/group.service';
 import { UserService } from '../../user/user.service';
 import { PostService } from '../../post/post.service';
 import { ConfigService } from '../../config/config.service';
+import { CreateActivity } from '../definitions/activities/create-activity';
+import { AP } from '../definitions/constants';
 
 jest.mock('../../group/group.service');
 jest.mock('../../user/user.service');
@@ -61,16 +63,6 @@ describe('ActivityService', () => {
 
     });
 
-    it('parsing a URI should work', () => {
-      const uri = 'https://example.com/user/somebody';
-
-      const result = service.parseSender(uri);
-      
-      expect(result).toBeDefined();
-      expect(result.sender).toBe('somebody');
-      expect(result.server).toBe('example.com');
-    });
-
     it('parsing a list of groups should work', () => {
       const targets = [
         'https://example.com/group/abc',
@@ -83,6 +75,36 @@ describe('ActivityService', () => {
 
       expect(result).toBeDefined();
       expect(result.length).toBe(3);
+    });
+
+    it('creating a new post object should work', () => {
+      const activity: CreateActivity = {
+        '@context': AP.Context,
+        id: '',
+        type: 'Create',
+        actor: 'https://example.com/user/somebody',
+        published: new Date().toJSON(),
+        to: [
+          'https://example.com/group/this',
+          'https://example.com/group/that',
+          AP.Public
+        ],
+        object: {
+          '@context': AP.Context,
+          type: 'Article',
+          attributedTo: 'https://example.com/user/somebody',
+          summary: 'A test post',
+          content: 'This is a test'
+        }
+      };
+
+      const result = service.createNewGlobalPost(activity);
+
+      expect(result).toBeDefined();
+      expect(result.sender).toMatchObject({name: 'somebody', server: 'example.com'});
+      expect(result.subject).toEqual(expect.any(String));
+      expect(result.content).toEqual(expect.any(String));
+      expect(result.groups.length).toBe(2);
     });
   });
 });

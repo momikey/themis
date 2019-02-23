@@ -8,9 +8,8 @@ import { PostService } from '../../post/post.service';
 import { ConfigService } from '../../config/config.service';
 import { Post } from '../../post/post.entity';
 import { CreateActivity } from '../definitions/activities/create-activity';
-import * as URI from 'uri-js';
-import { CreatePostDto } from 'src/post/create-post.dto';
-import { CreateReplyDto } from 'src/post/create-reply.dto';
+import { fromUri, ActorType, Actor } from '../definitions/actor.interface';
+import { CreateGlobalPostDto } from 'src/post/create-global-post.dto';
 
 @Injectable()
 export class ActivityService {
@@ -27,11 +26,11 @@ export class ActivityService {
         const postObject = activity.object;
         const actor = this.getActorUri(activity.object.attributedTo);
 
-        const {sender, server} = this.parseSender(actor);
+        const { name, server } = fromUri(actor).actor;
         const groups = this.parseGroups(activity.to);
 
         const post = {
-            sender: sender,
+            sender: name,
             server: server,
             subject: postObject.summary,
             parent: '',
@@ -46,25 +45,34 @@ export class ActivityService {
             post.parent = postObject.inReplyTo;
         }
 
-        return this.postService.createTopLevel(post);
+        // return this.postService.createTopLevel(post);
+        throw new NotImplementedException();
     }
 
-    parseSender(actor: string): ParsedActor {
-        // TODO: Implement actor handling, etc.
-        const parsed = URI.parse(actor);
-        const path = parsed.path.split('/');
+    createNewGlobalPost(activity: CreateActivity): CreateGlobalPostDto {
+        const post = activity.object;
+        const { actor, type: senderType } = fromUri(this.getActorUri(post.attributedTo));
+
         return {
-            sender: path[path.length-1],
-            server: parsed.host
+            sender: actor,
+            subject: post.summary,
+            content: post.content,
+            groups: this.parseGroups(activity.to),
+            parent: post.inReplyTo || undefined,
+            source: post.source || undefined
         }
     }
 
-    parseGroups(targets: string[]): string[] {
+    parseGroups(targets: string[]): Actor[] {
+        // return targets.map((t) => {
+        //     const pathElements = URI.parse(t).path.split('/');;
+        //     const isGroup = (pathElements[1] === 'group');
+        //     return (isGroup) ? pathElements[pathElements.length - 1] : '';
+        // }).filter((e) => e != '');
         return targets.map((t) => {
-            const pathElements = URI.parse(t).path.split('/');;
-            const isGroup = (pathElements[1] === 'group');
-            return (isGroup) ? pathElements[pathElements.length - 1] : '';
-        }).filter((e) => e != '');
+            const parsed = fromUri(t);
+            return (parsed.type === ActorType.Group) ? parsed.actor : undefined
+        }).filter((e) => e != undefined);
     }
 
     getActorUri(actor: string | (string | object)[]): string {
@@ -77,9 +85,4 @@ export class ActivityService {
             return actor[0]['id'];
         }
     }
-}
-
-interface ParsedActor {
-    readonly sender: string;
-    readonly server: string;
 }

@@ -1,12 +1,14 @@
-import { Controller, Get, NotImplementedException, Post as HttpPost, Body, Param } from '@nestjs/common';
+import { Controller, Get, NotImplementedException, Post as HttpPost, Body, Param, MethodNotAllowedException } from '@nestjs/common';
 import { ApGroupService } from './ap-group.service';
 import { Collection } from '../definitions/activities/collection-object';
 import { AP } from '../definitions/constants';
+import { ConfigService } from '../../config/config.service';
 
 @Controller('group')
 export class ApGroupController {
     constructor(
-        private readonly apGroupService: ApGroupService
+        private readonly apGroupService: ApGroupService,
+        private readonly configService: ConfigService
     ) {}
 
     @Get('/:name/inbox')
@@ -16,7 +18,11 @@ export class ApGroupController {
 
     @HttpPost('/:name/inbox')
     async postToInbox(@Param('name') name: string, @Body() body) {
-        throw new NotImplementedException();
+        if (this.configService.isFederating) {
+            throw new NotImplementedException();
+        } else {
+            throw new MethodNotAllowedException();
+        }
     }
 
     @Get('/:name/outbox')

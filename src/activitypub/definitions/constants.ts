@@ -4,6 +4,7 @@
  */
 export const AP = {
     Context: 'https://www.w3.org/ns/activitystreams',
+    Public: 'https://www.w3.org/ns/activitystreams#Public',
     InboxAddress: 'inbox',
     OutboxAddress: 'outbox',
     FollowersAddress: 'followers',
