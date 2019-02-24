@@ -1,13 +1,19 @@
 import { Controller, Get, Param, NotImplementedException, Body, Post as HttpPost, MethodNotAllowedException } from '@nestjs/common';
 import { ApUserService } from './ap-user.service';
 import { ConfigService } from '../../config/config.service';
+import { UserActor } from '../definitions/actors/user.actor';
 
-@Controller('ap-user')
+@Controller('user')
 export class ApUserController {
     constructor(
         private readonly apUserService: ApUserService,
         private readonly configService: ConfigService
     ) {}
+
+    @Get('/:name')
+    async getUserActor(@Param('name') name: string): Promise<UserActor> {
+        return this.apUserService.getActorForUser(name);
+    }
 
     @Get('/:name/inbox')
     async getInbox(@Param('name') name: string) {

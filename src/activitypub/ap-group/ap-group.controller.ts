@@ -3,6 +3,7 @@ import { ApGroupService } from './ap-group.service';
 import { Collection } from '../definitions/activities/collection-object';
 import { AP } from '../definitions/constants';
 import { ConfigService } from '../../config/config.service';
+import { GroupActor } from '../definitions/actors/group.actor';
 
 @Controller('group')
 export class ApGroupController {
@@ -10,6 +11,11 @@ export class ApGroupController {
         private readonly apGroupService: ApGroupService,
         private readonly configService: ConfigService
     ) {}
+
+    @Get('/:name')
+    async getGroupActor(@Param('name') name: string): Promise<GroupActor> {
+        return this.apGroupService.getActorForGroup(name);
+    }
 
     @Get('/:name/inbox')
     async getInbox(@Param('name') name: string) {
