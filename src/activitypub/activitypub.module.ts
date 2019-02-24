@@ -8,10 +8,20 @@ import { ActivityService } from './activity/activity.service';
 import { GroupModule } from 'src/group/group.module';
 import { ApGroupController } from './ap-group/ap-group.controller';
 import { ApUserController } from './ap-user/ap-user.controller';
+import { ApPostController } from './ap-post/ap-post.controller';
+import { ApPostService } from './ap-post/ap-post.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Activity } from './definitions/activities/activity.entity';
 
 @Module({
-  imports: [HttpModule, UserModule, PostModule, GroupModule],
-  controllers: [NodeinfoController, ApGroupController, ApUserController],
-  providers: [ApGroupService, ApUserService, ActivityService]
+  imports: [
+    TypeOrmModule.forFeature([Activity]),
+    HttpModule,
+    UserModule,
+    PostModule,
+    GroupModule
+  ],
+  controllers: [NodeinfoController, ApGroupController, ApUserController, ApPostController],
+  providers: [ApGroupService, ApUserService, ActivityService, ApPostService]
 })
 export class ActivityPubModule {}

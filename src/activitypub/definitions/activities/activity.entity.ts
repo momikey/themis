@@ -10,19 +10,19 @@ import { Post } from "../../../post/post.entity";
  * @export
  * @class Activity
  */
-@Entity('activities')
+@Entity('activity')
 export class Activity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(type => User, user => user.activities, { nullable: true })
-    users: User[];
+    @ManyToOne(type => User, user => user.activities)
+    targetUser: User;
 
-    @ManyToOne(type => Group, group => group.activities, { nullable: true })
-    groups: User[];
+    @ManyToOne(type => Group, group => group.activities)
+    targetGroup: Group;
 
-    @ManyToOne(type =>Post, post => post.activities, { nullable: true })
-    posts: Post[];
+    @ManyToOne(type =>Post, post => post.activities)
+    targetPost: Post;
 
     @Column()
     uuid: string;

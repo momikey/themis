@@ -83,6 +83,6 @@ export class Post {
 
     // 'activities' is a list of all activities connected to this post.
     // These might be useful for AP threading, etc.
-    @OneToMany(type => Activity, activity => activity.posts)
+    @OneToMany(type => Activity, activity => activity.targetPost)
     activities: Activity[];
 }

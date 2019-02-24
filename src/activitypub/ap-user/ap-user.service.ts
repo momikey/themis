@@ -3,6 +3,7 @@ import { UserService } from '../..//user/user.service';
 import { User } from '../..//user/user.entity';
 import { UserActor } from '../definitions/actors/user.actor';
 import { AP } from '../definitions/constants';
+import * as URI from 'uri-js';
 
 /**
  * This class creates and handles actor objects representing users.
@@ -63,6 +64,17 @@ export class ApUserService {
     }
 
     private idForUser(user: User): string {
-        return `https://${user.server}/user/${user.name}`
+        if (user.uri) {
+            return user.uri;
+        } else {
+            // Same configuration needs as for groups
+            const uri = URI.serialize({
+                scheme: 'https',
+                host: user.server,
+                path: `/user/${user.name}`
+            })
+
+            return uri;
+        }
     }
 }

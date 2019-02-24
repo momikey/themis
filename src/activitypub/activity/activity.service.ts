@@ -9,7 +9,7 @@ import { ConfigService } from '../../config/config.service';
 import { Post } from '../../post/post.entity';
 import { CreateActivity } from '../definitions/activities/create-activity';
 import { fromUri, ActorType, Actor } from '../definitions/actor.interface';
-import { CreateGlobalPostDto } from 'src/post/create-global-post.dto';
+import { CreateGlobalPostDto } from '../../post/create-global-post.dto';
 
 @Injectable()
 export class ActivityService {

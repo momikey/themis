@@ -38,8 +38,13 @@ export class Group {
 
     // 'activities' is a list of all activities connected to this group.
     // We use it for inbox generation, etc.
-    @OneToMany(type => Activity, activity => activity.groups)
+    @OneToMany(type => Activity, activity => activity.targetGroup)
     activities: Activity[];
+
+    // 'uri' is a unique identifying URI for this group, used in the
+    // ActivityPub portion of Themis.
+    @Column({ nullable: true })
+    uri: string;
     
     // We'll also store the date the group was created.
     // This isn't as necessary as for users, but it might come in handy.

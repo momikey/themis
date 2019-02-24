@@ -38,9 +38,14 @@ export class User {
 
     // 'activities' is a list of all activities connected to this user.
     // We use it for inbox generation, etc.
-    @OneToMany(type => Activity, activity => activity.users)
+    @OneToMany(type => Activity, activity => activity.targetUser)
     activities: Activity[];
 
+    // 'uri' is a unique identifying URI for this group, used in the
+    // ActivityPub portion of Themis.
+    @Column({ nullable: true })
+    uri: string;
+    
     // We store the date the user's record was created, mostly for debugging,
     // but also so we can do the "date joined" thing on profile pages.
     @CreateDateColumn({ readonly: true })

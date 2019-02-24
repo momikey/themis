@@ -3,6 +3,7 @@ import { GroupService } from '../../group/group.service';
 import { Group } from 'src/group/group.entity';
 import { GroupActor } from '../definitions/actors/group.actor';
 import { AP } from '../definitions/constants';
+import * as URI from 'uri-js';
 
 /**
  * This class creates and handles Group Actors, connecting them
@@ -91,6 +92,17 @@ export class ApGroupService {
     }
 
     private idForGroup(group: Group): string {
-        return `https://${group.server}/group/${group.name}`
+        if (group.uri) {
+            return group.uri;
+        } else {
+            // We'll need a lot of configuration stuff for this
+            const uri = URI.serialize({
+                scheme: 'https',
+                host: group.server,
+                path: `/group/${group.name}`
+            })
+
+            return uri;
+        }
     }
 }
