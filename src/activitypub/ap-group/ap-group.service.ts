@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { GroupService } from '../../group/group.service';
-import { Group } from 'src/group/group.entity';
+import { Group } from '../../group/group.entity';
 import { GroupActor } from '../definitions/actors/group.actor';
 import { AP } from '../definitions/constants';
 import * as URI from 'uri-js';
+import { ConfigService } from '../../config/config.service';
 
 /**
  * This class creates and handles Group Actors, connecting them
@@ -15,7 +16,8 @@ import * as URI from 'uri-js';
 @Injectable()
 export class ApGroupService {
     constructor(
-        private readonly groupService: GroupService
+        private readonly groupService: GroupService,
+        private readonly configService: ConfigService
     ) {}
 
     /**
@@ -99,7 +101,8 @@ export class ApGroupService {
             const uri = URI.serialize({
                 scheme: 'https',
                 host: group.server,
-                path: `/group/${group.name}`
+                path: `/group/${group.name}`,
+                port: this.configService.serverPort
             })
 
             return uri;

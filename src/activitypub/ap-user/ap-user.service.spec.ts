@@ -3,23 +3,28 @@ import { ApUserService } from './ap-user.service';
 import { UserService } from '../../user/user.service';
 import { User } from '../../user/user.entity';
 import { AP } from '../definitions/constants';
+import { ConfigService } from '../../config/config.service';
 
 jest.mock('../../user/user.service');
+jest.mock('../../config/config.service');
 
 describe('ApUserService', () => {
   let service: ApUserService;
   let userService: jest.Mocked<UserService>;
+  let configService: jest.Mocked<ConfigService>;
   
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ApUserService,
-        UserService
+        UserService,
+        ConfigService
       ],
     }).compile();
 
     service = module.get<ApUserService>(ApUserService);
     userService = module.get<UserService>(UserService) as jest.Mocked<UserService>;
+    configService = module.get<ConfigService>(ConfigService) as jest.Mocked<ConfigService>;
   });
 
   it('should be defined', () => {

@@ -4,23 +4,28 @@ import { GroupService } from '../../group/group.service';
 import { Group } from '../../group/group.entity';
 import { GroupActor } from '../definitions/actors/group.actor';
 import { AP } from '../definitions/constants';
+import { ConfigService } from '../../config/config.service';
 
 jest.mock('../../group/group.service');
+jest.mock('../../config/config.service');
 
 describe('ApGroupService', () => {
   let service: ApGroupService;
   let groupService: jest.Mocked<GroupService>;
+  let configService: jest.Mocked<ConfigService>;
   
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ApGroupService,
-        GroupService
+        GroupService,
+        ConfigService
       ],
     }).compile();
 
     service = module.get<ApGroupService>(ApGroupService);
     groupService = module.get<GroupService>(GroupService) as jest.Mocked<GroupService>;
+    configService = module.get<ConfigService>(ConfigService) as jest.Mocked<ConfigService>;
   });
 
   it('should be defined', () => {

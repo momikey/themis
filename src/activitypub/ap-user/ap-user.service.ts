@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { UserService } from '../..//user/user.service';
-import { User } from '../..//user/user.entity';
+import { UserService } from '../../user/user.service';
+import { User } from '../../user/user.entity';
 import { UserActor } from '../definitions/actors/user.actor';
 import { AP } from '../definitions/constants';
 import * as URI from 'uri-js';
+import { ConfigService } from '../../config/config.service';
 
 /**
  * This class creates and handles actor objects representing users.
@@ -15,7 +16,8 @@ import * as URI from 'uri-js';
 @Injectable()
 export class ApUserService {
     constructor(
-        private readonly userService: UserService
+        private readonly userService: UserService,
+        private readonly configService: ConfigService
     ) {}
 
     async getLocalUser(name: string): Promise<User> {
@@ -71,7 +73,8 @@ export class ApUserService {
             const uri = URI.serialize({
                 scheme: 'https',
                 host: user.server,
-                path: `/user/${user.name}`
+                path: `/user/${user.name}`,
+                port: this.configService.serverPort
             })
 
             return uri;
