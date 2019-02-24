@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn } from "typeorm";
+import { Entity, PrimaryColumn, Column } from "typeorm";
 
 // Preferences are simply that: preferences. In the database,
 // we store them as key/value pairs. There's not much else to it.
@@ -17,5 +17,6 @@ export class Preference {
 
     // The preference's value.  Note that, while there may be preferences
     // best modeled as numbers, we'll default to using strings to store them.
+    @Column()
     value: string;
 }
