@@ -5,6 +5,7 @@ import { Post } from './post.entity';
 import { CreatePostDto } from './create-post.dto';
 import { ConfigService } from '../config/config.service';
 import * as uuidv5 from 'uuid/v5';
+import * as URI from 'uri-js';
 import { User } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import { GroupService } from '../group/group.service';
@@ -293,8 +294,16 @@ export class PostService {
 
     uriFromUuid(uuid: string): string {
         const server = this.configService.serverAddress;
+        const port = this.configService.serverPort;
 
-        return `https://${server}/posts/${uuid}`;
+        const uri = URI.serialize({
+            scheme: 'https',
+            host: server,
+            port: port,
+            path: `/posts/${uuid}`
+        });
+
+        return uri;
     }
 
     createNewUuid(data: any): string {
