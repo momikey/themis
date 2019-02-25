@@ -93,7 +93,7 @@ export class ApGroupService {
         return [];
     }
 
-    private idForGroup(group: Group): string {
+    idForGroup(group: Group): string {
         if (group.uri) {
             return group.uri;
         } else {

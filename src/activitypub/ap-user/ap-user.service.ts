@@ -65,7 +65,7 @@ export class ApUserService {
         }
     }
 
-    private idForUser(user: User): string {
+    idForUser(user: User): string {
         if (user.uri) {
             return user.uri;
         } else {

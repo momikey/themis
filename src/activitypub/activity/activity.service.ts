@@ -10,6 +10,11 @@ import { Post } from '../../post/post.entity';
 import { CreateActivity } from '../definitions/activities/create-activity';
 import { fromUri, ActorType, Actor } from '../definitions/actor.interface';
 import { CreateGlobalPostDto } from '../../post/create-global-post.dto';
+import { PostObject } from '../definitions/activities/post-object';
+import { AP } from '../definitions/constants';
+import { TombstoneObject } from '../definitions/activities/tombstone-object';
+import { ApGroupService } from '../ap-group/ap-group.service';
+import { ApUserService } from '../ap-user/ap-user.service';
 
 @Injectable()
 export class ActivityService {
@@ -19,7 +24,9 @@ export class ActivityService {
         private readonly groupService: GroupService,
         private readonly userService: UserService,
         private readonly postService: PostService,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
+        private readonly apGroupService: ApGroupService,
+        private readonly apUserService: ApUserService
     ) {}
 
     async createPostFromActivity(activity: CreateActivity): Promise<Post> {
@@ -47,6 +54,66 @@ export class ActivityService {
 
         // return this.postService.createTopLevel(post);
         throw new NotImplementedException();
+    }
+
+    async createObjectFromPost(post: Post): Promise<PostObject | TombstoneObject> {
+        const activities = await this.getActivitiesForPost(post);
+
+        if (!post.deleted) {
+            const children = await this.postService.getReplies(post);
+            const parent = await this.postService.getParent(post);
+
+            const postObject: PostObject = {
+                '@context': AP.Context,
+                id: post.uri,
+                type: 'Article',
+                attributedTo: post.sender.uri || this.apUserService.idForUser(post.sender),
+                summary: post.subject,
+                content: post.content,
+
+                to: post.groups.map((g) => g.uri || this.apGroupService.idForGroup(g)),
+                created: post.timestamp
+            }
+
+            if (parent) {
+                postObject.inReplyTo = post.parentUri || parent.uri;
+            }
+
+            if (post.source) {
+                postObject.source = {
+                    content: post.source,
+
+                    // TODO: Configuration for type
+                    mediaType: 'text/markdown'
+                }
+            }
+
+            if (children) {
+                postObject.replies = children.map((c) => c.uri);
+            }
+
+            return postObject;
+        } else {
+            // Create a Tombstone object to represent deleted posts
+            // TODO: Store a deletion timestamp
+            const deletingActivity = activities.find((a) => a.activityObject['type'] === 'Delete');
+
+            const tombstone: TombstoneObject = {
+                '@context': AP.Context,
+                id: post.uri,
+                type: 'Tombstone'
+            }
+
+            if (deletingActivity && deletingActivity.activityObject['published']) {
+                tombstone.deleted = deletingActivity.activityObject['published'];
+            }
+
+            return tombstone
+        }
+    }
+
+    async getActivitiesForPost(post: Post): Promise<Activity[]> {
+        return this.activityRepository.find({ targetPost: post });
     }
 
     createNewGlobalPost(activity: CreateActivity): CreateGlobalPostDto {

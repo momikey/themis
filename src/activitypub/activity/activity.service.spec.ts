@@ -10,10 +10,14 @@ import { ConfigService } from '../../config/config.service';
 import { CreateActivity } from '../definitions/activities/create-activity';
 import { AP } from '../definitions/constants';
 import { ActorType } from '../definitions/actor.interface';
+import { ApGroupService } from '../ap-group/ap-group.service';
+import { ApUserService } from '../ap-user/ap-user.service';
 
 jest.mock('../../group/group.service');
 jest.mock('../../user/user.service');
 jest.mock('../../post/post.service');
+jest.mock('../ap-group/ap-group.service');
+jest.mock('../ap-user/ap-user.service');
 
 jest.mock('../../config/config.service');
 jest.mock('typeorm/repository/Repository');
@@ -34,7 +38,9 @@ describe('ActivityService', () => {
         UserService,
         PostService,
         ConfigService,
-        { provide: getRepositoryToken(Activity), useClass: Repository }
+        { provide: getRepositoryToken(Activity), useClass: Repository },
+        ApGroupService,
+        ApUserService
       ],
     }).compile();
 

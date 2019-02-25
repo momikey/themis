@@ -277,6 +277,37 @@ export class PostService {
         return response;
     }
 
+    /**
+     * Get the direct replies for a post.
+     *
+     * @param parent The parent post
+     * @returns An array containing all direct children, if any
+     * @memberof PostService
+     */
+    async getReplies(parent: Post): Promise<Post[]> {
+        const treeRepository = this.postRepository.manager.getTreeRepository(Post);
+
+        const filled = await treeRepository.findDescendantsTree(parent);
+
+        const children = Promise.all(filled.children.map((c) => this.find(c.id)));
+        return children;
+    }
+
+    /**
+     * Get the direct parent of a post
+     *
+     * @param child The post whose parent is needed
+     * @returns The parent post, or undefined if the given post is top-level
+     * @memberof PostService
+     */
+    async getParent(child: Post): Promise<Post | undefined> {
+        const treeRepository = this.postRepository.manager.getTreeRepository(Post);
+
+        const filled = await treeRepository.findAncestorsTree(child);
+
+        return filled.parent || undefined;
+    }
+
     uriFromLocalPost(post: Post): string {
         const server = this.configService.serverAddress;
 

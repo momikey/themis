@@ -27,6 +27,9 @@ export class Activity {
     @Column()
     uuid: string;
 
+    @Column('simple-json')
+    activityObject: object;
+
     @CreateDateColumn()
     created: Date;
 }
