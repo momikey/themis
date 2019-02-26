@@ -29,7 +29,19 @@ export class TombstoneObject {
      *
      * @memberof TombstoneObject
      */
-    deleted?: string
+    deleted?: string;
+
+    /**
+     * The reason why this object was deleted.
+     * As Themis is intended to be censorship-resistant, all
+     * deletions *must* have a reason. If this is because of
+     * a legal action such as a court order, we will return
+     * the special HTTP status code 451 for any access, because
+     * users should know this.
+     *
+     * @memberof TombstoneObject
+     */
+    reason: string;
 
     [key: string]: any;
 }

@@ -101,14 +101,17 @@ export class ActivityService {
             const tombstone: TombstoneObject = {
                 '@context': AP.Context,
                 id: post.uri,
-                type: 'Tombstone'
+                type: 'Tombstone',
+                deleted: ((deletingActivity && deletingActivity.created) || new Date(0)).toJSON(),
+                reason: (deletingActivity && deletingActivity.activityObject['summary']) || 
+                    'Unknown reason'
             }
 
             if (deletingActivity && deletingActivity.activityObject['published']) {
                 tombstone.deleted = deletingActivity.activityObject['published'];
             }
 
-            return tombstone
+            return tombstone;
         }
     }
 

@@ -28,6 +28,10 @@ export class ApPostService {
     }
 
     getLocalPostObject(post: Post): Promise<PostObject | TombstoneObject> {
+        if (post == null) {
+            return Promise.reject("Post does not exist");
+        }
+        
         const uri = URI.parse(post.uri);
 
         if (uri.host == this.configService.serverAddress &&
