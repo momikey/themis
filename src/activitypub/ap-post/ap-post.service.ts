@@ -5,6 +5,7 @@ import { Post } from '../../post/post.entity';
 import { TombstoneObject } from '../definitions/activities/tombstone-object';
 import { PostObject } from '../definitions/activities/post-object';
 import { ActivityService } from '../activity/activity.service';
+import * as URI from 'uri-js';
 
 @Injectable()
 export class ApPostService {
@@ -17,12 +18,27 @@ export class ApPostService {
     async getPostByUuid(uuid: string): Promise<PostObject | TombstoneObject> {
         const post = await this.postService.findByUuid(uuid);
 
-        return this.activityService.createObjectFromPost(post);
+        return this.getLocalPostObject(post);
     }
 
     async getPostById(id: number): Promise<PostObject | TombstoneObject> {
         const post = await this.postService.find(id);
 
-        return this.activityService.createObjectFromPost(post);
+        return this.getLocalPostObject(post);
+    }
+
+    getLocalPostObject(post: Post): Promise<PostObject | TombstoneObject> {
+        const uri = URI.parse(post.uri);
+
+        if (uri.host == this.configService.serverAddress &&
+            uri.port == this.configService.serverPort) {
+                
+            return Promise.resolve(this.activityService.createObjectFromPost(post));
+        } else {
+            // We don't return objects for posts that don't
+            // originate on this server.
+            // TODO: Maybe a better error message?
+            return Promise.reject("Post not available");
+        }
     }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
 import { ApPostService } from './ap-post.service';
 
 @Controller('post')
@@ -9,11 +9,21 @@ export class ApPostController {
 
     @Get('/:uuid')
     async getPostByUuid(@Param('uuid') uuid: string) {
-        return this.apPostService.getPostByUuid(uuid);
+        try {
+            const result = this.apPostService.getPostByUuid(uuid);
+            return result;
+        } catch (e) {
+            throw new NotFoundException(e);
+        }
     }
 
     @Get('/id/:id')
     async getPostById(@Param('id') id: number) {
-        return this.apPostService.getPostById(id);
+        try {
+            const result = await this.apPostService.getPostById(id);
+            return result;
+        } catch (e) {
+            throw new NotFoundException(e);
+        }
     }
 }
