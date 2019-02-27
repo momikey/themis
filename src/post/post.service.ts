@@ -58,29 +58,28 @@ export class PostService {
         const targetGroupEntities = await Promise.all(post.groups.map((g) =>
             this.findOrCreateGroup(g)));
 
+        const uuid = this.createNewUuid(post.sender + post.content);
+        const entity = this.postRepository.create({
+            sender: senderEntity,
+            server: post.sender.server,
+            groups: targetGroupEntities,
+            subject: post.subject,
+            content: post.content,
+            source: post.source || null,
+
+            uri: post.id || this.uriFromUuid(uuid),
+            parentUri: post.parent || '',
+
+            uuid: uuid,
+            timestamp: (new Date()).toJSON(),
+            deleted: false,
+        });
+
         if (post.parent) {
-            // This is a reply
-            // TODO: Handle that
-            throw new NotImplementedException();
-        } else {
-            const entity = this.postRepository.create({
-                sender: senderEntity,
-                server: post.sender.server,
-                groups: targetGroupEntities,
-                subject: post.subject,
-                content: post.content,
-                source: post.source || null,
-
-                uri: post.id || '',
-                parentUri: post.parent || '',
-
-                uuid: this.createNewUuid(post.sender + post.content),
-                timestamp: (new Date()).toJSON(),
-                deleted: false,
-            });
-
-            return this.postRepository.save(entity);
+            entity.parent = await this.findByUri(post.parent);
         }
+
+        return this.postRepository.save(entity);
     }
 
     /**
@@ -213,6 +212,18 @@ export class PostService {
         }
     }
 
+    /**
+     * Find a post given its URI. Since these include UUIDs,
+     * and those are unique by definition, this should work.
+     *
+     * @param uri The URI of the post
+     * @returns The post as a DB entity
+     * @memberof PostService
+     */
+    async findByUri(uri: string): Promise<Post> {
+        return this.postRepository.findOneOrFail({uri});
+    }
+
     async findByUserId(id: number): Promise<Post[]> {
         const response = await this.postRepository
             .createQueryBuilder("post")
@@ -331,7 +342,7 @@ export class PostService {
             scheme: 'https',
             host: server,
             port: port,
-            path: `/posts/${uuid}`
+            path: `/post/${uuid}`
         });
 
         return uri;

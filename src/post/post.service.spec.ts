@@ -12,6 +12,7 @@ import { CreateTopLevelPostDto } from './create-top-level-post.dto';
 import { CreateReplyDto } from './create-reply.dto';
 import { User } from '../user/user.entity';
 import { Group } from '../group/group.entity';
+import { CreateGlobalPostDto } from './create-global-post.dto';
 
 jest.mock('../user/user.service');
 jest.mock('../group/group.service');
@@ -22,7 +23,7 @@ const ConfigServiceMock = <jest.Mock<ConfigService>>ConfigService;
 ConfigServiceMock.mockImplementation(() => {
   return {
     serverAddress: 'example.com',
-    serverPort: 80
+    serverPort: 3000
   }
 });
 
@@ -244,6 +245,50 @@ describe('PostService', () => {
 
       expect(result).toBeDefined();
       expect(result.search(uuidFormat)).toBeTruthy();
+    });
+
+    it('finding/creating a new user should perform the appropriate action', async () => {
+      userService.create.mockReturnValue(Object.assign(new User, {
+        name: 'user',
+        server: 'example.com',
+        displayName: 'A user',
+      }));
+
+      userService.findGlobalByName.mockResolvedValueOnce(Object.assign(new User, {
+        name: 'test',
+        server: 'example.invalid',
+        displayName: 'Test user'
+      }));
+      const goodResult = await service.findOrCreateUser({name: 'test', server: 'example.invalid'});
+      
+      expect(goodResult).toBeDefined();
+      expect(goodResult.name).toBe('test');
+
+      userService.findGlobalByName.mockRejectedValueOnce(undefined);
+      const badResult = await service.findOrCreateUser({name: 'user', server: 'example.com'});
+
+      expect(badResult).toBeDefined();
+      expect(badResult.name).toBe('user');
+    });
+
+    it('creating from an activity should produce a new Post entity', async () => {
+      const newPost: CreateGlobalPostDto = {
+        sender: {
+          name: 'user',
+          server: 'example.com'
+        },
+        subject: 'Test post',
+        groups: [{
+          name: 'group',
+          server: 'example.com'
+        }],
+        content: 'This is a test',
+        recipients: [],
+      };
+
+      const result = await service.createFromActivity(newPost);
+
+      expect(result).toBeDefined();
     });
   });
 });

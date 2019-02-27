@@ -12,6 +12,7 @@ import { AP } from '../definitions/constants';
 import { ActorType } from '../definitions/actor.interface';
 import { ApGroupService } from '../ap-group/ap-group.service';
 import { ApUserService } from '../ap-user/ap-user.service';
+import { PostObject } from '../definitions/activities/post-object';
 
 jest.mock('../../group/group.service');
 jest.mock('../../user/user.service');
@@ -117,6 +118,23 @@ describe('ActivityService', () => {
       expect(result.subject).toEqual(expect.any(String));
       expect(result.content).toEqual(expect.any(String));
       expect(result.groups.length).toBe(2);
+    });
+
+    it('creating a new activity from a post object should work', async () => {
+      const object: PostObject = {
+        '@context': AP.Context,
+        type: 'Article',
+        attributedTo: 'https://example.com/user/somebody',
+        summary: 'A test post',
+        content: 'This is a test',
+        to: ['https://example.com/group/test']
+      };
+
+      const result = service.activityFromObject(object);
+
+      expect(result).toBeDefined();
+      expect(result.object.type).toBe(object.type);
+      expect(result.to).toBe(object.to);
     });
   });
 });
