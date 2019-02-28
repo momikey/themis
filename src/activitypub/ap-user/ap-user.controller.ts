@@ -1,4 +1,4 @@
-import { Controller, Get, Param, NotImplementedException, Body, Post as HttpPost, MethodNotAllowedException } from '@nestjs/common';
+import { Controller, Get, Param, NotImplementedException, Body, Post as HttpPost, MethodNotAllowedException, HttpCode } from '@nestjs/common';
 import { ApUserService } from './ap-user.service';
 import { ConfigService } from '../../config/config.service';
 import { UserActor } from '../definitions/actors/user.actor';
@@ -35,6 +35,7 @@ export class ApUserController {
     }
 
     @HttpPost('/:name/outbox')
+    @HttpCode(201)
     async postToOutbox(@Param('name') name: string, @Body() body) {
         throw new NotImplementedException();
     }
