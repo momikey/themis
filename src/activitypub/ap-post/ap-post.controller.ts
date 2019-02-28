@@ -1,4 +1,4 @@
-import { Controller, Get, Param, NotFoundException, Res, HttpStatus, GoneException } from '@nestjs/common';
+import { Controller, Get, Param, NotFoundException, GoneException } from '@nestjs/common';
 import { ApPostService } from './ap-post.service';
 
 @Controller('post')
