@@ -4,27 +4,36 @@ import { UserService } from '../../user/user.service';
 import { User } from '../../user/user.entity';
 import { AP } from '../definitions/constants';
 import { ConfigService } from '../../config/config.service';
+import { ActivityService } from '../activity/activity.service';
+import { PostObject } from '../definitions/activities/post-object';
+import { ApPostService } from '../ap-post/ap-post.service';
 
 jest.mock('../../user/user.service');
 jest.mock('../../config/config.service');
+jest.mock('../activity/activity.service');
+jest.mock('../ap-post/ap-post.service');
 
 describe('ApUserService', () => {
   let service: ApUserService;
   let userService: jest.Mocked<UserService>;
   let configService: jest.Mocked<ConfigService>;
+  let apPostService: jest.Mocked<ApPostService>;
   
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ApUserService,
         UserService,
-        ConfigService
+        ConfigService,
+        ApPostService,
+        ActivityService
       ],
     }).compile();
 
     service = module.get<ApUserService>(ApUserService);
     userService = module.get<UserService>(UserService) as jest.Mocked<UserService>;
     configService = module.get<ConfigService>(ConfigService) as jest.Mocked<ConfigService>;
+    apPostService = module.get<ApPostService>(ApPostService) as jest.Mocked<ApPostService>;
   });
 
   it('should be defined', () => {
@@ -36,6 +45,25 @@ describe('ApUserService', () => {
   });
 
   describe('Method testing', () => {
+    // A sample post object, which we'll use later.
+    const postObject: PostObject = {
+      '@context': AP.Context,
+      type: 'Article',
+      attributedTo: 'https://example.com/user/sample',
+      summary: 'Test post',
+      content: 'This is a test',
+      to: ['https://example.com/group/test']
+    }
+    // Define some test activities, so we don't have to keep doing it.
+    const activities = {
+      create: {
+        '@context': AP.Context,
+        type: 'Create',
+        object: postObject,
+        to: ['https://example.com/group/test']
+      }
+    }
+
     beforeAll(() => {
       userService.findLocalByName.mockReturnValue(Object.assign(new User, {
         id: 1,
@@ -63,6 +91,32 @@ describe('ApUserService', () => {
       expect(result).toBeDefined();
       expect(result['@context']).toBe(AP.Context);
       expect(result.id).toMatch(/https:/);
+    });
+
+    describe('Posting to outbox', () => {
+      beforeAll(() => {
+        const { ApPostService } = jest.requireActual('../ap-post/ap-post.service');
+        const ap = new ApPostService();
+        apPostService.createNewGlobalPost.mockImplementation(ap.createNewGlobalPost);
+      });
+
+      it('bare object', async () => {
+        const result = await service.acceptPostRequest('sample', postObject);
+        
+        expect(result).toBeDefined();
+        expect(result.sender).toEqual({ name: 'sample', server: 'example.com'});
+        expect(result.groups).toHaveLength(1);
+        expect(result.groups[0]).toEqual({ name: 'test', server: 'example.com'});
+      });
+
+      it('Create activity', async () => {
+        const result = await service.acceptPostRequest('sample', activities.create);
+
+        expect(result).toBeDefined();
+        expect(result.sender).toEqual({ name: 'sample', server: 'example.com'});
+        expect(result.groups).toHaveLength(1);
+        expect(result.groups[0]).toEqual({ name: 'test', server: 'example.com'});
+      });
     });
   });
 });

@@ -1,4 +1,6 @@
 import { PostObject } from "./post-object";
+import { User } from "../../../user/user.entity";
+import { AP } from "../constants";
 
 /**
  * An ActivityPub Create activity object, used for posts
@@ -24,4 +26,35 @@ export class CreateActivity {
     to: string[];
 
     [key: string]: any;
+}
+
+/**
+ * Create a new Create activity from a bare object,
+ * as per ActivityPub spec 6.2.1. We won't add the ID here,
+ * since that requires actually committing the post to the DB.
+ *
+ * @param asObject An object representing a post
+ * @returns A new Create activity that wraps the object
+ * @memberof ActivityService
+ */
+export function activityFromObject(asObject: PostObject, sender?: User): CreateActivity {
+    const from: string = asObject.attributedTo || (sender && sender.uri);
+
+    const created: CreateActivity = {
+        '@context': AP.Context,
+        type: 'Create',
+        actor: from,
+        to: asObject.to || [],
+        cc: asObject.cc || [],
+        bto: asObject.bto || [],
+        bcc: asObject.bcc || [],
+        audience: asObject.audience || [],
+        published: asObject.published || new Date().toJSON(),
+
+        id: '',
+
+        object: asObject
+    };
+
+    return created;
 }

@@ -1,4 +1,7 @@
 import * as URI from 'uri-js';
+import { User } from 'src/user/user.entity';
+import { Group } from 'src/group/group.entity';
+import { userInfo } from 'os';
 
 /**
  * An actor can be any sender or recipient. They're identified
@@ -51,4 +54,55 @@ export function fromUri(uri: string): { actor: Actor, type: ActorType } {
     }
 
     return result;
+}
+
+/**
+ * Parse a list of actor URIs into objects
+ *
+ * @param targets An array of URIs representing actors
+ * @param desiredType The type of actor: group or user
+ * @returns Actor objects for every actor of the given type in the list
+ */
+export function parseActor(targets: string[], desiredType: ActorType): Actor[] {
+    return targets.map((t) => {
+        const parsed = fromUri(t);
+        return (parsed.type === desiredType) ? parsed.actor : undefined
+    }).filter((e) => e != undefined);
+}
+
+/**
+ * Extract a URI from an actor reference. These can be in
+ * various forms (URI, array, or object), so we have to
+ * compensate for that.
+ *
+ * @param actor A reference to an actor
+ * @returns The URI for that actor
+ */
+export function getActorUri(actor: string | (string | object)[]): string {
+    // TODO: Better handling fo this
+    if (typeof actor == 'string') {
+        return actor;
+    } else if (typeof actor[0] == 'string') {
+        return actor[0] as string;
+    } else {
+        return actor[0]['id'];
+    }
+}
+
+export function getIdForActor(actor: User | Group, type: ActorType): string {
+    if (actor.uri) {
+        return actor.uri;
+    } else {
+        const t = ActorType[type].toLowerCase();
+        const uri = URI.serialize({
+            scheme: 'https',
+            host: actor.server,
+
+            // TODO: Handle nonstandard ports
+            port: 443,
+            path: `${t}/${actor.name}`
+        });
+
+        return URI.normalize(uri);
+    }
 }

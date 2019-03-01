@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotImplementedException, BadRequestException } from '@nestjs/common';
 import { UserService } from '../../user/user.service';
 import { User } from '../../user/user.entity';
 import { UserActor } from '../definitions/actors/user.actor';
 import { AP } from '../definitions/constants';
 import * as URI from 'uri-js';
 import { ConfigService } from '../../config/config.service';
+import { ActivityService } from '../activity/activity.service';
+import { activityFromObject } from '../definitions/activities/create-activity';
+import { ApPostService } from '../ap-post/ap-post.service';
 
 /**
  * This class creates and handles actor objects representing users.
@@ -17,7 +20,9 @@ import { ConfigService } from '../../config/config.service';
 export class ApUserService {
     constructor(
         private readonly userService: UserService,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
+        private readonly apPostService: ApPostService,
+        private readonly activityService: ActivityService
     ) {}
 
     async getLocalUser(name: string): Promise<User> {
@@ -37,6 +42,41 @@ export class ApUserService {
             return this.createActor(user);
         } catch (e) {
             return Promise.reject(e);
+        }
+    }
+
+    /**
+     * Handle a POST request in a user's outbox. These will be AP
+     * Activities, except that a bare object is also allowed; this
+     * must be wrapped in a Create. Also, types are a bit wonky here,
+     * so we're leaving them as "any" for the time being.
+     *
+     * @param username The name of the user sending the request
+     * @param data The body of the request, as an AP activity or object
+     * @returns The newly created activity representing the request
+     * @memberof ApUserService
+     */
+    async acceptPostRequest(username: string, data: any): Promise<any> {
+        // Strictly speaking, Activities can have content. But Themis
+        // expects that to only appear on the post objects themselves.
+        const activity = (data.content == null)
+            ? data
+            : activityFromObject(data);
+        
+        switch (activity.type) {
+            case 'Create':
+                return this.apPostService.createNewGlobalPost(activity);
+            case 'Delete':
+            case 'Update':
+            case 'Follow':
+            case 'Add':
+            case 'Remove':
+            case 'Like':
+            case 'Block':
+            case 'Undo':
+                throw new NotImplementedException();
+            default:
+                throw new BadRequestException(`Invalid activity type ${activity.type}`);
         }
     }
 

@@ -1,5 +1,5 @@
 import { Injectable, MethodNotAllowedException } from '@nestjs/common';
-import { Repository, FindOperator } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Group } from './group.entity';
 import { CreateGroupDto } from './create-group.dto';

@@ -6,6 +6,9 @@ import { TombstoneObject } from '../definitions/activities/tombstone-object';
 import { PostObject } from '../definitions/activities/post-object';
 import { ActivityService } from '../activity/activity.service';
 import * as URI from 'uri-js';
+import { CreateActivity } from '../definitions/activities/create-activity';
+import { CreateGlobalPostDto } from 'src/post/create-global-post.dto';
+import { fromUri, getActorUri, parseActor, ActorType } from '../definitions/actor.interface';
 
 @Injectable()
 export class ApPostService {
@@ -43,6 +46,29 @@ export class ApPostService {
             // originate on this server.
             // TODO: Maybe a better error message?
             return Promise.reject("Post not available");
+        }
+    }
+
+
+    /**
+     * Create a new "global" post, one that can come from any server.
+     *
+     * @param activity An activity representing the post
+     * @returns A data object suitable for inserting into the DB
+     * @memberof ActivityService
+     */
+    createNewGlobalPost(activity: CreateActivity): CreateGlobalPostDto {
+        const post = activity.object;
+        const { actor, type: senderType } = fromUri(getActorUri(post.attributedTo));
+
+        return {
+            sender: actor,
+            subject: post.summary,
+            content: post.content,
+            groups: parseActor(activity.to, ActorType.Group),
+            parent: post.inReplyTo || undefined,
+            source: post.source || undefined,
+            recipients: parseActor(activity.to, ActorType.User)
         }
     }
 }

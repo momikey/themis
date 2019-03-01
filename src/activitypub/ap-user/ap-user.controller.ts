@@ -41,9 +41,8 @@ export class ApUserController {
     @UseGuards(ContentTypeGuard)
     @UseInterceptors(new LocationInterceptor)
     async postToOutbox(@Param('name') name: string, @Body() body) {
-        console.log(body);
-        
-        throw new NotImplementedException();
+
+        return this.apUserService.acceptPostRequest(name, body);
     }
 
     @Get('/:name/followers')

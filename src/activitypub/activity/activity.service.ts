@@ -8,15 +8,13 @@ import { PostService } from '../../post/post.service';
 import { ConfigService } from '../../config/config.service';
 import { Post } from '../../post/post.entity';
 import { CreateActivity } from '../definitions/activities/create-activity';
-import { fromUri, ActorType, Actor } from '../definitions/actor.interface';
+import { fromUri, ActorType, Actor, parseActor, getActorUri, getIdForActor } from '../definitions/actor.interface';
 import { CreateGlobalPostDto } from '../../post/create-global-post.dto';
 import { PostObject } from '../definitions/activities/post-object';
 import { AP } from '../definitions/constants';
 import { TombstoneObject } from '../definitions/activities/tombstone-object';
 import { ApGroupService } from '../ap-group/ap-group.service';
 import { ApUserService } from '../ap-user/ap-user.service';
-import { User } from 'src/user/user.entity';
-import { UserActor } from '../definitions/actors/user.actor';
 
 @Injectable()
 export class ActivityService {
@@ -27,16 +25,14 @@ export class ActivityService {
         private readonly userService: UserService,
         private readonly postService: PostService,
         private readonly configService: ConfigService,
-        private readonly apGroupService: ApGroupService,
-        private readonly apUserService: ApUserService
     ) {}
 
     async createPostFromActivity(activity: CreateActivity): Promise<Post> {
         const postObject = activity.object;
-        const actor = this.getActorUri(activity.object.attributedTo);
+        const actor = getActorUri(activity.object.attributedTo);
 
         const { name, server } = fromUri(actor).actor;
-        const groups = this.parseActor(activity.to, ActorType.Group);
+        const groups = parseActor(activity.to, ActorType.Group);
 
         const post = {
             sender: name,
@@ -78,11 +74,11 @@ export class ActivityService {
                 '@context': AP.Context,
                 id: post.uri,
                 type: 'Article',
-                attributedTo: post.sender.uri || this.apUserService.idForUser(post.sender),
+                attributedTo: post.sender.uri || getIdForActor(post.sender, ActorType.User) /* this.apUserService.idForUser(post.sender) */,
                 summary: post.subject,
                 content: post.content,
 
-                to: post.groups.map((g) => g.uri || this.apGroupService.idForGroup(g)),
+                to: post.groups.map((g) => g.uri || getIdForActor(g, ActorType.Group)),
                 created: post.timestamp
             }
 
@@ -135,93 +131,5 @@ export class ActivityService {
      */
     async getActivitiesForPost(post: Post): Promise<Activity[]> {
         return this.activityRepository.find({ targetPost: post });
-    }
-
-    /**
-     * Create a new "global" post, one that can come from any server.
-     *
-     * @param activity An activity representing the post
-     * @returns A data object suitable for inserting into the DB
-     * @memberof ActivityService
-     */
-    createNewGlobalPost(activity: CreateActivity): CreateGlobalPostDto {
-        const post = activity.object;
-        const { actor, type: senderType } = fromUri(this.getActorUri(post.attributedTo));
-
-        return {
-            sender: actor,
-            subject: post.summary,
-            content: post.content,
-            groups: this.parseActor(activity.to, ActorType.Group),
-            parent: post.inReplyTo || undefined,
-            source: post.source || undefined,
-            recipients: this.parseActor(activity.to, ActorType.User)
-        }
-    }
-
-    /**
-     * Create a new Create activity from a bare object,
-     * as per ActivityPub spec 6.2.1. We won't add the ID here,
-     * since that requires actually committing the post to the DB.
-     *
-     * @param asObject An object representing a post
-     * @returns A new Create activity that wraps the object
-     * @memberof ActivityService
-     */
-    activityFromObject(asObject: PostObject, sender?: User): CreateActivity {
-        const from: string = asObject.attributedTo || (sender && sender.uri);
-
-        const created: CreateActivity = {
-            '@context': AP.Context,
-            type: 'Create',
-            actor: from,
-            to: asObject.to || [],
-            cc: asObject.cc || [],
-            bto: asObject.bto || [],
-            bcc: asObject.bcc || [],
-            audience: asObject.audience || [],
-            published: asObject.published,
-
-            id: '',
-
-            object: asObject
-        };
-
-        return created;
-    }
-
-    /**
-     * Parse a list of actor URIs into objects
-     *
-     * @param targets An array of URIs representing actors
-     * @param desiredType The type of actor: group or user
-     * @returns Actor objects for every actor of the given type in the list
-     * @memberof ActivityService
-     */
-    parseActor(targets: string[], desiredType: ActorType): Actor[] {
-        return targets.map((t) => {
-            const parsed = fromUri(t);
-            return (parsed.type === desiredType) ? parsed.actor : undefined
-        }).filter((e) => e != undefined);
-    }
-
-    /**
-     * Extract a URI from an actor reference. These can be in
-     * various forms (URI, array, or object), so we have to
-     * compensate for that.
-     *
-     * @param actor A reference to an actor
-     * @returns The URI for that actor
-     * @memberof ActivityService
-     */
-    getActorUri(actor: string | (string | object)[]): string {
-        // TODO: Better handling fo this
-        if (typeof actor == 'string') {
-            return actor;
-        } else if (typeof actor[0] == 'string') {
-            return actor[0] as string;
-        } else {
-            return actor[0]['id'];
-        }
     }
 }
