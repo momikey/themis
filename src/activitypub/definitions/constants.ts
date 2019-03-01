@@ -8,5 +8,8 @@ export const AP = {
     InboxAddress: 'inbox',
     OutboxAddress: 'outbox',
     FollowersAddress: 'followers',
-    FollowingAddress: 'following'
+    FollowingAddress: 'following',
+
+    ContentType: 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"',
+    AltContentType: 'application/activity+json',
 }
