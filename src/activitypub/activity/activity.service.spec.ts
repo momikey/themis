@@ -7,12 +7,12 @@ import { GroupService } from '../../group/group.service';
 import { UserService } from '../../user/user.service';
 import { PostService } from '../../post/post.service';
 import { ConfigService } from '../../config/config.service';
-import { CreateActivity, activityFromObject } from '../definitions/activities/create-activity';
+import { activityFromObject } from '../definitions/activities/create-activity';
 import { AP } from '../definitions/constants';
 import { ActorType, parseActor } from '../definitions/actor.interface';
-import { ApGroupService } from '../ap-group/ap-group.service';
-import { ApUserService } from '../ap-user/ap-user.service';
+
 import { PostObject } from '../definitions/activities/post-object';
+
 
 jest.mock('../../group/group.service');
 jest.mock('../../user/user.service');
@@ -72,8 +72,7 @@ describe('ActivityService', () => {
   });
 
   describe('Method testing', () => {
-    beforeAll(() => {
-
+    beforeAll(async () => {
     });
 
     it('parsing a list of groups should work', () => {
@@ -115,7 +114,6 @@ describe('ActivityService', () => {
     it('creating a URI from an activity should do that', () => {
       const activity: Activity = {
         id: 1,
-        uuid: '00000000-0000-0000-0000-000000000000',
         type: 'Create',
         activityObject: {},
         created: new Date(),
@@ -129,6 +127,9 @@ describe('ActivityService', () => {
 
       expect(result).toBeDefined();
       expect(result).toBe('https://example.com/p/1');
+    });
+
+    it('saving an activity should work', async () => {
     });
   });
 });

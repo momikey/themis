@@ -25,9 +25,6 @@ export class Activity {
     targetPost: Post;
 
     @Column()
-    uuid: string;
-
-    @Column()
     type: string;
 
     @Column('simple-json')

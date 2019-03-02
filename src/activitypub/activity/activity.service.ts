@@ -49,6 +49,22 @@ export class ActivityService {
     }
 
     /**
+     * Save an activity to the database. The activity can be
+     * associated with one or more groups, users, or posts.
+     * It will be given an ID and timestamp if those aren't
+     * present.
+     *
+     * @param activity An object implementing at least some of the Activity interface
+     * @returns The fully created Activity object, as stored in the DB
+     * @memberof ActivityService
+     */
+    async save(activity: Partial<Activity>): Promise<Activity> {
+        const entity = this.activityRepository.create(activity);
+
+        return this.activityRepository.save(entity);
+    }
+
+    /**
      * Create an ActivityPub object from a post in the database.
      * This fills in all of the necessary properties, but it also
      * compacts the _to_ and _cc_ fields.

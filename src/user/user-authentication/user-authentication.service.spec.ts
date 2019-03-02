@@ -100,7 +100,8 @@ describe('UserAuthenticationService', () => {
         icon: '',
         posts: [],
         date: '',
-        activities: []
+        activities: [],
+        uri: ''
     };
 
     const sampleAuthentication: UserAuthentication = {

@@ -107,7 +107,8 @@ describe('Post Controller', () => {
         summary: '',
         date: '',
         posts: [],
-        activities: []
+        activities: [],
+        uri: ''
       };
       const examplePost: Post = {
         id: 1,
@@ -145,7 +146,8 @@ describe('Post Controller', () => {
         icon: '',
         date: '',
         posts: [],
-        activities: []
+        activities: [],
+        uri: ''
       };
       const examplePost: Post = {
         id: 1,
@@ -182,7 +184,8 @@ describe('Post Controller', () => {
         summary: '',
         date: '',
         posts: [],
-        activities: []
+        activities: [],
+        uri: ''
       };
       const examplePost: Post = {
         id: 1,
