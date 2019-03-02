@@ -89,6 +89,15 @@ export function getActorUri(actor: string | (string | object)[]): string {
     }
 }
 
+/**
+ * Get the URI for a user or group, for use as the ID
+ * in Activities.
+ *
+ * @export
+ * @param actor The user or group
+ * @param type The type of actor
+ * @returns A unique URI for the user or group
+ */
 export function getIdForActor(actor: User | Group, type: ActorType): string {
     if (actor.uri) {
         return actor.uri;

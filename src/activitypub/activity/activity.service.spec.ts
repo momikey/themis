@@ -19,6 +19,15 @@ jest.mock('../../user/user.service');
 jest.mock('../../post/post.service');
 
 jest.mock('../../config/config.service');
+const ConfigServiceMock = <jest.Mock<ConfigService>>ConfigService;
+ConfigServiceMock.mockImplementation(() => {
+  return {
+    serverAddress: 'example.com',
+    serverPort: 443,
+    isFederating: false
+  }
+});
+
 jest.mock('typeorm/repository/Repository');
 
 describe('ActivityService', () => {
@@ -36,7 +45,7 @@ describe('ActivityService', () => {
         GroupService,
         UserService,
         PostService,
-        ConfigService,
+        { provide: ConfigService, useClass: ConfigServiceMock },
         { provide: getRepositoryToken(Activity), useClass: Repository },
       ],
     }).compile();
@@ -101,6 +110,25 @@ describe('ActivityService', () => {
       expect(result).toBeDefined();
       expect(result.object.type).toBe(object.type);
       expect(result.to).toBe(object.to);
+    });
+
+    it('creating a URI from an activity should do that', () => {
+      const activity: Activity = {
+        id: 1,
+        uuid: '00000000-0000-0000-0000-000000000000',
+        type: 'Create',
+        activityObject: {},
+        created: new Date(),
+
+        targetUser: undefined,
+        targetGroup: undefined,
+        targetPost: undefined,
+      };
+
+      const result = service.getIdForActivity(activity);
+
+      expect(result).toBeDefined();
+      expect(result).toBe('https://example.com/p/1');
     });
   });
 });

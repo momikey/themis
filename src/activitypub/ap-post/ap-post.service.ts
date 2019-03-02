@@ -49,7 +49,6 @@ export class ApPostService {
         }
     }
 
-
     /**
      * Create a new "global" post, one that can come from any server.
      *
@@ -70,5 +69,17 @@ export class ApPostService {
             source: post.source || undefined,
             recipients: parseActor(activity.to, ActorType.User)
         }
+    }
+
+    /**
+     * Submits a post derived from an Activity. This can come from
+     * any server.
+     *
+     * @param post The data for the post
+     * @returns The post entity that will be inserted into the DB
+     * @memberof ApPostService
+     */
+    async submitNewGlobalPost(post: CreateGlobalPostDto): Promise<Post> {
+        return this.postService.createFromActivity(post);
     }
 }

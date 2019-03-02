@@ -1,30 +1,24 @@
 import { Injectable, NotImplementedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Activity } from '../definitions/activities/activity.entity';
-import { GroupService } from '../../group/group.service';
 import { Repository } from 'typeorm';
-import { UserService } from '../../user/user.service';
 import { PostService } from '../../post/post.service';
-import { ConfigService } from '../../config/config.service';
 import { Post } from '../../post/post.entity';
 import { CreateActivity } from '../definitions/activities/create-activity';
-import { fromUri, ActorType, Actor, parseActor, getActorUri, getIdForActor } from '../definitions/actor.interface';
-import { CreateGlobalPostDto } from '../../post/create-global-post.dto';
+import { fromUri, ActorType, parseActor, getActorUri, getIdForActor } from '../definitions/actor.interface';
 import { PostObject } from '../definitions/activities/post-object';
 import { AP } from '../definitions/constants';
 import { TombstoneObject } from '../definitions/activities/tombstone-object';
-import { ApGroupService } from '../ap-group/ap-group.service';
-import { ApUserService } from '../ap-user/ap-user.service';
+import * as URI from 'uri-js';
+import { ConfigService } from '../../config/config.service';
 
 @Injectable()
 export class ActivityService {
     constructor(
         @InjectRepository(Activity)
         private readonly activityRepository: Repository<Activity>,
-        private readonly groupService: GroupService,
-        private readonly userService: UserService,
         private readonly postService: PostService,
-        private readonly configService: ConfigService,
+        private readonly configService: ConfigService
     ) {}
 
     async createPostFromActivity(activity: CreateActivity): Promise<Post> {
@@ -55,7 +49,7 @@ export class ActivityService {
     }
 
     /**
-     * Creat an ActivityPub object from a post in the database.
+     * Create an ActivityPub object from a post in the database.
      * This fills in all of the necessary properties, but it also
      * compacts the _to_ and _cc_ fields.
      *
@@ -131,5 +125,27 @@ export class ActivityService {
      */
     async getActivitiesForPost(post: Post): Promise<Activity[]> {
         return this.activityRepository.find({ targetPost: post });
+    }
+
+    /**
+     * Each activity also requires a unique ID, as per spec. This
+     * method generates one based on the database ID.
+     *
+     * @param activity An entity representing the activity
+     * @returns A unique URI for the activity
+     * @memberof ActivityService
+     */
+    getIdForActivity(activity: Activity): string {
+        if (activity.activityObject['id']) {
+            return activity.activityObject['id'];
+        } else {
+            const path = `/p/${activity.id}`;
+            return URI.normalize(URI.serialize({
+                scheme: 'https',
+                host: this.configService.serverAddress,
+                port: this.configService.serverPort,
+                path: path
+            }));
+        }
     }
 }
