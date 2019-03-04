@@ -57,15 +57,26 @@ export class ApUserService {
      * @memberof ApUserService
      */
     async acceptPostRequest(username: string, data: any): Promise<any> {
+        const user = await this.userService.findLocalByName(username);
+
         // Strictly speaking, Activities can have content. But Themis
         // expects that to only appear on the post objects themselves.
         const activity = (data.content == null)
             ? data
-            : activityFromObject(data);
+            : activityFromObject(data, user);        
         
         switch (activity.type) {
             case 'Create':
-                return this.apPostService.createNewGlobalPost(activity);
+                const postObject = this.apPostService.createNewGlobalPost(activity);
+                const postEntity = await this.apPostService.submitNewGlobalPost(postObject);
+                const activityEntity = {
+                    targetUser: user,
+                    targetPost: postEntity,
+                    type: activity.type,
+                    activityObject: activity
+                };
+
+                return (await this.activityService.save(activityEntity)).activityObject;
             case 'Delete':
             case 'Update':
             case 'Follow':

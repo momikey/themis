@@ -38,7 +38,7 @@ export class ApUserController {
 
     @HttpPost('/:name/outbox')
     @HttpCode(201)
-    @UseGuards(ContentTypeGuard)
+    // @UseGuards(ContentTypeGuard)
     @UseInterceptors(new LocationInterceptor)
     async postToOutbox(@Param('name') name: string, @Body() body) {
 

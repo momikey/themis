@@ -61,7 +61,17 @@ export class ActivityService {
     async save(activity: Partial<Activity>): Promise<Activity> {
         const entity = this.activityRepository.create(activity);
 
-        return this.activityRepository.save(entity);
+        // A new activity won't have the proper ID property set.
+        // Since it's derived from the database ID, that means we
+        // have to put it *into* the database first. Then, we'll
+        // add the ID and update the entry before returning it.
+        const updated = await this.activityRepository.save(entity);
+        if (!updated.activityObject['id']) {
+            updated.activityObject['id'] = this.getIdForActivity(updated);
+            return this.activityRepository.save(updated);
+        } else {
+            return updated;
+        }
     }
 
     /**

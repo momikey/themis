@@ -1,6 +1,7 @@
 import { PostObject } from "./post-object";
 import { User } from "../../../user/user.entity";
 import { AP } from "../constants";
+import { getActorUri, getIdForActor, ActorType } from "../actor.interface";
 
 /**
  * An ActivityPub Create activity object, used for posts
@@ -38,7 +39,7 @@ export class CreateActivity {
  * @memberof ActivityService
  */
 export function activityFromObject(asObject: PostObject, sender?: User): CreateActivity {
-    const from: string = asObject.attributedTo || (sender && sender.uri);
+    const from: string = asObject.attributedTo || (sender && getIdForActor(sender, ActorType.User));
 
     const created: CreateActivity = {
         '@context': AP.Context,
