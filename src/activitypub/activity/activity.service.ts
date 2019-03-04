@@ -1,7 +1,7 @@
 import { Injectable, NotImplementedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Activity } from '../definitions/activities/activity.entity';
-import { Repository } from 'typeorm';
+import { Repository, InsertResult } from 'typeorm';
 import { PostService } from '../../post/post.service';
 import { Post } from '../../post/post.entity';
 import { CreateActivity } from '../definitions/activities/create-activity';
@@ -65,13 +65,19 @@ export class ActivityService {
         // Since it's derived from the database ID, that means we
         // have to put it *into* the database first. Then, we'll
         // add the ID and update the entry before returning it.
-        const updated = await this.activityRepository.save(entity);
-        if (!updated.activityObject['id']) {
-            updated.activityObject['id'] = this.getIdForActivity(updated);
-            return this.activityRepository.save(updated);
-        } else {
-            return updated;
+        const inserted = await this.activityRepository.save(entity);
+
+        if (inserted.activityObject['object'] &&!inserted.activityObject['object'].id) {
+            inserted.activityObject['object'].id = inserted.targetPost.uri;
         }
+
+        if (!inserted.activityObject['id']) {
+            inserted.activityObject['id'] = this.getIdForActivity(inserted);
+            const updated = await this.activityRepository.update(inserted.id, 
+                { activityObject: inserted.activityObject });
+        }
+
+        return inserted;
     }
 
     /**
