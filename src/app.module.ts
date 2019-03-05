@@ -10,9 +10,10 @@ import { ActivityPubModule } from './activitypub/activitypub.module';
 import { ConfigModule } from './config/config.module';
 import { MetaModule } from './meta/meta.module';
 import { FilterModule } from './filter/filter.module';
+import { ServerModule } from './server/server.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(), UserModule, GroupModule, PostModule, ActivityPubModule, ConfigModule, MetaModule, FilterModule],
+  imports: [TypeOrmModule.forRoot(), UserModule, GroupModule, PostModule, ActivityPubModule, ConfigModule, MetaModule, FilterModule, ServerModule],
   controllers: [AppController],
   providers: [AppService],
 })
