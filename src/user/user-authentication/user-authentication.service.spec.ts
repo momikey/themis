@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserAuthenticationService } from './user-authentication.service';
 import { UserService } from '../user.service';
-import { UserAuthentication } from './user-authentication.entity';
+import { Account } from './account.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConfigService } from '../../config/config.service';
 import { JwtService } from '@nestjs/jwt/dist/jwt.service';
@@ -12,6 +12,7 @@ import { CreateAccountDto } from './create-account.dto';
 import { User } from '../user.entity';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from './user-authentication.role';
+import { Server } from '../../server/server.entity';
 
 jest.mock('../user.service');
 jest.mock('@nestjs/jwt/dist/jwt.service');
@@ -32,7 +33,7 @@ ConfigServiceMock.mockImplementation(() => {
 
 describe('UserAuthenticationService', () => {
   let service: UserAuthenticationService;
-  let repository: jest.Mocked<Repository<UserAuthentication>>;
+  let repository: jest.Mocked<Repository<Account>>;
   let jwtService: jest.Mocked<JwtService>;
   let userService: jest.Mocked<UserService>;
   let configService: jest.Mocked<ConfigService>;
@@ -44,13 +45,13 @@ describe('UserAuthenticationService', () => {
         UserService,
         JwtService,
         { provide: ConfigService, useClass: ConfigServiceMock },
-        { provide: getRepositoryToken(UserAuthentication), useClass: Repository }
+        { provide: getRepositoryToken(Account), useClass: Repository }
       ],
     }).compile();
 
     service = module.get<UserAuthenticationService>(UserAuthenticationService);
-    repository = module.get<Repository<UserAuthentication>>(
-      getRepositoryToken(UserAuthentication)) as jest.Mocked<Repository<UserAuthentication>>;
+    repository = module.get<Repository<Account>>(
+      getRepositoryToken(Account)) as jest.Mocked<Repository<Account>>;
     jwtService = module.get<JwtService>(JwtService) as jest.Mocked<JwtService>;
     userService = module.get<UserService>(UserService) as jest.Mocked<UserService>;
     configService = module.get<ConfigService>(ConfigService) as jest.Mocked<ConfigService>;
@@ -95,16 +96,18 @@ describe('UserAuthenticationService', () => {
         id: 1,
         name: 'user',
         displayName: 'A user',
-        server: 'example.com',
         summary: '',
         icon: '',
         posts: [],
         date: '',
         activities: [],
-        uri: ''
+        uri: '',
+        server: Object.assign(new Server(), {
+          host: 'example.com',
+        })
     };
 
-    const sampleAuthentication: UserAuthentication = {
+    const sampleAuthentication: Account = {
       id: 1,
       user: sampleUserData,
       email: 'user@example.com',
@@ -122,7 +125,7 @@ describe('UserAuthenticationService', () => {
       repository.findOneOrFail.mockReturnValue(sampleAuthentication);
       repository.findOne.mockReturnValue(sampleAuthentication);
       repository.save.mockImplementation((entity) => entity);
-      repository.create.mockImplementation((entity) => Object.assign(new UserAuthentication, entity));
+      repository.create.mockImplementation((entity) => Object.assign(new Account, entity));
 
       mockBcryptCompare.mockReturnValue(true);
       mockBcryptHash.mockReturnValue(Promise.resolve('secret'));
@@ -178,7 +181,7 @@ describe('UserAuthenticationService', () => {
       const result = await service.createAccount(newAccount);
 
       expect(result).toBeDefined();
-      expect(result).toBeInstanceOf(UserAuthentication);
+      expect(result).toBeInstanceOf(Account);
       expect(result.email).toBe('user@example.com');
     });
 

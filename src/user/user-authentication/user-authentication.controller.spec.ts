@@ -3,7 +3,7 @@ import { UserAuthenticationController } from './user-authentication.controller';
 import { UserAuthenticationService } from './user-authentication.service';
 import { CreateAccountDto } from './create-account.dto';
 import { JwtPayload } from './jwt.interface';
-import { UserAuthentication } from './user-authentication.entity';
+import { Account } from './account.entity';
 import { LoginDto } from './login.dto';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 
@@ -41,7 +41,7 @@ describe('UserAuthentication Controller', () => {
       });
 
       service.createAccount.mockImplementation(async (user: CreateAccountDto) => 
-        Object.assign(new UserAuthentication, user)
+        Object.assign(new Account, user)
       );
 
       service.validateLogin.mockImplementation((user: LoginDto) => true);
@@ -67,7 +67,7 @@ describe('UserAuthentication Controller', () => {
       });
 
       expect(result).toBeDefined();
-      expect(result).toBeInstanceOf(UserAuthentication);
+      expect(result).toBeInstanceOf(Account);
       expect(result.email).toBe('user@example.com');
     });
 
@@ -87,7 +87,7 @@ describe('UserAuthentication Controller', () => {
     it('trying to create an existing account should fail with 400 Bad Request', async () => {
       service.createAccount.mockImplementation((user: CreateAccountDto) => 
         (user.username === 'good'
-          ? new UserAuthentication
+          ? new Account
           : Promise.reject())
       );
 
@@ -106,7 +106,7 @@ describe('UserAuthentication Controller', () => {
       const goodResult = await controller.createAccount(goodData);
       
       expect(goodResult).toBeDefined();
-      expect(goodResult).toBeInstanceOf(UserAuthentication);
+      expect(goodResult).toBeInstanceOf(Account);
 
       try {
         const badResult = await controller.createAccount(badData);
@@ -119,7 +119,7 @@ describe('UserAuthentication Controller', () => {
     it('incorrect login should fail with an appropriate status code', async () => {
       service.validateLogin.mockImplementation((login: LoginDto) => 
         (login.username === 'good' && login.password === 'secret'
-        ? Promise.resolve(new UserAuthentication)
+        ? Promise.resolve(new Account)
         : Promise.reject(false)
         )
       );
