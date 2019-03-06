@@ -8,14 +8,14 @@ import { UserAuthenticationService } from './user-authentication/user-authentica
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { UserAuthenticationController } from './user-authentication/user-authentication.controller';
-import { UserAuthentication } from './user-authentication/user-authentication.entity';
+import { Account } from './user-authentication/account.entity';
 import { JwtStrategy } from './user-authentication/jwt.strategy';
 import passport = require('passport');
 import { LocalStrategy } from './user-authentication/local.strategy';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, UserAuthentication]),
+    TypeOrmModule.forFeature([User, Account]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       // TODO: change these for production

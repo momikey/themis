@@ -5,7 +5,7 @@ import { JwtPayload } from './jwt.interface';
 import { User } from '../user.entity';
 import { CreateAccountDto } from './create-account.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserAuthentication } from './user-authentication.entity';
+import { Account } from './account.entity';
 import { Repository, useContainer } from 'typeorm';
 import { ConfigService } from '../../config/config.service';
 import * as bcrypt from 'bcrypt';
@@ -22,8 +22,8 @@ import { isAfter } from 'date-fns';
 @Injectable()
 export class UserAuthenticationService {
     constructor(
-        @InjectRepository(UserAuthentication)
-        private readonly authRepository: Repository<UserAuthentication>,
+        @InjectRepository(Account)
+        private readonly authRepository: Repository<Account>,
         private readonly userService: UserService,
         private readonly configService: ConfigService,
         private readonly jwtService: JwtService
@@ -34,7 +34,7 @@ export class UserAuthenticationService {
 
     // Get the authentication entry for a given user.
     // Note that we don't return the password or token fields.
-    async findOne(name: string): Promise<UserAuthentication> {
+    async findOne(name: string): Promise<Account> {
         const user = await this.userService.findByName(name);
         return this.authRepository.findOneOrFail({
             select: ['id', 'user', 'email', 'reset', 'role', 'lastLoggedIn'],
@@ -97,7 +97,7 @@ export class UserAuthenticationService {
         return true;
     }
 
-    async validateLogin(login: LoginDto): Promise<UserAuthentication> {
+    async validateLogin(login: LoginDto): Promise<Account> {
         const user = await this.userService.findByName(login.username);
 
         if (user) {
@@ -122,7 +122,7 @@ export class UserAuthenticationService {
 
     // Update the last logged-in datetime for a specific user.
     // We can use this for stats, e.g., NodeInfo.
-    async updateLastLogin(auth: UserAuthentication): Promise<UserAuthentication> {
+    async updateLastLogin(auth: Account): Promise<Account> {
         auth.lastLoggedIn = new Date();
         this.authRepository.save(auth);
         return auth;
@@ -130,7 +130,7 @@ export class UserAuthenticationService {
 
     // Change a user's role. This can upgrade or downgrade, but we'll
     // leave it up to other layers to determine who is allowed to do this.
-    async changeRole(auth: UserAuthentication, newRole: UserRole): Promise<UserAuthentication> {
+    async changeRole(auth: Account, newRole: UserRole): Promise<Account> {
         auth.role = newRole;
         this.authRepository.save(auth);
         return auth;
@@ -138,7 +138,7 @@ export class UserAuthenticationService {
 
     // Create a new account. Note that this is for authentication first.
     // We'll also have to create the user.
-    async createAccount(account: CreateAccountDto, role?: UserRole): Promise<UserAuthentication> {
+    async createAccount(account: CreateAccountDto, role?: UserRole): Promise<Account> {
         if (await this.validateAccount(account)) {
             const newUser = await this.userService.createEmptyUserEntry(account.username);
             

@@ -3,7 +3,7 @@ import { User } from "../user.entity";
 import { UserRole } from "./user-authentication.role";
 
 @Entity()
-export class UserAuthentication {
+export class Account {
     // A given user is only going to have one authentication entry,
     // but we'll still use a generated ID.
     @PrimaryGeneratedColumn()

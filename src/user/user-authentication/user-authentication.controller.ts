@@ -4,7 +4,7 @@ import { JwtPayload } from './jwt.interface';
 import { CreateAccountDto } from './create-account.dto';
 import { LoginDto } from './login.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { UserAuthentication } from './user-authentication.entity';
+import { Account } from './account.entity';
 import { TokenDto } from './token.dto';
 import { UserRole } from './user-authentication.role';
 import { RoleDto } from './role.dto';
@@ -25,7 +25,7 @@ export class UserAuthenticationController {
     }
 
     @Post('create-account')
-    async createAccount(@Body() user: CreateAccountDto): Promise<UserAuthentication> {
+    async createAccount(@Body() user: CreateAccountDto): Promise<Account> {
         try {
             const result = await this.authService.createAccount(user);
 
@@ -49,14 +49,14 @@ export class UserAuthenticationController {
 
     @Post('user-role-change')
     @UseGuards(AuthGuard('jwt'))
-    async changeUserRole(@Body() role: RoleDto): Promise<UserAuthentication> {
+    async changeUserRole(@Body() role: RoleDto): Promise<Account> {
         const auth = await this.authService.findOne(role.username);
         return this.authService.changeRole(auth, role.newRole);
     }
 
     @Get('user-authentication/:name')
     @UseGuards(AuthGuard('jwt'))
-    async getUserAuthentication(@Param('name') name: string): Promise<UserAuthentication> {
+    async getUserAuthentication(@Param('name') name: string): Promise<Account> {
         try {
             const auth = await this.authService.findOne(name);
             return auth;
