@@ -1,4 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Group } from "../group/group.entity";
+import { User } from "../user/user.entity";
+import { Post } from "../post/post.entity";
 
 /**
  * This entity tracks a Themis server. Each entity contains
@@ -40,4 +43,13 @@ export class Server {
      */
     @Column({ default: 'https' })
     scheme: string;
+
+    @OneToMany(type => Group, group => group.server)
+    groups: Group[];
+
+    @OneToMany(type => User, user => user.server)
+    users: User[];
+
+    @OneToMany(type => Post, post => post.server)
+    posts: Post[];
 }

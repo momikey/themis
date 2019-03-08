@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Server } from './server.entity';
 import { ConfigService } from '../config/config.service';
 import { Repository } from 'typeorm';
+import * as URI from 'uri-js';
+import { CreateServerDto } from './create-server.dto';
 
 /**
  * Despite the dumb name, this service allows us to work
@@ -62,5 +64,18 @@ export class ServerService {
         const entityToDelete = await this.find(server);
 
         return this.serverRepository.remove([entityToDelete]);
+    }
+
+    parseHostname(host: string): CreateServerDto {
+        // We may be passed bare host names, which technically *aren't*
+        // URIs. Adding the double-slash to the start, however, works
+        // to transform it into one.
+        const hostAsUri = (host.includes('//') ? host : '//' + host);
+        const parsed = URI.parse(hostAsUri);
+        return {
+            host: parsed.host || this.configService.serverAddress,
+            scheme: parsed.scheme || 'http',
+            port: +parsed.port || this.configService.serverPort
+        }
     }
 }
