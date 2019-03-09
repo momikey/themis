@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, CreateDateColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, CreateDateColumn, Column, OneToMany, ManyToOne } from 'typeorm';
 import { Post } from '../post/post.entity';
 import { Activity } from '../activitypub/definitions/activities/activity.entity';
+import { Server } from '../server/server.entity';
 
 @Entity()
 export class User {
@@ -15,8 +16,8 @@ export class User {
 
     // `server` is the name of the server the user is on.
     // Mostly, this is for caching purposes.
-    @Column('text')
-    server: string;
+    @ManyToOne(type => Server, server => server.users, { eager: true })
+    server: Server;
 
     // `displayName` is the "preferred" name for the user.
     @Column('text')

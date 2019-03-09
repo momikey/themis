@@ -4,19 +4,24 @@ import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './create-user.dto';
 import { ConfigService } from '../config/config.service';
+import { ServerService } from '../server/server.service';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
+        private readonly serverService: ServerService
     ) {}
 
     async create(user: CreateUserDto): Promise<User> {
+        const hostname = this.serverService.parseHostname(user.server);
+        const server = (await this.serverService.findOrCreate(hostname)) ||
+            (await this.serverService.local());
         const userEntity = this.userRepository.create({
             name: user.name,
-            server: user.server || this.configService.serverAddress,
+            server: server,
             displayName: user.displayName,
             summary: user.summary || '',
             icon: user.iconUrl || ''
@@ -32,7 +37,7 @@ export class UserService {
 
         const userEntity = this.userRepository.create({
             name: username,
-            server: this.configService.serverAddress,
+            server: await this.serverService.local(),
             displayName: username,
             summary: '',
             icon: ''
@@ -75,7 +80,7 @@ export class UserService {
         try {
             const response = await this.userRepository.findOneOrFail({
                 name: name,
-                server: this.configService.serverAddress
+                server: await this.serverService.local()
             });
 
             return response;
@@ -85,10 +90,12 @@ export class UserService {
     }
 
     async findGlobalByName(name: string, server: string): Promise<User> {
+        const serverEntity = await this.serverService.find(this.serverService.parseHostname(server));
+
         try {
             const response = await this.userRepository.findOneOrFail({
                 name,
-                server
+                server: serverEntity
             });
 
             return response;

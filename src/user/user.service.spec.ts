@@ -5,8 +5,11 @@ import { User } from './user.entity';
 import { ConfigService } from '../config/config.service';
 import { Repository } from 'typeorm/repository/Repository';
 import { CreateUserDto } from './create-user.dto';
+import { Server } from '../server/server.entity';
+import { ServerService } from '../server/server.service';
 
 jest.mock('../config/config.service');
+jest.mock('../server/server.service');
 const ConfigServiceMock = <jest.Mock<ConfigService>>ConfigService;
 ConfigServiceMock.mockImplementation(() => {
   return {
@@ -21,19 +24,22 @@ describe('UserService', () => {
   let service: UserService;
   let repository: jest.Mocked<Repository<User>>;
   let configService: jest.Mocked<ConfigService>;
+  let serverService: jest.Mocked<ServerService>;
   
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserService,
         { provide: getRepositoryToken(User), useClass: Repository },
-        { provide: ConfigService, useClass: ConfigServiceMock }
+        { provide: ConfigService, useClass: ConfigServiceMock },
+        ServerService
       ],
     }).compile();
 
     service = module.get<UserService>(UserService);
     repository = module.get<Repository<User>>(getRepositoryToken(User)) as jest.Mocked<Repository<User>>;
     configService = module.get<ConfigService>(ConfigService) as jest.Mocked<ConfigService>;
+    serverService = module.get<ServerService>(ServerService) as jest.Mocked<ServerService>;
   });
   
   it('should be defined', () => {
@@ -50,10 +56,12 @@ describe('UserService', () => {
   });
 
   describe('Method testing', () => {
+    const makeServer = (host) => Object.assign(new Server, { host });
+
     const data: User[] = [
-      { id: 1, name: 'user', displayName: 'Test User', server: 'example.com', summary: '', icon: '', date: '', posts: [], activities: [], uri:''},
-      { id: 2, name: 'other', displayName: 'Test User', server: 'example.invalid', summary: '', icon: '', date: '', posts: [], activities: [], uri:''},
-      { id: 3, name: 'another', displayName: 'Test User', server: 'local.local', summary: '', icon: '', date: '', posts: [], activities: [], uri:''},
+      { id: 1, name: 'user', displayName: 'Test User', server: makeServer('example.com'), summary: '', icon: '', date: '', posts: [], activities: [], uri:''},
+      { id: 2, name: 'other', displayName: 'Test User', server: makeServer('example.invalid'), summary: '', icon: '', date: '', posts: [], activities: [], uri:''},
+      { id: 3, name: 'another', displayName: 'Test User', server: makeServer('local.local'), summary: '', icon: '', date: '', posts: [], activities: [], uri:''},
       ]
 
     beforeAll(() => {
@@ -79,6 +87,12 @@ describe('UserService', () => {
           return undefined;
         }
       });
+
+      serverService.local.mockResolvedValue(Object.assign(new Server, {
+        host: 'example.com',
+        port: 80,
+        scheme: 'http'
+      }));
     });
 
     it('create should create a new DB entry and return it', async () => {
@@ -104,7 +118,7 @@ describe('UserService', () => {
 
       expect(result).toBeDefined();
       expect(result).toBeInstanceOf(User);
-      expect(result.server).toBe('example.com');
+      expect(result.server.host).toBe('example.com');
     });
 
     it('delete should remove an entry from the DB and return it', async () => {

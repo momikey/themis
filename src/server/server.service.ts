@@ -43,6 +43,24 @@ export class ServerService {
         return this.serverRepository.find({host});
     }
 
+    async findOrCreate(server: CreateServerDto): Promise<Server> {
+        if (server.host == undefined) {
+            return Promise.reject('No host given');
+        } else {
+            const result = await this.find({
+                host: server.host,
+                port: server.port,
+                scheme: server.scheme
+            });
+
+            if (result != undefined) {
+                return result;
+            } else {
+                return this.insert(server);
+            }
+        }
+    }
+
     async local(): Promise<Server> {
         return this.serverRepository.findOne({
             host: this.configService.serverAddress,
@@ -50,8 +68,13 @@ export class ServerService {
         });
     }
 
-    async insert(server: Partial<Server>): Promise<Server> {
-        return this.serverRepository.save(server);
+    async insert(server: CreateServerDto): Promise<Server> {
+        const serverEntity = this.serverRepository.create({
+            host: server.host,
+            port: server.port,
+            scheme: server.scheme
+        })
+        return this.serverRepository.save(serverEntity);
     }
 
     async update(server: Partial<Server>): Promise<Server> {
