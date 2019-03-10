@@ -4,9 +4,12 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { Group } from './group.entity';
 import { ConfigService } from '../config/config.service';
+import { ServerService } from '../server/server.service';
+import { Server } from '../server/server.entity';
 
 
 jest.mock('../config/config.service');
+jest.mock('../server/server.service');
 const ConfigServiceMock = <jest.Mock<ConfigService>>ConfigService;
 ConfigServiceMock.mockImplementation(() => {
   return {
@@ -21,11 +24,12 @@ describe('GroupService', () => {
   let service: GroupService;
   let repository: jest.Mocked<Repository<Group>>;
   let configService: jest.Mocked<ConfigService>;
+  let serverService: jest.Mocked<ServerService>;
 
   const testData = [
-      { id: 1, name: 'first', server: 'example.com', displayName: 'Testing', summary: '' },
-      { id: 2, name: 'second', server: 'example.com', displayName: 'Testing', summary: '' },
-      { id: 3, name: 'third', server: 'example.invalid', displayName: 'Foreign', summary: ''}
+      { id: 1, name: 'first', server: {host: 'example.com'}, displayName: 'Testing', summary: '' },
+      { id: 2, name: 'second', server: {host: 'example.com'}, displayName: 'Testing', summary: '' },
+      { id: 3, name: 'third', server: {host: 'example.invalid'}, displayName: 'Foreign', summary: ''}
     ];
   
   beforeAll(async () => {
@@ -34,12 +38,14 @@ describe('GroupService', () => {
         GroupService,
         { provide: getRepositoryToken(Group), useClass: Repository },
         { provide: ConfigService, useClass: ConfigServiceMock },
+        ServerService
       ],
     }).compile();
 
     service = module.get<GroupService>(GroupService);
     repository = module.get<Repository<Group>>(getRepositoryToken(Group)) as jest.Mocked<Repository<Group>>;
     configService = module.get<ConfigService>(ConfigService) as jest.Mocked<ConfigService>;
+    serverService = module.get<ServerService>(ServerService) as jest.Mocked<ServerService>;
 
     repository.count.mockImplementation(() => testData.length);
     repository.find.mockImplementation(() => testData);
@@ -58,7 +64,15 @@ describe('GroupService', () => {
     expect(configService.serverPort).toBe(80);
   });
 
-  describe('Method testing', () => {    
+  describe('Method testing', () => {
+    beforeAll(() => {
+      serverService.local.mockResolvedValue(Object.assign(new Server, {
+        host: 'example.com',
+        port: 80,
+        scheme: 'http'
+      }));
+    });
+
     it('findAll method should return all entities', async () => {
       const result = await service.findAll();
 
@@ -117,7 +131,7 @@ describe('GroupService', () => {
 
 
       expect(result).toBeDefined();
-      expect(result.server).toBe(testData[1].server);
+      expect(result.server.host).toBe(testData[1].server.host);
     });
 
     it('update should update an entity and return it', async () => {

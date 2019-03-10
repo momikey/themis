@@ -7,19 +7,24 @@ import { Post } from '../post/post.entity';
 import { ConfigService } from '../config/config.service';
 import { UpdateGroupDto } from './update-group.dto';
 import { GroupFilterEntry, GroupFilter } from '../filter/group-filter';
+import { ServerService } from '../server/server.service';
 
 @Injectable()
 export class GroupService {
     constructor(
         @InjectRepository(Group)
         private readonly groupRepository: Repository<Group>,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
+        private readonly serverService: ServerService
     ) {}
 
     async create(group: CreateGroupDto): Promise<Group> {
+        const hostname = this.serverService.parseHostname(group.server);
+        const server = (await this.serverService.findOrCreate(hostname)) ||
+            (await this.serverService.local());
         const groupEntity = this.groupRepository.create({
             name: group.name,
-            server: group.server || this.configService.serverAddress,
+            server: server,
             displayName: group.displayName,
             summary: group.summary
         });
@@ -29,10 +34,17 @@ export class GroupService {
 
     async update(group: UpdateGroupDto): Promise<Group> {
         const hasOldGroup = (await this.groupRepository.count({ id: group.id })) > 0;
-
         if (hasOldGroup) {
             // This is an update, so actually update the entry
-            return this.groupRepository.save(group);
+            const hostname = this.serverService.parseHostname(group.server);
+            const server = (await this.serverService.findOrCreate(hostname)) ||
+                (await this.serverService.local());
+            
+            // Change server as text to server as object
+            const entity: any = group;
+            entity.server = server;
+    
+            return this.groupRepository.save(entity);
         } else {
             // You can't update something that's not there
             return Promise.reject(new MethodNotAllowedException());
@@ -71,7 +83,7 @@ export class GroupService {
         try {
             const response = await this.groupRepository.findOneOrFail({
                 name: name,
-                server: this.configService.serverAddress
+                server: await this.serverService.local()
             });
 
             return response;
@@ -93,7 +105,7 @@ export class GroupService {
         try {
             const response = await this.groupRepository.findOneOrFail({
                 name,
-                server
+                server: this.serverService.parseHostname(server)
             });
 
             return response;

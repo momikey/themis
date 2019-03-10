@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToMany, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToMany, OneToMany, ManyToOne } from 'typeorm';
 import { Post } from '../post/post.entity';
 import { Activity } from '../activitypub/definitions/activities/activity.entity';
+import { Server } from '../server/server.entity';
 
 // Note that we have to change the table name because "group" is a reserved word in SQL.
 @Entity("groups")
@@ -18,8 +19,8 @@ export class Group {
     // `server` is the name of the server hosting this group.
     // Groups are local to the server; IOW, multiple servers can all
     // have a group named "foo", and these would be separate.
-    @Column('text')
-    server: string;
+    @ManyToOne(type => Server, server => server.groups, { eager: true })
+    server: Server;
 
     // `displayName` is a public name for the group.
     // It's not entirely necessary, but it's a useful parallel to users.
