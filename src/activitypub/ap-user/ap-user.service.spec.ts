@@ -7,6 +7,7 @@ import { ConfigService } from '../../config/config.service';
 import { ActivityService } from '../activity/activity.service';
 import { PostObject } from '../definitions/activities/post-object';
 import { ApPostService } from '../ap-post/ap-post.service';
+import { Server } from '../../server/server.entity';
 
 jest.mock('../../user/user.service');
 jest.mock('../../config/config.service');
@@ -70,7 +71,7 @@ describe('ApUserService', () => {
       userService.findLocalByName.mockReturnValue(Object.assign(new User, {
         id: 1,
         name: 'user',
-        server: 'example.com',
+        server: Object.assign(new Server, {host: 'example.com', scheme: 'http'}),
         displayName: 'A user',
         summary: 'A user for testing',
         icon: '',
@@ -92,7 +93,7 @@ describe('ApUserService', () => {
 
       expect(result).toBeDefined();
       expect(result['@context']).toBe(AP.Context);
-      expect(result.id).toMatch(/https:/);
+      expect(result.id).toMatch(/http:/);
     });
 
     describe('Posting to outbox', () => {

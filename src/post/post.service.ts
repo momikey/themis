@@ -331,8 +331,6 @@ export class PostService {
     }
 
     async uriFromLocalPost(post: Post): Promise<string> {
-        console.log("*** Local", post.server, await this.isLocalPost(post));
-
         if (post.uri) {
             // We already have a URI, so just return that
             return post.uri;

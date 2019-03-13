@@ -5,6 +5,7 @@ import { Group } from '../../group/group.entity';
 import { GroupActor } from '../definitions/actors/group.actor';
 import { AP } from '../definitions/constants';
 import { ConfigService } from '../../config/config.service';
+import { Server } from '../../server/server.entity';
 
 jest.mock('../../group/group.service');
 jest.mock('../../config/config.service');
@@ -37,11 +38,16 @@ describe('ApGroupService', () => {
   });
 
   describe('Method testing', () => {
+    const sampleServer = Object.assign(new Server, {
+      host: 'example.com',
+      scheme: 'http'
+    });
+
     beforeAll(() => {
       groupService.findLocalByName.mockReturnValue(Object.assign(new Group, {
         id: 1,
         name: 'group',
-        server: 'example.com',
+        server: sampleServer,
         displayName: 'A Group',
         summary: 'A testing group',
         posts: [],
@@ -62,7 +68,7 @@ describe('ApGroupService', () => {
 
       expect(result).toBeDefined();
       expect(result['@context']).toBe(AP.Context);
-      expect(result.id).toMatch(/https:/);
+      expect(result.id).toMatch(/http:/);
     });
   });
 });

@@ -99,10 +99,10 @@ export class ApGroupService {
         } else {
             // We'll need a lot of configuration stuff for this
             const uri = URI.serialize({
-                scheme: 'https',
-                host: group.server,
-                path: `/group/${group.name}`,
-                port: this.configService.serverPort
+                scheme: group.server.scheme,
+                host: group.server.host,
+                port: group.server.port,
+                path: `/group/${group.name}`
             })
 
             return uri;

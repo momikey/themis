@@ -122,10 +122,10 @@ export class ApUserService {
         } else {
             // Same configuration needs as for groups
             const uri = URI.serialize({
-                scheme: 'https',
-                host: user.server,
-                path: `/user/${user.name}`,
-                port: this.configService.serverPort
+                scheme: user.server.scheme,
+                host: user.server.host,
+                port: user.server.port,
+                path: `/user/${user.name}`
             })
 
             return uri;

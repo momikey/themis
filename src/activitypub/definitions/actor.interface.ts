@@ -104,11 +104,9 @@ export function getIdForActor(actor: User | Group, type: ActorType): string {
     } else {
         const t = ActorType[type].toLowerCase();
         const uri = URI.serialize({
-            scheme: 'https',
-            host: actor.server,
-
-            // TODO: Handle nonstandard ports
-            port: 443,
+            host: actor.server.host,
+            scheme: actor.server.scheme,
+            port: actor.server.port,
             path: `${t}/${actor.name}`
         });
 

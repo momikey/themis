@@ -38,7 +38,7 @@ export class ApPostService {
         const uri = URI.parse(post.uri);
 
         if (uri.host == this.configService.serverAddress &&
-            uri.port == this.configService.serverPort) {
+            uri.port == this.configService.serverPort || uri.port == undefined) {
                 
             return Promise.resolve(this.activityService.createObjectFromPost(post));
         } else {
