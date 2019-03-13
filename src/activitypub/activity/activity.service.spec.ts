@@ -24,7 +24,8 @@ ConfigServiceMock.mockImplementation(() => {
   return {
     serverAddress: 'example.com',
     serverPort: 443,
-    isFederating: false
+    isFederating: false,
+    isHttps: true
   }
 });
 

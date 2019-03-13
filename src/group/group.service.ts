@@ -1,4 +1,4 @@
-import { Injectable, MethodNotAllowedException } from '@nestjs/common';
+import { Injectable, MethodNotAllowedException, InternalServerErrorException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Group } from './group.entity';
@@ -103,9 +103,12 @@ export class GroupService {
      */
     async findGlobalByName(name: string, server: string): Promise<Group> {
         try {
+            const serverEntity = await this.serverService.find(
+                this.serverService.parseHostname(server));
+
             const response = await this.groupRepository.findOneOrFail({
                 name,
-                server: this.serverService.parseHostname(server)
+                server: serverEntity
             });
 
             return response;
