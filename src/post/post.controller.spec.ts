@@ -8,6 +8,7 @@ import { CreatePostDto } from './create-post.dto';
 import { CreateTopLevelPostDto } from './create-top-level-post.dto';
 import { CreateReplyDto } from './create-reply.dto';
 import { Group } from '../group/group.entity';
+import { Server } from '../server/server.entity';
 
 jest.mock('./post.service');
 
@@ -37,11 +38,16 @@ describe('Post Controller', () => {
   });
 
   describe('Method testing', () => {
+    const sampleServer = Object.assign(new Server, {
+      host: 'example.com',
+      scheme: 'http'
+    });
+
     const data: Post[] = [
       {
         id: 1,
         uuid: uuidv4(),
-        server: 'example.com',
+        server: sampleServer,
         sender: new User,
         uri: '',
         parentUri: '',
@@ -57,7 +63,7 @@ describe('Post Controller', () => {
       {
         id: 2,
         uuid: uuidv4(),
-        server: 'example.com',
+        server: sampleServer,
         sender: new User,
         uri: '',
         parentUri: '',
@@ -102,7 +108,7 @@ describe('Post Controller', () => {
       const exampleGroup: Group = {
         id: 3,
         name: 'group',
-        server: 'example.com',
+        server: sampleServer,
         displayName: 'A group',
         summary: '',
         date: '',
@@ -113,7 +119,7 @@ describe('Post Controller', () => {
       const examplePost: Post = {
         id: 1,
         uuid: '00000000-0000-0000-0000-000000000000',
-        server: 'example.com',
+        server: sampleServer,
         sender: new User,
         uri: '',
         parentUri: '',
@@ -140,7 +146,7 @@ describe('Post Controller', () => {
       const exampleUser: User = {
         id: 4,
         name: 'user',
-        server: 'example.com',
+        server: sampleServer,
         displayName: 'A user',
         summary: '',
         icon: '',
@@ -152,7 +158,7 @@ describe('Post Controller', () => {
       const examplePost: Post = {
         id: 1,
         uuid: '00000000-0000-0000-0000-000000000000',
-        server: 'example.com',
+        server: sampleServer,
         sender: exampleUser,
         uri: '',
         parentUri: '',
@@ -179,7 +185,7 @@ describe('Post Controller', () => {
       const exampleGroup: Group = {
         id: 3,
         name: 'group',
-        server: 'example.com',
+        server: sampleServer,
         displayName: 'A group',
         summary: '',
         date: '',
@@ -190,7 +196,7 @@ describe('Post Controller', () => {
       const examplePost: Post = {
         id: 1,
         uuid: '00000000-0000-0000-0000-000000000000',
-        server: 'example.com',
+        server: sampleServer,
         sender: new User,
         uri: '',
         parentUri: '',
