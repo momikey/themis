@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, Tree, Tre
 import { User } from "../user/user.entity";
 import { Group } from "../group/group.entity";
 import { Activity } from "../activitypub/definitions/activities/activity.entity";
+import { Server } from "../server/server.entity";
 
 @Entity()
 @Tree('materialized-path')
@@ -18,8 +19,8 @@ export class Post {
     // `server` is the server where this post originated.
     // We will store "foreign" posts for multiple reasons. One, for caching purposes,
     // to ease network load. Two, because we'll need references to them.
-    @Column('text')
-    server: string;
+    @ManyToOne(type => Server, server => server.posts, { eager: true })
+    server: Server;
 
     // `sender` is the user who sent this post.
     @ManyToOne(type => User, user => user.posts, { eager: true })

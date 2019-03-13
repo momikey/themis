@@ -7,15 +7,20 @@ import { UserService } from '../user/user.service';
 import { GroupService } from '../group/group.service';
 import { Repository } from 'typeorm/repository/Repository';
 import * as uuidv5 from 'uuid/v5';
+import * as URI from 'uri-js';
 import { CreatePostDto } from './create-post.dto';
 import { CreateTopLevelPostDto } from './create-top-level-post.dto';
 import { CreateReplyDto } from './create-reply.dto';
 import { User } from '../user/user.entity';
 import { Group } from '../group/group.entity';
 import { CreateGlobalPostDto } from './create-global-post.dto';
+import { Server } from '../server/server.entity';
+import { ServerService } from '../server/server.service';
 
 jest.mock('../user/user.service');
 jest.mock('../group/group.service');
+jest.mock('../server/server.service');
+
 jest.mock('typeorm/repository/Repository'); 
 
 jest.mock('../config/config.service');
@@ -33,6 +38,7 @@ describe('PostService', () => {
   let userService: jest.Mocked<UserService>;
   let groupService: jest.Mocked<GroupService>;
   let configService: jest.Mocked<ConfigService>;
+  let serverService: jest.Mocked<ServerService>;
   
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -42,6 +48,7 @@ describe('PostService', () => {
         GroupService,
         { provide: getRepositoryToken(Post), useClass: Repository },
         { provide: ConfigService, useClass: ConfigServiceMock },
+        ServerService
       ],
     }).compile();
 
@@ -50,6 +57,7 @@ describe('PostService', () => {
     userService = module.get<UserService>(UserService) as jest.Mocked<UserService>;
     groupService = module.get<GroupService>(GroupService) as jest.Mocked<GroupService>;
     configService = module.get<ConfigService>(ConfigService) as jest.Mocked<ConfigService>;
+    serverService = module.get<ServerService>(ServerService) as jest.Mocked<ServerService>;
   });
 
   it('should be defined', () => {
@@ -63,9 +71,17 @@ describe('PostService', () => {
   describe('Method testing', () => {
     const uuidFormat = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
     const sampleUuid = uuidv5('example.com', uuidv5.DNS);
+
+    const sampleServer = Object.assign(new Server, {
+      host: 'example.com',
+      scheme: 'http',
+      port: 80
+    });
+    const sampleServerUri = URI.normalize(URI.serialize(sampleServer));
+
     const samplePost: CreatePostDto = {
       sender: 'user',
-      server: 'example.com',
+      server: sampleServerUri,
       subject: 'Subject',
       parent: '',
       primaryGroup: 'group',
@@ -75,7 +91,7 @@ describe('PostService', () => {
     };
     const sampleTopLevel: CreateTopLevelPostDto = {
       sender: 'user',
-      server: 'example.com',
+      server: sampleServerUri,
       subject: 'Subject',
       primaryGroup: 'group',
       ccGroups: [],
@@ -84,18 +100,19 @@ describe('PostService', () => {
     };
     const sampleReply: CreateReplyDto = {
       sender: 'user',
-      server: 'example.com',
+      server: sampleServerUri,
       subject: 'Subject',
       group: 1,
       content: 'This is a test',
       source: ''
     };
 
+
     const data: Post[] = [
-      {id: 1, uuid: sampleUuid, server: 'example.com', sender: new User, uri: '', parentUri: '',
+      {id: 1, uuid: sampleUuid, server: sampleServer, sender: new User, uri: '', parentUri: '',
         groups: [], subject: 'Subject', content: 'Content', source: '', timestamp: '',
         deleted: false, children: [], parent: undefined, activities: [] },
-      {id: 2, uuid: '00000000-1234-5678-987654321cafe', server: 'example.com', sender: new User, 
+      {id: 2, uuid: '00000000-1234-5678-987654321cafe', server: sampleServer, sender: new User, 
         uri: '', parentUri: '', groups: [], subject: 'Subject', content: 'Content', 
         source: '', timestamp: '', deleted: false, children: [], parent: undefined, activities: [] }
     ];
@@ -113,6 +130,12 @@ describe('PostService', () => {
       repository.find.mockImplementation(() => (
         data.map((e) => Object.assign(new Post, e))
       ));
+
+      serverService.local.mockResolvedValue(Object.assign(new Server, {
+        host: 'example.com',
+        port: 80,
+        scheme: 'http'
+      }));
     });
 
     it('create should create a post entity', async () => {
@@ -120,7 +143,7 @@ describe('PostService', () => {
 
       expect(result).toBeDefined();
       expect(result).toBeInstanceOf(Post);
-      expect(result.server).toBe(samplePost.server);
+      expect(result.server.host).toBe(sampleServer.host);
       expect(result.uuid.search(uuidFormat));
     });
 
@@ -224,12 +247,12 @@ describe('PostService', () => {
     */
    /* End disabled tests */
 
-    it('URI from post entity should create a properly-formatted URI', () => {
-      const result = service.uriFromLocalPost(data[1]);
+    it('URI from post entity should create a properly-formatted URI', async () => {
+      const result = await service.uriFromLocalPost(data[1]);
 
       expect(result).toBeDefined();
       expect(result.search(uuidFormat)).toBeTruthy();
-      expect(result.startsWith('https')).toBeTruthy();
+      expect(result.startsWith('http')).toBeTruthy();
     });
 
     it('URI from UUID should create a properly-formatted URI', () => {
@@ -237,7 +260,7 @@ describe('PostService', () => {
 
       expect(result).toBeDefined();
       expect(result.search(uuidFormat)).toBeTruthy();
-      expect(result.startsWith('https')).toBeTruthy();
+      expect(result.startsWith('http')).toBeTruthy();
     });
 
     it('create new UUID should do that', () => {

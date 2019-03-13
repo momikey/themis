@@ -14,6 +14,7 @@ import { CreateReplyDto } from './create-reply.dto';
 import { Group } from '../group/group.entity';
 import { CreateGlobalPostDto } from './create-global-post.dto';
 import { Actor } from '../activitypub/definitions/actor.interface';
+import { ServerService } from '../server/server.service';
 
 @Injectable()
 export class PostService {
@@ -22,7 +23,8 @@ export class PostService {
         private readonly postRepository: Repository<Post>,
         private readonly configService: ConfigService,
         private readonly userService: UserService,
-        private readonly groupService: GroupService
+        private readonly groupService: GroupService,
+        private readonly serverService: ServerService
     ) {}
 
     async create(post: CreatePostDto) {
@@ -30,10 +32,15 @@ export class PostService {
         const postedGroups: Group[] = await Promise.all(postedGroupNames.map(
             (e) => this.groupService.findByName(e)
         ));
+
+        const hostname = this.serverService.parseHostname(post.server);
+        const server = (await this.serverService.findOrCreate(hostname)) ||
+        (await this.serverService.local());
+
         const postEntity = this.postRepository.create({
             uuid: this.createNewUuid(post.subject + post.content + post.sender),
             sender: await this.userService.findByName(post.sender),
-            server: post.server,
+            server: server,
             subject: post.subject,
             parentUri: post.parent,
             groups: postedGroups,
@@ -55,13 +62,17 @@ export class PostService {
      */
     async createFromActivity(post: CreateGlobalPostDto): Promise<Post> {
         const senderEntity = await this.findOrCreateUser(post.sender);
+        const hostname = this.serverService.parseHostname(post.sender.server);
+        const server = (await this.serverService.findOrCreate(hostname)) ||
+        (await this.serverService.local());
+
         const targetGroupEntities = await Promise.all(post.groups.map((g) =>
             this.findOrCreateGroup(g)));
 
         const uuid = this.createNewUuid(post.sender + post.content);
         const entity = this.postRepository.create({
             sender: senderEntity,
-            server: post.sender.server,
+            server: server,
             groups: targetGroupEntities,
             subject: post.subject,
             content: post.content,
@@ -190,7 +201,7 @@ export class PostService {
      * @memberof PostService
      */
     async countLocal(): Promise<number> {
-        return this.postRepository.count({ server: this.configService.serverAddress });
+        return this.postRepository.count({ server: await this.serverService.local() });
     }
 
     // TODO: Maybe consider changing to Flake or some other
@@ -319,13 +330,13 @@ export class PostService {
         return filled.parent || undefined;
     }
 
-    uriFromLocalPost(post: Post): string {
-        const server = this.configService.serverAddress;
+    async uriFromLocalPost(post: Post): Promise<string> {
+        console.log("*** Local", post.server, await this.isLocalPost(post));
 
         if (post.uri) {
             // We already have a URI, so just return that
             return post.uri;
-        } else if (post.server === server) {
+        } else if (await this.isLocalPost(post)) {
             // It's a local post, so we can make a URI
             return this.uriFromUuid(post.uuid);
         } else {
@@ -335,13 +346,14 @@ export class PostService {
     }
 
     uriFromUuid(uuid: string): string {
-        const server = this.configService.serverAddress;
+        const host = this.configService.serverAddress;
         const port = this.configService.serverPort;
+        const scheme = this.configService.isHttps ? 'https' : 'http';
 
         const uri = URI.serialize({
-            scheme: 'https',
-            host: server,
-            port: port,
+            host,
+            port,
+            scheme,
             path: `/post/${uuid}`
         });
 
@@ -371,10 +383,10 @@ export class PostService {
         postEntity.parentUri = '';
         postEntity.timestamp = (new Date()).toJSON();
         // TODO: Handle federation
-        postEntity.server = this.configService.serverAddress;
+        postEntity.server = await this.serverService.local();
 
         postEntity.uuid = this.createNewUuid(post.subject + post.body + post.sender);
-        postEntity.uri = this.uriFromLocalPost(postEntity);
+        postEntity.uri = await this.uriFromLocalPost(postEntity);
 
         // TODO: Handle post deletion, tombstones, etc.
         postEntity.deleted = false;
@@ -392,5 +404,14 @@ export class PostService {
         }
 
         return result;
+    }
+
+    private async isLocalPost(post: Post): Promise<boolean> {
+        const local = await this.serverService.local();
+        return (
+            local.host === post.server.host 
+            && local.scheme === post.server.scheme
+            && (local.port === post.server.port || post.server.port === undefined)
+        )
     }
 }
