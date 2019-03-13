@@ -173,7 +173,7 @@ export class ActivityService {
         } else {
             const path = `/p/${activity.id}`;
             return URI.normalize(URI.serialize({
-                scheme: 'https',
+                scheme: (this.configService.isHttps) ? 'https' : 'http',
                 host: this.configService.serverAddress,
                 port: this.configService.serverPort,
                 path: path

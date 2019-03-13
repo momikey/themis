@@ -41,7 +41,7 @@ export class Account {
     @Column('integer', {default: UserRole.Guest})
     role: UserRole;
 
-    @Column()
+    @Column({nullable: true})
     lastLoggedIn: Date;
 
     // TODO: Do we need a date field here? Might be useful for password expiration.
