@@ -67,7 +67,11 @@ export class ActivityService {
         // add the ID and update the entry before returning it.
         const inserted = await this.activityRepository.save(entity);
 
-        if (inserted.activityObject['object'] &&!inserted.activityObject['object'].id) {
+        if (typeof inserted.activityObject['object'] == 'string') {
+            // Some activities allow their target objects to be specified
+            // by URI instead of being embedded. For those, we can just
+            // leave the URI as-is.
+        } else if (inserted.activityObject['object'] && !inserted.activityObject['object'].id) {
             inserted.activityObject['object'].id = inserted.targetPost.uri;
         }
 

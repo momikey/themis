@@ -331,6 +331,25 @@ export class PostService {
         return filled.parent || undefined;
     }
 
+    /**
+     * Performs a "soft" delete of a post. This does not remove the post
+     * from the database. Instead, it sets the "deleted" flag, which will
+     * cause accesses to return a 410 Gone status code.
+     *
+     * @param post The post to delete
+     * @returns The post, now with the deleted flag set
+     * @memberof PostService
+     */
+    async softDelete(post: Post): Promise<Post> {
+        if (await this.isLocalPost(post)) {
+            post.deleted = true;
+            return this.postRepository.save(post);
+        } else {
+            // We can't delete posts that aren't our own.
+            throw new BadRequestException("Can't delete a non-local post");
+        }
+    }
+
     async uriFromLocalPost(post: Post): Promise<string> {
         if (post.uri) {
             // We already have a URI, so just return that

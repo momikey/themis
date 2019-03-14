@@ -63,10 +63,10 @@ export class ApUserService {
         // expects that to only appear on the post objects themselves.
         const activity = (data.content == null)
             ? data
-            : activityFromObject(data, user);        
+            : activityFromObject(data, user); 
         
         switch (activity.type) {
-            case 'Create':
+            case 'Create': {
                 const postObject = this.apPostService.createNewGlobalPost(activity);
                 const postEntity = await this.apPostService.submitNewGlobalPost(postObject);
                 const activityEntity = {
@@ -76,8 +76,23 @@ export class ApUserService {
                     activityObject: activity
                 };
 
+                // TODO: Handle delivery, etc.
+
                 return (await this.activityService.save(activityEntity)).activityObject;
-            case 'Delete':
+            }
+            case 'Delete': {
+                const deletedPost = await this.apPostService.deletePostFromActivity(activity);
+                const activityEntity = {
+                    targetUser: user,
+                    targetPost: deletedPost,
+                    type: activity.type,
+                    activityObject: activity
+                };
+
+                // TODO: Handle delivery, etc.
+
+                return (await this.activityService.save(activityEntity)).activityObject;
+            }
             case 'Update':
             case 'Follow':
             case 'Add':

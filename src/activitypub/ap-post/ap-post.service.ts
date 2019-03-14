@@ -9,6 +9,7 @@ import * as URI from 'uri-js';
 import { CreateActivity } from '../definitions/activities/create-activity';
 import { CreateGlobalPostDto } from 'src/post/create-global-post.dto';
 import { fromUri, getActorUri, parseActor, ActorType } from '../definitions/actor.interface';
+import { DeleteActivity } from '../definitions/activities/delete-activity';
 
 @Injectable()
 export class ApPostService {
@@ -81,5 +82,14 @@ export class ApPostService {
      */
     async submitNewGlobalPost(post: CreateGlobalPostDto): Promise<Post> {
         return this.postService.createFromActivity(post);
+    }
+
+    async deletePostFromActivity(activity: DeleteActivity): Promise<Post> {
+        const postUri = (typeof activity.object == 'string')
+            ? activity.object
+            : activity.object['id'];
+        
+        const post = await this.postService.findByUri(postUri);
+        return this.postService.softDelete(post);
     }
 }
