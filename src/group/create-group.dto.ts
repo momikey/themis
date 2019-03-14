@@ -6,4 +6,5 @@ export class CreateGroupDto {
     readonly server: string;
     readonly displayName: string;
     readonly summary: string;
+    readonly uri?: string;
 }

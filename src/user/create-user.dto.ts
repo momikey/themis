@@ -8,4 +8,5 @@ export class CreateUserDto {
     readonly displayName: string;
     readonly summary: string;
     readonly iconUrl: string;
+    readonly uri?: string;
 }

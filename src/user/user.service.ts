@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './create-user.dto';
 import { ConfigService } from '../config/config.service';
 import { ServerService } from '../server/server.service';
+import { getIdForActor, ActorType } from '../activitypub/definitions/actor.interface';
 
 @Injectable()
 export class UserService {
@@ -27,6 +28,8 @@ export class UserService {
             icon: user.iconUrl || ''
         });
 
+        userEntity.uri = userEntity.uri || getIdForActor(userEntity, ActorType.User);
+
         return this.userRepository.save(userEntity);
     }
 
@@ -42,6 +45,8 @@ export class UserService {
             summary: '',
             icon: ''
         });
+
+        userEntity.uri = userEntity.uri || getIdForActor(userEntity, ActorType.User);
 
         return this.userRepository.save(userEntity);
     }

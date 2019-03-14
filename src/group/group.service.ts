@@ -8,6 +8,7 @@ import { ConfigService } from '../config/config.service';
 import { UpdateGroupDto } from './update-group.dto';
 import { GroupFilterEntry, GroupFilter } from '../filter/group-filter';
 import { ServerService } from '../server/server.service';
+import { getIdForActor, ActorType } from '../activitypub/definitions/actor.interface';
 
 @Injectable()
 export class GroupService {
@@ -28,6 +29,8 @@ export class GroupService {
             displayName: group.displayName,
             summary: group.summary
         });
+
+        groupEntity.uri = groupEntity.uri || getIdForActor(groupEntity, ActorType.Group);
 
         return await this.groupRepository.save(groupEntity);
     }
