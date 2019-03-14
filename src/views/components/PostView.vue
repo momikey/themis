@@ -72,6 +72,8 @@
 import Vue, { VueConstructor } from 'vue'
 import { distanceInWordsToNow, parse, format } from 'date-fns'
 
+import { formatServer } from '../../server/format-server'
+
 export default Vue.extend({
     props: [
         'post'
@@ -83,7 +85,7 @@ export default Vue.extend({
         formatSender (sender) {
             // Coptied from ThreadList
             // We need to make this something that isn't repeated, probably in a service class
-            return `${sender.displayName} (@${sender.name}@${sender.server})`;
+            return `${sender.displayName} (@${sender.name}@${formatServer(sender.server)})`;
         },
         formatDate (date) {
             // TODO: Make this pretty

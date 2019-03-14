@@ -101,6 +101,8 @@
 import Vue, { VueConstructor } from 'vue'
 import axios from 'axios'
 
+import { formatServer } from '../../server/format-server'
+
 import CreateFilterDialog from './CreateFilterDialog.vue'
 
 export default Vue.extend({
@@ -141,7 +143,7 @@ export default Vue.extend({
     },
     methods: {
         formatGroupName (group) {
-            return `@group-${group.name}@${group.server}`;
+            return `@group-${group.name}@${formatServer(group.server)}`;
         },
         retrieveGroupList () {
             if (!this.isFiltered) {

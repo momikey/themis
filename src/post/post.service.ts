@@ -264,6 +264,7 @@ export class PostService {
             .createQueryBuilder("post")
             .leftJoinAndSelect("post.groups", "groups")
             .leftJoinAndSelect("post.sender", "sender")
+            .leftJoinAndSelect("post.server", "server")
             .where("groups.id = :id", { id })
             .getMany();
 

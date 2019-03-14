@@ -20,7 +20,7 @@
                     <tr @click="props.expanded = !props.expanded">
                         <td>{{ props.item.id }}</td>
                         <td>{{ props.item.name }}</td>
-                        <td>{{ props.item.server }}</td>
+                        <td>{{ formatServer(props.item.server) }}</td>
                         <td>{{ props.item.displayName }}</td>
                         <td>{{ props.item.date }}</td>
                         <td>
@@ -78,7 +78,7 @@
             <template slot="items" slot-scope="props">
                 <tr @click="props.expanded = !props.expanded">
                         <td>{{ props.item.id }}</td>
-                        <td>{{ props.item.server}}</td>
+                        <td>{{ formatServer(props.item.server) }}</td>
                         <td>{{ props.item.subject }}</td>
                         <td>{{ props.item.timestamp }}</td>
                         <td>{{ props.item.deleted }}</td>
@@ -185,6 +185,7 @@ import axios from 'axios'
 import { format, parse } from 'date-fns'
 
 import { UserRole } from '../../user/user-authentication/user-authentication.role';
+import { formatServer } from '../../server/format-server'
 
 export default Vue.extend({
     data () {
@@ -245,7 +246,7 @@ export default Vue.extend({
         },
 
         formatGroupList (groups) {
-            return '[' + groups.map(e => `@${e.name}@${e.server}`).join(',') + ']';
+            return '[' + groups.map(e => `@${e.name}@${formatServer(e.server)}`).join(',') + ']';
         },
 
         formatDate (date) {
@@ -303,6 +304,11 @@ export default Vue.extend({
                 default:
                     throw new Error('Invalid selection');
             }
+        },
+
+        // Delegate, because Vue won't let use imports for some reason
+        formatServer (server) {
+            return formatServer(server);
         }
     },
     mounted () {

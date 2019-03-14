@@ -31,7 +31,7 @@
                 <div slot="header">
                     {{group.id}}: <span class="ml-2"><strong>{{group.displayName}}</strong></span>
                     <v-spacer></v-spacer>
-                    (@{{group.name}}@{{group.server}})
+                    (@{{group.name}}@{{formatServer(group.server)}})
                 </div>
                 <v-card>
                     <v-card-text>
@@ -101,6 +101,8 @@
 <script lang="ts">
 import Vue, { VueConstructor } from 'vue'
 import axios from 'axios'
+
+import { formatServer } from '../../server/format-server';
 
 import CreateGroupDialog from './CreateGroupDialog.vue'
 import AdminGroupPostsList from './AdminGroupPostsList.vue'
@@ -182,6 +184,11 @@ export default Vue.extend({
             this.postsGroup = group;
             
             this.window = 1;
+        },
+
+        // Delegate, because Vue won't let use imports for some reason
+        formatServer (server) {
+            return formatServer(server);
         }
     },
     mounted () {

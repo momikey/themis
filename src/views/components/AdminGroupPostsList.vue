@@ -14,7 +14,7 @@
             <tr @click="props.expanded = !props.expanded">
                     <td>{{ props.item.id }}</td>
                     <td>{{ props.item.sender && props.item.sender.name}}</td>
-                    <td>{{ props.item.server}}</td>
+                    <td>{{ formatServer(props.item.server) }}</td>
                     <td>{{ props.item.subject }}</td>
                     <td>{{ props.item.timestamp }}</td>
                     <td>{{ props.item.deleted }}</td>
@@ -43,6 +43,8 @@
 import Vue, { VueConstructor } from 'vue'
 import axios from 'axios'
 
+import { formatServer } from '../../server/format-server'
+
 export default Vue.extend({
     data () {
         return {
@@ -68,6 +70,11 @@ export default Vue.extend({
                 return response;
             })
             .catch(error => console.log(error));
+        },
+
+        // Delegate, because Vue won't let use imports for some reason
+        formatServer (server) {
+            return formatServer(server);
         }
     },
     mounted () {
