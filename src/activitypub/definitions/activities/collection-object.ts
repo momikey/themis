@@ -19,3 +19,19 @@ export class Collection {
 
     [key: string]: any;
 }
+
+export class CollectionPage {
+    '@context': string;
+
+    type: 'CollectionPage' | 'OrderedCollectionPage';
+
+    partOf: string;
+
+    items?: any[];
+    orderedItems?: any[];
+
+    prev?: string;
+    next?: string;
+
+    [key: string]: any;
+}

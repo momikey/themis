@@ -11,6 +11,8 @@ import { AP } from '../definitions/constants';
 import { TombstoneObject } from '../definitions/activities/tombstone-object';
 import * as URI from 'uri-js';
 import { ConfigService } from '../../config/config.service';
+import { Collection, CollectionPage } from '../definitions/activities/collection-object';
+import { compareDesc } from 'date-fns';
 
 @Injectable()
 export class ActivityService {
@@ -184,4 +186,122 @@ export class ActivityService {
             }));
         }
     }
+
+    /**
+     * Create a new AP Collection for an array of activities.
+     *
+     * @template Act The type of activity
+     * @param activities An array of activities
+     * @returns A Collection object
+     * @memberof ActivityService
+     */
+    createCollection<Act>(activities: Act[]): Collection {
+        return {
+            '@context': AP.Context,
+            type: 'Collection',
+            totalItems: activities.length,
+            items: activities
+        }
+    }
+
+    /**
+     * Create a new AP OrderedCollection for an array of activities.
+     * Because we must order these in reverse chronological order,
+     * we need a little more information, which we find in each
+     * activity's `created` field.
+     *
+     * @template Act The type of Activity
+     * @param activities An array of activities
+     * @returns An OrderedCollection object
+     * @memberof ActivityService
+     */
+    createOrderedCollection<Act extends Chronological>(activities: Act[]): Collection {
+        return {
+            '@context': AP.Context,
+            type: 'OrderedCollection',
+            totalItems: activities.length,
+            orderedItems: activities.sort((a,b) => compareDesc(a.created, b.created))
+        }
+    }
+
+    /**
+     * Create a page in a collection that would otherwise be too long
+     * to reasonably transfer. This requires a lot of setup, as seen
+     * in the arguments list.
+     *
+     * @template Act The type of activity
+     * @param activities An array of activities
+     * @param baseUri The base URI of the collection
+     * @param pageNumber The number for this page
+     * @param pageLength The length of each page
+     * @returns A CollectionPage object suitable for inserting into a Collection
+     * @memberof ActivityService
+     */
+    createCollectionPage<Act>(
+        activities: Act[],
+        baseUri: string | URI.URIComponents,
+        pageNumber: number,
+        pageLength: number) : CollectionPage {
+            if (pageNumber < 1 || pageNumber * pageLength > activities.length) {
+                throw new RangeError(`Index ${pageNumber} out of range`);
+            }
+
+            const uri = (typeof baseUri == 'string') ? URI.parse(baseUri) : baseUri;
+            const uriString = (typeof baseUri == 'string') ? baseUri : URI.normalize(URI.serialize(baseUri));
+
+            uri.query = this.pageQueryString(pageNumber);
+
+            const startPos = (pageNumber - 1) * pageLength;
+            const endPos = (startPos + pageLength < activities.length)
+                ? startPos - pageLength
+                : activities.length;
+
+            const page: CollectionPage = {
+                '@context': AP.Context,
+                type: 'CollectionPage',
+                partOf: uriString,
+                id: URI.normalize(URI.serialize(uri)),
+                items: activities.slice(startPos, endPos)
+            }
+
+            if (startPos !== 0) {
+                uri.query = this.pageQueryString(pageNumber - 1);
+                page.prev = URI.normalize(URI.serialize(uri));
+            }
+
+            if (endPos !== activities.length) {
+                uri.query = this.pageQueryString(pageNumber + 1);
+                page.next = URI.normalize(URI.serialize(uri))
+            }
+
+            return page;
+    }
+
+    createPagedCollection<Act>(
+        activities: Act[],
+        numberPerPage: number,
+        baseUri: string | URI.URIComponents): Collection {
+            const uri = (typeof baseUri == 'string') ? baseUri : URI.normalize(URI.serialize(baseUri));
+
+            return {
+                '@context': AP.Context,
+                type: 'Collection',
+                totalItems: Math.min(activities.length, numberPerPage),
+                id: uri,
+                first: this.createCollectionPage(activities, baseUri, 1, numberPerPage)    
+            }
+    }
+
+    pageQueryString(page: number) : string {
+        return `page=${page}`;
+    }
+}
+
+/**
+ * Helper interface for sorting ordered collections.
+ *
+ * @interface Chronological
+ */
+interface Chronological {
+    created: Date;
 }

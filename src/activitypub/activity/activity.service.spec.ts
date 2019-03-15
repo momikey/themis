@@ -73,10 +73,17 @@ describe('ActivityService', () => {
   });
 
   describe('Method testing', () => {
+    const sampleActivities = [
+      { type: 'Create', created: new Date('2019-03-15T12:00:00') },
+      { type: 'Like', created: new Date('2019-03-15T12:34:56') },
+      { type: 'Like', created: new Date('2019-03-15T13:37:00') },
+      { type: 'Delete', created: new Date('2019-03-15T12:59:59') }
+    ];
+    
     beforeAll(async () => {
     });
 
-    it('parsing a list of groups should work', () => {
+    it('parsing a list of groups', () => {
       const targets = [
         'https://example.com/group/abc',
         'https://example.com/group/def',
@@ -95,7 +102,7 @@ describe('ActivityService', () => {
       expect(users[0].name).toBe('somebody');
     });
 
-    it('creating a new activity from a post object should work', async () => {
+    it('creating a new activity from a post object', async () => {
       const object: PostObject = {
         '@context': AP.Context,
         type: 'Article',
@@ -112,7 +119,7 @@ describe('ActivityService', () => {
       expect(result.to).toBe(object.to);
     });
 
-    it('creating a URI from an activity should do that', () => {
+    it('creating a URI from an activity', () => {
       const activity: Activity = {
         id: 1,
         type: 'Create',
@@ -130,7 +137,54 @@ describe('ActivityService', () => {
       expect(result).toBe('https://example.com/p/1');
     });
 
-    it('saving an activity should work', async () => {
+    it('saving an activity', async () => {
+    });
+
+    it('creating an unordered collection', () => {
+      const result = service.createCollection(sampleActivities);
+
+      expect(result).toBeDefined();
+      expect(result.type).toBe('Collection');
+      expect(result.totalItems).toBe(sampleActivities.length);
+      expect(result.items).toHaveLength(result.totalItems);
+      expect(result.items[0].type).toBe('Create');
+      expect(result.items[3].type).toBe('Delete');
+    });
+
+    it('creating an ordered collection', () => {
+      // We use `slice()` here because createOrderedCollection
+      // modifies the original array.
+      const result = service.createOrderedCollection(sampleActivities.slice());
+
+      expect(result).toBeDefined();
+      expect(result.type).toBe('OrderedCollection');
+      expect(result.totalItems).toBe(sampleActivities.length);
+      expect(result.orderedItems).toHaveLength(result.totalItems);
+      expect(result.orderedItems[0].type).toBe('Like');
+      expect(result.orderedItems[3].type).toBe('Create');
+    });
+
+    it('creating a collection page', () => {
+      const baseUri = 'http://example.com/test';
+      const result = service.createCollectionPage(sampleActivities, baseUri, 2, 2);
+
+      expect(result).toBeDefined();
+      expect(result.type).toBe('CollectionPage');
+      expect(result.partOf).toBe(baseUri); 
+      expect(result.prev).toBe('http://example.com/test?page=1');
+
+      expect(() => {
+        service.createCollectionPage(sampleActivities, baseUri, 3, 4);
+      }).toThrow();
+    });
+
+    it('creating a paged collection', () => {
+      const baseUri = 'http://example.com/test';
+      const result = service.createPagedCollection(sampleActivities, 2, baseUri);
+      
+      expect(result).toBeDefined();
+      expect(result.type).toBe('Collection');
+      expect(result.first).toBeDefined();
     });
   });
 });
