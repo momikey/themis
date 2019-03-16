@@ -13,8 +13,8 @@ describe('ServerService', () => {
   let repository = new Repository<Server>();
   let configService: jest.Mocked<ConfigService>;
 
-  jest.spyOn(repository, 'create').mockReturnValue({});
-  jest.spyOn(repository, 'findOneOrFail').mockResolvedValue(true);
+  jest.spyOn(repository, 'create').mockReturnValue({} as Server);
+  jest.spyOn(repository, 'findOneOrFail').mockResolvedValue({} as Server);
   
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({

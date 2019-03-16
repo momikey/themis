@@ -19,7 +19,7 @@ jest.mock('../../user/user.service');
 jest.mock('../../post/post.service');
 
 jest.mock('../../config/config.service');
-const ConfigServiceMock = <jest.Mock<ConfigService>>ConfigService;
+const ConfigServiceMock = <jest.Mock<ConfigService>>ConfigService as any;
 ConfigServiceMock.mockImplementation(() => {
   return {
     serverAddress: 'example.com',

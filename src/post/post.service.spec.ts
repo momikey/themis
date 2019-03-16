@@ -24,7 +24,7 @@ jest.mock('../server/server.service');
 jest.mock('typeorm/repository/Repository'); 
 
 jest.mock('../config/config.service');
-const ConfigServiceMock = <jest.Mock<ConfigService>>ConfigService;
+const ConfigServiceMock = <jest.Mock<ConfigService>>ConfigService as any;
 ConfigServiceMock.mockImplementation(() => {
   return {
     serverAddress: 'example.com',
@@ -118,16 +118,16 @@ describe('PostService', () => {
     ];
 
     beforeAll(() => {
-      userService.findByName.mockReturnValue(new User);
-      groupService.findByIds.mockReturnValue([new Group]);
+      userService.findByName.mockResolvedValue(new User);
+      groupService.findByIds.mockResolvedValue([new Group]);
 
       repository.create.mockImplementation((entity) => Object.assign(new Post, entity));
-      repository.save.mockImplementation((entity) => entity);
-      repository.findOne.mockImplementation((o: {uuid: string}) => 
+      repository.save.mockImplementation(async (entity) => entity as Post);
+      repository.findOne.mockImplementation(async (o: {uuid: string}) => 
         Object.assign(new Post, data.find((_) => _.uuid === o.uuid))
       );
-      repository.remove.mockImplementation((entity) => Object.assign(new Post, entity));
-      repository.find.mockImplementation(() => (
+      repository.remove.mockImplementation(async (entity) => Object.assign(new Post, entity));
+      repository.find.mockImplementation(async () => (
         data.map((e) => Object.assign(new Post, e))
       ));
 
@@ -271,7 +271,7 @@ describe('PostService', () => {
     });
 
     it('finding/creating a new user should perform the appropriate action', async () => {
-      userService.create.mockReturnValue(Object.assign(new User, {
+      userService.create.mockResolvedValue(Object.assign(new User, {
         name: 'user',
         server: 'example.com',
         displayName: 'A user',

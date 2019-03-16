@@ -8,6 +8,7 @@ import { ActivityService } from '../activity/activity.service';
 import { PostObject } from '../definitions/activities/post-object';
 import { ApPostService } from '../ap-post/ap-post.service';
 import { Server } from '../../server/server.entity';
+import { Activity } from '../definitions/activities/activity.entity';
 
 jest.mock('../../user/user.service');
 jest.mock('../../config/config.service');
@@ -68,7 +69,7 @@ describe('ApUserService', () => {
     }
 
     beforeAll(() => {
-      userService.findLocalByName.mockReturnValue(Object.assign(new User, {
+      userService.findLocalByName.mockResolvedValue(Object.assign(new User, {
         id: 1,
         name: 'user',
         server: Object.assign(new Server, {host: 'example.com', scheme: 'http'}),
@@ -102,7 +103,7 @@ describe('ApUserService', () => {
         const ap = new ApPostService();
         apPostService.createNewGlobalPost.mockImplementation(ap.createNewGlobalPost);
 
-        activityService.save.mockResolvedValue({ activityObject: undefined });
+        activityService.save.mockResolvedValue({ activityObject: undefined } as Activity);
       });
 
       it('bare object', async () => {

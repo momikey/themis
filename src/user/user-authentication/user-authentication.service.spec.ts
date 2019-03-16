@@ -23,7 +23,7 @@ const mockBcryptCompare = jest.spyOn(bcrypt, 'compare');
 const mockBcryptHash = jest.spyOn(bcrypt, 'hash');
 
 jest.mock('../../config/config.service');
-const ConfigServiceMock = <jest.Mock<ConfigService>>ConfigService;
+const ConfigServiceMock = <jest.Mock<ConfigService>>ConfigService as any;
 ConfigServiceMock.mockImplementation(() => {
   return {
     serverAddress: 'example.com',
@@ -120,14 +120,14 @@ describe('UserAuthenticationService', () => {
 
     beforeAll(() => {
       jwtService.sign.mockReturnValue('secret');
-      userService.findByName.mockReturnValue(sampleUserData);
+      userService.findByName.mockResolvedValue(sampleUserData);
 
-      repository.findOneOrFail.mockReturnValue(sampleAuthentication);
-      repository.findOne.mockReturnValue(sampleAuthentication);
-      repository.save.mockImplementation((entity) => entity);
+      repository.findOneOrFail.mockResolvedValue(sampleAuthentication);
+      repository.findOne.mockResolvedValue(sampleAuthentication);
+      repository.save.mockImplementation(async (entity) => entity as Account);
       repository.create.mockImplementation((entity) => Object.assign(new Account, entity));
 
-      mockBcryptCompare.mockReturnValue(true);
+      mockBcryptCompare.mockResolvedValue(true);
       mockBcryptHash.mockReturnValue(Promise.resolve('secret'));
     });
 
@@ -172,7 +172,7 @@ describe('UserAuthenticationService', () => {
 
     it('creating an account should return a new, valid authentication object', async () => {
       userService.findByName.mockReturnValueOnce(undefined);
-      userService.createEmptyUserEntry.mockImplementation((name: string) => {
+      userService.createEmptyUserEntry.mockImplementation(async (name: string) => {
         const entity = new User;
         entity.name = name;
         return entity;

@@ -44,9 +44,9 @@ describe('Nodeinfo Controller', () => {
   });
 
   it('should provide a valid NodeInfo object', async () => {
-    authService.count.mockReturnValue(1);
-    authService.countActiveSince.mockReturnValue(42);
-    postService.countLocal.mockReturnValue(444);
+    authService.count.mockResolvedValue(1);
+    authService.countActiveSince.mockResolvedValue(42);
+    postService.countLocal.mockResolvedValue(444);
 
     const result = await controller.getNodeInfo();
 

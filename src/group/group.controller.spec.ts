@@ -36,25 +36,25 @@ describe('Group Controller', () => {
   describe('Method testing', () => {
     beforeAll(async () => {
       const data = [
-        { id: 1, name: 'first', server: 'example.com', displayName: 'First test', summary: '' },
-        { id: 2, name: 'second', server: 'example.invalid', displayName: 'Foreign', summary: '' },
+        { id: 1, name: 'first', server: 'example.com', displayName: 'First test', summary: '' } as any as Group,
+        { id: 2, name: 'second', server: 'example.invalid', displayName: 'Foreign', summary: '' } as any as Group,
       ];
 
       service.findAll.mockImplementation(() => Promise.resolve(data));
       service.findByName.mockImplementation((name: string) => 
         Promise.resolve(data.find((e) => e.name === name)));
       service.create.mockImplementation((group: CreateGroupDto) => {
-        const result = Object.assign({id: data.length + 1}, group);
+        const result = Object.assign({id: data.length + 1} as Group, group);
         return Promise.resolve(result);
       });
-      service.update.mockImplementation((group: UpdateGroupDto) => {
+      service.update.mockImplementation(async (group: UpdateGroupDto) => {
         if (data.find((e) => e.id === group.id)) {
-          return group;
+          return group as any as Group;
         } else {
           throw new Error('Invalid group to update');
         }
       });
-      service.delete.mockImplementation((id: number) => {
+      service.delete.mockImplementation(async (id: number) => {
         return data.find((e) => e.id === id);
       });
     });
@@ -111,7 +111,7 @@ describe('Group Controller', () => {
 
   describe('Error handling', () => {
     it("finding a group that doesn't exist should return 404", async () => {
-      service.findByName.mockImplementation((name: string) => {
+      service.findByName.mockImplementation(async (name: string) => {
         if (name === 'good') {
           return new Group();
         } else {
@@ -131,7 +131,7 @@ describe('Group Controller', () => {
     });
     
     it('asking for top-level posts of a nonexistent group should return 404', async () => {
-      service.getTopLevelPosts.mockImplementation((name: string) => {
+      service.getTopLevelPosts.mockImplementation(async (name: string) => {
         if (name === 'good') {
           return [];
         } else {

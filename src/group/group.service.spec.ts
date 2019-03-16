@@ -10,7 +10,7 @@ import { Server } from '../server/server.entity';
 
 jest.mock('../config/config.service');
 jest.mock('../server/server.service');
-const ConfigServiceMock = <jest.Mock<ConfigService>>ConfigService;
+const ConfigServiceMock = <jest.Mock<ConfigService>>ConfigService as any;
 ConfigServiceMock.mockImplementation(() => {
   return {
     serverAddress: 'example.com',
@@ -47,9 +47,9 @@ describe('GroupService', () => {
     configService = module.get<ConfigService>(ConfigService) as jest.Mocked<ConfigService>;
     serverService = module.get<ServerService>(ServerService) as jest.Mocked<ServerService>;
 
-    repository.count.mockImplementation(() => testData.length);
-    repository.find.mockImplementation(() => testData);
-    repository.save.mockImplementation((entity) => entity);
+    repository.count.mockResolvedValue(testData.length);
+    repository.find.mockResolvedValue(testData as Group[]);
+    repository.save.mockImplementation(async (entity) => entity as Group);
   });
 
   it('should be defined', () => {
@@ -81,7 +81,7 @@ describe('GroupService', () => {
     });
 
     it('findByName should find a single entity', async () => {
-      repository.findOne.mockImplementation((o) => testData.find((_) => _.name === o.name));
+      repository.findOne.mockImplementation(async (o) => testData.find((_) => _.name === o.name) as Group);
 
       const result = await service.findByName('first');
 
@@ -90,7 +90,7 @@ describe('GroupService', () => {
     });
 
     it('find should find a single entity', async () => {
-      repository.findOne.mockImplementation((id) => testData.find((_) => _.id === id));
+      repository.findOne.mockImplementation(async (id) => testData.find((_) => _.id === id) as Group);
 
       const result = await service.find(1);    
 
@@ -99,7 +99,7 @@ describe('GroupService', () => {
     });
 
     it('findByIds should get all entities whose IDs are in the given list', async () => {
-      repository.findByIds.mockImplementation((ids) => testData.filter((_) => ids.includes(_.id)));
+      repository.findByIds.mockImplementation(async (ids) => testData.filter((_) => ids.includes(_.id)) as Group[]);
 
       const result = await service.findByIds([1,3]);
 
@@ -110,7 +110,7 @@ describe('GroupService', () => {
     });
 
     it('delete should delete an entity from the DB and return it', async () => {
-      repository.remove.mockImplementation((entity) => entity);
+      repository.remove.mockImplementation(async (entity) => entity);
 
       const result = await service.delete(1);
 
@@ -119,8 +119,8 @@ describe('GroupService', () => {
     });
 
     it('create should properly create a Group entity', async () => {
-      repository.create.mockImplementation((entity) => entity);
-      repository.save.mockImplementation((entity) => entity);
+      repository.create.mockImplementation((entity) => entity as Group);
+      repository.save.mockImplementation(async (entity) => entity as Group);
 
       const result = await service.create({
         name: 'second',
@@ -135,8 +135,8 @@ describe('GroupService', () => {
     });
 
     it('update should update an entity and return it', async () => {
-      repository.count.mockImplementation((o) => testData.filter((_) => o.id === _.id).length);
-      repository.save.mockImplementation((entity) => entity);
+      repository.count.mockImplementation(async (o) => testData.filter((_) => o.id === _.id).length);
+      repository.save.mockImplementation(async (entity) => entity as Group);
 
       const result = await service.update({
         id: 2,

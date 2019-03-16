@@ -44,7 +44,7 @@ describe('UserAuthentication Controller', () => {
         Object.assign(new Account, user)
       );
 
-      service.validateLogin.mockImplementation((user: LoginDto) => true);
+      service.validateLogin.mockImplementation(async (user: LoginDto) => new Account);
 
       service.createLoginToken.mockImplementation(async (user: LoginDto) => {
         return { expiresIn: 1000, accessToken: 'secret' };
@@ -85,7 +85,7 @@ describe('UserAuthentication Controller', () => {
     });
 
     it('trying to create an existing account should fail with 400 Bad Request', async () => {
-      service.createAccount.mockImplementation((user: CreateAccountDto) => 
+      service.createAccount.mockImplementation(async (user: CreateAccountDto) => 
         (user.username === 'good'
           ? new Account
           : Promise.reject())
@@ -124,7 +124,7 @@ describe('UserAuthentication Controller', () => {
         )
       );
 
-      service.createLoginToken.mockImplementation(() => {
+      service.createLoginToken.mockImplementation(async () => {
         return { expiresIn: 1000, accessToken: ''}
       });
 

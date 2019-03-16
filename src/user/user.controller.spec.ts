@@ -37,8 +37,8 @@ describe('User Controller', () => {
   describe('Method testing', () => {
     beforeAll(() => {
       const data = [
-        { id: 1, name: 'user1', server: 'example.com', displayName: 'User', summary: '', icon: ''},
-        { id: 2, name: 'user2', server: 'example.invalid', displayName: 'User', summary: '', icon: ''}
+        { id: 1, name: 'user1', server: 'example.com', displayName: 'User', summary: '', icon: ''} as any as User,
+        { id: 2, name: 'user2', server: 'example.invalid', displayName: 'User', summary: '', icon: ''} as any as User
       ];
   
       service.findAll.mockImplementation(() => Promise.resolve(data));
@@ -86,7 +86,7 @@ describe('User Controller', () => {
 
   describe('Error handling', () => {
     beforeAll(() => {
-      service.findByName.mockImplementation((name: string) => (name === 'good') ? new User : undefined);
+      service.findByName.mockImplementation(async (name: string) => (name === 'good') ? new User : undefined);
     });
 
     it('find by name should return 404 for an invalid user name', async () => {

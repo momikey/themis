@@ -28,11 +28,11 @@ describe('PreferenceService', () => {
 
   describe('Method testing', () => {
     beforeAll(() => {
-      repository.findOne.mockImplementation((o: {name: string}) => {
+      repository.findOne.mockImplementation(async (o: {name: string}) => {
         return { name: o.name, value: 'Test value' }
       });
 
-      repository.save.mockImplementation((p: Preference) => p);
+      repository.save.mockImplementation(async (p: Preference) => p);
     });
 
     it('get should return a valid preference', async () => {
@@ -54,7 +54,7 @@ describe('PreferenceService', () => {
 
   describe('Error handling', () => {
     beforeAll(() => {
-      repository.findOne.mockImplementation((o: {name: string}) => 
+      repository.findOne.mockImplementation(async (o: {name: string}) => 
         (o.name === 'good'
           ? { name: o.name, value: 'good value' }
           : undefined)

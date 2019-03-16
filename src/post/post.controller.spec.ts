@@ -79,12 +79,12 @@ describe('Post Controller', () => {
     ].map((p) => Object.assign(new Post, p));
 
   beforeAll(() => {
-      service.findAll.mockImplementation(() => data);
-      service.findByUuid.mockImplementation((u: string) => data.find((_) => _.uuid === u));
-      service.create.mockImplementation((entity) => Object.assign(new Post, entity));
-      service.createTopLevel.mockImplementation((entity) => Object.assign(new Post, entity));
-      service.createReply.mockImplementation((entity) => Object.assign(new Post, entity));
-      service.delete.mockImplementation((u: string) => data.find((_) => _.uuid === u));
+      service.findAll.mockResolvedValue(data);
+      service.findByUuid.mockImplementation(async (u: string) => data.find((_) => _.uuid === u));
+      service.create.mockImplementation(async (entity) => Object.assign(new Post, entity));
+      service.createTopLevel.mockImplementation(async (entity) => Object.assign(new Post, entity));
+      service.createReply.mockImplementation(async (entity) => Object.assign(new Post, entity));
+      service.delete.mockImplementation(async (u: string) => data.find((_) => _.uuid === u));
     });
 
     it('findAll should return all posts', async () => {
@@ -133,7 +133,7 @@ describe('Post Controller', () => {
         parent: undefined,
         activities: []
       };
-      service.findTopLevelByGroup.mockReturnValueOnce([examplePost]);
+      service.findTopLevelByGroup.mockResolvedValueOnce([examplePost]);
 
       const result = await controller.findByGroup('group');
 
@@ -172,7 +172,7 @@ describe('Post Controller', () => {
         parent: undefined,
         activities: []
       };
-      service.findByUserId.mockReturnValue([examplePost]);
+      service.findByUserId.mockResolvedValueOnce([examplePost]);
 
       const result = await controller.findAllByUser(4);
 
@@ -210,7 +210,7 @@ describe('Post Controller', () => {
         parent: undefined,
         activities: []
       };
-      service.findByGroupId.mockReturnValueOnce([examplePost]);
+      service.findByGroupId.mockResolvedValueOnce([examplePost]);
 
       const result = await controller.findAllInGroup(3);
 

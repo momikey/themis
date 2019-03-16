@@ -44,7 +44,7 @@ describe('ApGroupService', () => {
     });
 
     beforeAll(() => {
-      groupService.findLocalByName.mockReturnValue(Object.assign(new Group, {
+      groupService.findLocalByName.mockResolvedValue(Object.assign(new Group, {
         id: 1,
         name: 'group',
         server: sampleServer,
