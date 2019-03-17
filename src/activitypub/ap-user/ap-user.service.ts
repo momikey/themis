@@ -12,6 +12,7 @@ import { UserAuthenticationService } from '../../user/user-authentication/user-a
 import { Collection } from '../definitions/activities/collection-object';
 import { Group } from '../../group/group.entity';
 import { compareDesc } from 'date-fns';
+import { Post } from '../../post/post.entity';
 
 /**
  * This class creates and handles actor objects representing users.
@@ -102,10 +103,22 @@ export class ApUserService {
             case 'Follow':
             case 'Add':
             case 'Remove':
-            case 'Like':
+                throw new NotImplementedException;
+            case 'Like': {
+                const likedPost = await this.apPostService.getPostEntityByUri(activity.object);
+
+                const activityEntity = {
+                    targetUser: await this.likePost(user, likedPost),
+                    targetPost: likedPost,
+                    type: activity.type,
+                    activityObject: activity
+                }
+
+                return (await this.activityService.save(activityEntity)).activityObject;
+            }
             case 'Block':
             case 'Undo':
-                throw new NotImplementedException();
+                throw new NotImplementedException;
             default:
                 throw new BadRequestException(`Invalid activity type ${activity.type}`);
         }
@@ -155,6 +168,23 @@ export class ApUserService {
         } catch (e) {
             throw new NotFoundException(`User ${name} does not exist on this server`);
         }
+    }
+
+    async getLikes(name: string): Promise<Collection> {
+        try {
+            const user = await this.userService.findLocalByName(name);
+
+            const withLikes = await this.userService.getLikes(user);
+            const uris = withLikes.liked.map((p) => p.uri);
+
+            return this.activityService.createCollection(uris);
+        } catch (e) {
+            throw new NotFoundException(`User ${name} does not exist on this server`);
+        }
+    }
+
+    async likePost(user: User, post: Post): Promise<User> {
+        return this.userService.addLike(user, post);
     }
 
     /**

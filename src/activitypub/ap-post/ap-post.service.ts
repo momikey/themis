@@ -31,6 +31,10 @@ export class ApPostService {
         return this.getLocalPostObject(post);
     }
 
+    async getPostEntityByUri(uri: string): Promise<Post> {
+        return this.postService.findByUri(uri);
+    }
+
     getLocalPostObject(post: Post): Promise<PostObject | TombstoneObject> {
         if (post == null) {
             return Promise.reject("Post does not exist");

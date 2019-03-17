@@ -86,4 +86,8 @@ export class Post {
     // These might be useful for AP threading, etc.
     @OneToMany(type => Activity, activity => activity.targetPost)
     activities: Activity[];
+
+    // All users that like this post.
+    @ManyToMany(type => User, user => user.liked)
+    likes: User[];
 }

@@ -54,4 +54,9 @@ export class ApUserController {
     async getFollowing(@Param('name') name: string) {
         return this.apUserService.getFollowing(name);
     }
+
+    @Get('/:name/likes')
+    async getLikes(@Param('name') name: string) {
+        return this.apUserService.getLikes(name);
+    }
 }

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, CreateDateColumn, Column, OneToMany, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, CreateDateColumn, Column, OneToMany, ManyToOne, ManyToMany, JoinTable } from 'typeorm';
 import { Post } from '../post/post.entity';
 import { Activity } from '../activitypub/definitions/activities/activity.entity';
 import { Server } from '../server/server.entity';
@@ -51,4 +51,10 @@ export class User {
     // but also so we can do the "date joined" thing on profile pages.
     @CreateDateColumn({ readonly: true })
     date: string;
+
+    // All posts that this user likes. We store this here instead of on
+    // account so that we can turn around and use it on posts, too.
+    @ManyToMany(type => Post, post => post.likes)
+    @JoinTable()
+    liked: Post[];
 }

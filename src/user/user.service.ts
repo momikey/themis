@@ -6,6 +6,7 @@ import { CreateUserDto } from './create-user.dto';
 import { ConfigService } from '../config/config.service';
 import { ServerService } from '../server/server.service';
 import { getIdForActor, ActorType } from '../activitypub/definitions/actor.interface';
+import { Post } from '../post/post.entity';
 
 @Injectable()
 export class UserService {
@@ -107,5 +108,16 @@ export class UserService {
         } catch (e) {
             return Promise.reject(new Error(`Cannot find user ${name}@${server}`));
         }
+    }
+
+    async getLikes(user: User): Promise<User> {
+        return this.userRepository.findOne(user.id, { relations: ['liked'] });
+    }
+
+    async addLike(user: User, post: Post): Promise<User> {
+        const result = await this.getLikes(user);
+
+        result.liked.push(post);
+        return this.userRepository.save(result);
     }
 }

@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn, Column, ManyToMan
 import { User } from "../user.entity";
 import { UserRole } from "./user-authentication.role";
 import { Group } from "../../group/group.entity";
+import { Post } from "../../post/post.entity";
 
 @Entity()
 export class Account {
@@ -63,10 +64,20 @@ export class Account {
     @JoinTable()
     userFollowing: User[];
 
+    /**
+     * A list of all groups following this account.
+     *
+     * @memberof Account
+     */
     @ManyToMany(type => Group)
     @JoinTable()
     groupFollowers: Group[];
 
+    /**
+     * A list of all groups this account is following.
+     *
+     * @memberof Account
+     */
     @ManyToMany(type => Group)
     @JoinTable()
     groupFollowing: Group[];

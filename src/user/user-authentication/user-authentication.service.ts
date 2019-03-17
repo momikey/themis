@@ -14,6 +14,7 @@ import { TokenDto } from './token.dto';
 import { UserRole } from './user-authentication.role';
 import { isAfter } from 'date-fns';
 import { Group } from '../../group/group.entity';
+import { Post } from '../../post/post.entity';
 
 // User authentication service. It does what it says.
 // This one's fairly important. It'll have to handle passwords, auth tokens,
@@ -209,7 +210,7 @@ export class UserAuthenticationService {
      */
     async getFollowers(account: Account): Promise<Account> {
         return this.authRepository.findOne(account.id,
-             { relations: ['userFollowers', 'groupFollowers']});
+             { relations: ['userFollowers', 'groupFollowers'] });
     }
 
     async addFollowerToAccount(account: Account, user?: User, group?: Group): Promise<Account> {
@@ -223,7 +224,7 @@ export class UserAuthenticationService {
             result.groupFollowers.push(user);
         }
 
-        return result;
+        return this.authRepository.save(result);
     }
 
     /**
@@ -235,7 +236,7 @@ export class UserAuthenticationService {
      */
     async getFollowing(account: Account): Promise<Account> {
         return this.authRepository.findOne(account.id,
-             { relations: ['userFollowing', 'groupFollowing']});
+             { relations: ['userFollowing', 'groupFollowing'] });
     }
 
     async addFollowingToAccount(account: Account, user?: User, group?: Group): Promise<Account> {
@@ -249,6 +250,6 @@ export class UserAuthenticationService {
             result.groupFollowing.push(user);
         }
 
-        return result;
+        return this.authRepository.save(result);
     }
 }
