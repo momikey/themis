@@ -47,11 +47,11 @@ export class ApUserController {
 
     @Get('/:name/followers')
     async getFollowers(@Param('name') name: string) {
-        throw new NotImplementedException();
+        return this.apUserService.getFollowers(name);
     }
 
     @Get('/:name/following')
     async getFollowing(@Param('name') name: string) {
-        
+        return this.apUserService.getFollowing(name);
     }
 }

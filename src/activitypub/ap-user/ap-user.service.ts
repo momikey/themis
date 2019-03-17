@@ -1,4 +1,4 @@
-import { Injectable, NotImplementedException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotImplementedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { UserService } from '../../user/user.service';
 import { User } from '../../user/user.entity';
 import { UserActor } from '../definitions/actors/user.actor';
@@ -8,6 +8,10 @@ import { ConfigService } from '../../config/config.service';
 import { ActivityService } from '../activity/activity.service';
 import { activityFromObject } from '../definitions/activities/create-activity';
 import { ApPostService } from '../ap-post/ap-post.service';
+import { UserAuthenticationService } from '../../user/user-authentication/user-authentication.service';
+import { Collection } from '../definitions/activities/collection-object';
+import { Group } from '../../group/group.entity';
+import { compareDesc } from 'date-fns';
 
 /**
  * This class creates and handles actor objects representing users.
@@ -22,7 +26,8 @@ export class ApUserService {
         private readonly userService: UserService,
         private readonly configService: ConfigService,
         private readonly apPostService: ApPostService,
-        private readonly activityService: ActivityService
+        private readonly activityService: ActivityService,
+        private readonly accountService: UserAuthenticationService
     ) {}
 
     async getLocalUser(name: string): Promise<User> {
@@ -103,6 +108,52 @@ export class ApUserService {
                 throw new NotImplementedException();
             default:
                 throw new BadRequestException(`Invalid activity type ${activity.type}`);
+        }
+    }
+
+    /**
+     * Get the followers for this actor in an AP Collection.
+     *
+     * @param name The name of a local user
+     * @returns An AP Collection object holding all following actors
+     * @memberof ApUserService
+     */
+    async getFollowers(name: string): Promise<Collection> {
+        try {
+            const account = await this.accountService.findOne(name);
+
+            const withFollowers = await this.accountService.getFollowers(account);
+            const allFollowers: (Group | User)[] = withFollowers.groupFollowers
+                .concat(...withFollowers.userFollowers)
+                .sort((a,b) => compareDesc(a.date, b.date));
+
+            const uris = allFollowers.map((f) => f.uri);
+            return this.activityService.createCollection(uris);
+        } catch (e) {
+            throw new NotFoundException(`User ${name} does not exist on this server`);
+        }
+    }
+
+    /**
+     * Get the followed actors for this actor in an AP Collection.
+     *
+     * @param name The name of a local user
+     * @returns An AP Collection object holding all followed actors
+     * @memberof ApUserService
+     */
+    async getFollowing(name: string): Promise<Collection> {
+        try {
+            const account = await this.accountService.findOne(name);
+
+            const withFollowing = await this.accountService.getFollowers(account);
+            const allFollowing: (Group | User)[] = withFollowing.groupFollowing
+                .concat(...withFollowing.userFollowing)
+                .sort((a,b) => compareDesc(a.date, b.date));
+
+            const uris = allFollowing.map((f) => f.uri);
+            return this.activityService.createCollection(uris);
+        } catch (e) {
+            throw new NotFoundException(`User ${name} does not exist on this server`);
         }
     }
 

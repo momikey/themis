@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn, Column, ManyToMany, JoinTable } from "typeorm";
 import { User } from "../user.entity";
 import { UserRole } from "./user-authentication.role";
+import { Group } from "../../group/group.entity";
 
 @Entity()
 export class Account {
@@ -43,6 +44,32 @@ export class Account {
 
     @Column({nullable: true})
     lastLoggedIn: Date;
+
+    /**
+     * A list of all users who are following this account.
+     *
+     * @memberof Account
+     */
+    @ManyToMany(type => User)
+    @JoinTable()
+    userFollowers: User[];
+
+    /**
+     * A list of all users this account is following.
+     *
+     * @memberof Account
+     */
+    @ManyToMany(type => User)
+    @JoinTable()
+    userFollowing: User[];
+
+    @ManyToMany(type => Group)
+    @JoinTable()
+    groupFollowers: Group[];
+
+    @ManyToMany(type => Group)
+    @JoinTable()
+    groupFollowing: Group[];
 
     // TODO: Do we need a date field here? Might be useful for password expiration.
 }

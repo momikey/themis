@@ -9,11 +9,13 @@ import { PostObject } from '../definitions/activities/post-object';
 import { ApPostService } from '../ap-post/ap-post.service';
 import { Server } from '../../server/server.entity';
 import { Activity } from '../definitions/activities/activity.entity';
+import { UserAuthenticationService } from '../../user/user-authentication/user-authentication.service';
 
 jest.mock('../../user/user.service');
 jest.mock('../../config/config.service');
 jest.mock('../activity/activity.service');
 jest.mock('../ap-post/ap-post.service');
+jest.mock('../../user/user-authentication/user-authentication.service');
 
 describe('ApUserService', () => {
   let service: ApUserService;
@@ -29,7 +31,8 @@ describe('ApUserService', () => {
         UserService,
         ConfigService,
         ApPostService,
-        ActivityService
+        ActivityService,
+        UserAuthenticationService
       ],
     }).compile();
 

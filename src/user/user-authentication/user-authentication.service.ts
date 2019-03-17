@@ -13,6 +13,7 @@ import { LoginDto } from './login.dto';
 import { TokenDto } from './token.dto';
 import { UserRole } from './user-authentication.role';
 import { isAfter } from 'date-fns';
+import { Group } from '../../group/group.entity';
 
 // User authentication service. It does what it says.
 // This one's fairly important. It'll have to handle passwords, auth tokens,
@@ -36,10 +37,15 @@ export class UserAuthenticationService {
     // Note that we don't return the password or token fields.
     async findOne(name: string): Promise<Account> {
         const user = await this.userService.findByName(name);
-        return this.authRepository.findOneOrFail({
-            select: ['id', 'user', 'email', 'reset', 'role', 'lastLoggedIn'],
-            where: {user},
-        });
+
+        if (!user) {
+            return Promise.reject(`User ${name} not found`);
+        } else {        
+            return this.authRepository.findOneOrFail({
+                select: ['id', 'user', 'email', 'reset', 'role', 'lastLoggedIn'],
+                where: {user},
+            });
+        }
     }
 
     // Create a JWT for a given user. This is for API access, which we'll add soon.
@@ -190,5 +196,59 @@ export class UserAuthenticationService {
         const auth = await this.authRepository.find({ select: ['lastLoggedIn'] });
 
         return auth.map((e) => isAfter(e.lastLoggedIn, date)).length;
+    }
+
+    /**
+     * Get all groups and users following this account.
+     * (Groups don't actually follow at present, but this may change,
+     * and it doesn't really hurt.)
+     *
+     * @param account The user account entity
+     * @returns The same entity, but with followers loaded into it
+     * @memberof UserAuthenticationService
+     */
+    async getFollowers(account: Account): Promise<Account> {
+        return this.authRepository.findOne(account.id,
+             { relations: ['userFollowers', 'groupFollowers']});
+    }
+
+    async addFollowerToAccount(account: Account, user?: User, group?: Group): Promise<Account> {
+        const result = await this.getFollowers(account);
+
+        if (user) {
+            result.userFollowers.push(user);
+        }
+
+        if (group) {
+            result.groupFollowers.push(user);
+        }
+
+        return result;
+    }
+
+    /**
+     * Get all users or groups this user is following.
+     *
+     * @param account The user account entity
+     * @returns The same entity, but with following users/groups loaded into it
+     * @memberof UserAuthenticationService
+     */
+    async getFollowing(account: Account): Promise<Account> {
+        return this.authRepository.findOne(account.id,
+             { relations: ['userFollowing', 'groupFollowing']});
+    }
+
+    async addFollowingToAccount(account: Account, user?: User, group?: Group): Promise<Account> {
+        const result = await this.getFollowing(account);
+
+        if (user) {
+            result.userFollowing.push(user);
+        }
+
+        if (group) {
+            result.groupFollowing.push(user);
+        }
+
+        return result;
     }
 }
