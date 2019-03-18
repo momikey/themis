@@ -10,6 +10,7 @@ import { CreateActivity } from '../definitions/activities/create-activity';
 import { CreateGlobalPostDto } from 'src/post/create-global-post.dto';
 import { fromUri, getActorUri, parseActor, ActorType } from '../definitions/actor.interface';
 import { DeleteActivity } from '../definitions/activities/delete-activity';
+import { UpdateActivity } from '../definitions/activities/update-activity';
 
 @Injectable()
 export class ApPostService {
@@ -88,6 +89,15 @@ export class ApPostService {
         return this.postService.createFromActivity(post);
     }
 
+    /**
+     * Delete a post derived from an Activity. This is a "soft" deletion,
+     * meaning that the post remains in the database, but attempts to access
+     * it will fail.
+     *
+     * @param activity The activity containing the post to be deleted
+     * @returns The updated post entity
+     * @memberof ApPostService
+     */
     async deletePostFromActivity(activity: DeleteActivity): Promise<Post> {
         const postUri = (typeof activity.object == 'string')
             ? activity.object
@@ -95,5 +105,24 @@ export class ApPostService {
         
         const post = await this.postService.findByUri(postUri);
         return this.postService.softDelete(post);
+    }
+
+    async updatePostFromActivity(activity: UpdateActivity): Promise<Post> {
+        const postUri = activity.object.id;
+        const post = await this.postService.findByUri(postUri);
+
+        for (const prop in activity.object) {
+            if (activity.object[prop] === null) {
+                // Properties set to `null` must be deleted.
+                delete post[prop];
+            } else if (prop === 'id') {
+                // Don't touch the ID, because it's special.
+                continue;
+            } else {
+                post[prop] = activity.object[prop];
+            }
+        }
+
+        return this.postService.update(post);
     }
 }

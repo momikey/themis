@@ -187,6 +187,10 @@ export class PostService {
         return await this.postRepository.remove(post);
     }
 
+    async update(post: Post): Promise<Post> {
+        return this.postRepository.save(post);
+    }
+
     async findAll(): Promise<Post[]> {
         return await this.postRepository.find();
     }

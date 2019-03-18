@@ -13,6 +13,7 @@ import { Collection } from '../definitions/activities/collection-object';
 import { Group } from '../../group/group.entity';
 import { compareDesc } from 'date-fns';
 import { Post } from '../../post/post.entity';
+import { fromUri } from '../definitions/actor.interface';
 
 /**
  * This class creates and handles actor objects representing users.
@@ -62,7 +63,7 @@ export class ApUserService {
      * @returns The newly created activity representing the request
      * @memberof ApUserService
      */
-    async acceptPostRequest(username: string, data: any): Promise<any> {
+    async acceptPostRequest(username: string, data: any): Promise<any> {        
         const user = await this.userService.findLocalByName(username);
 
         // Strictly speaking, Activities can have content. But Themis
@@ -99,8 +100,33 @@ export class ApUserService {
 
                 return (await this.activityService.save(activityEntity)).activityObject;
             }
-            case 'Update':
-            case 'Follow':
+            case 'Update': {                
+                const updatedPost = await this.apPostService.updatePostFromActivity(activity);
+                const activityEntity = {
+                    targetUser: user,
+                    targetPost: updatedPost,
+                    type: activity.type,
+                    activityObject: activity
+                }
+                
+                // TODO: Handle delivery, etc.
+
+                return (await this.activityService.save(activityEntity)).activityObject;
+            }
+            case 'Follow': {
+                const toFollow = fromUri(activity.object);
+
+                const activityEntity = {
+                    targetUser: user,
+                    type: activity.type,
+                    activityObject: activity
+                }
+
+                // TODO: Handle delivery, etc.
+                // Note that Follow activities are *requests*. We have to wait
+                // until we get an Accept reply to actually follow.
+                return (await this.activityService.save(activityEntity)).activityObject;
+            }
             case 'Add':
             case 'Remove':
                 throw new NotImplementedException;
