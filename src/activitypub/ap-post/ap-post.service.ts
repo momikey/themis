@@ -107,6 +107,14 @@ export class ApPostService {
         return this.postService.softDelete(post);
     }
 
+    /**
+     * Update a post based on the data in an Activity. This is a
+     * partial update, as per AP specs.
+     *
+     * @param activity The activity containing the updated post
+     * @returns The updated post entity
+     * @memberof ApPostService
+     */
     async updatePostFromActivity(activity: UpdateActivity): Promise<Post> {
         const postUri = activity.object.id;
         const post = await this.postService.findByUri(postUri);

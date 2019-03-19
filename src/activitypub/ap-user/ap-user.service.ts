@@ -52,6 +52,28 @@ export class ApUserService {
         }
     }
 
+    async getOutbox(username: string, page?: number): Promise<Collection> {
+        const user = await this.getLocalUser(username);
+
+        if (user === undefined) {
+            return Promise.reject(`User ${username} does not exist on this server`);
+        } else {
+            const actor = await this.getActorForUser(username);
+            const outbox = actor.outbox;
+            
+            try {
+                return this.activityService.createPagedCollection(
+                    await this.activityService.getActivitiesForUser(user),
+                    100, // TODO: Configuration
+                    outbox,
+                    page || 1
+                );
+            } catch (e) {
+                throw new BadRequestException('Unable to fetch activities');
+            }
+        }
+    }
+
     /**
      * Handle a POST request in a user's outbox. These will be AP
      * Activities, except that a bare object is also allowed; this
@@ -196,6 +218,13 @@ export class ApUserService {
         }
     }
 
+    /**
+     * Get all posts this user likes.
+     *
+     * @param name The name of a local user
+     * @returns An AP Collection object holding all liked posts
+     * @memberof ApUserService
+     */
     async getLikes(name: string): Promise<Collection> {
         try {
             const user = await this.userService.findLocalByName(name);
@@ -209,6 +238,14 @@ export class ApUserService {
         }
     }
 
+    /**
+     * Add a post to a user's liked collection
+     *
+     * @param user The name of a local user
+     * @param post The post to be liked
+     * @returns
+     * @memberof ApUserService
+     */
     async likePost(user: User, post: Post): Promise<User> {
         return this.userService.addLike(user, post);
     }

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, NotImplementedException, Body, Post as HttpPost, MethodNotAllowedException, HttpCode, UseInterceptors, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, NotImplementedException, Body, Post as HttpPost, MethodNotAllowedException, HttpCode, UseInterceptors, UseGuards, Query, BadRequestException } from '@nestjs/common';
 import { ApUserService } from './ap-user.service';
 import { ConfigService } from '../../config/config.service';
 import { UserActor } from '../definitions/actors/user.actor';
@@ -32,8 +32,8 @@ export class ApUserController {
     }
 
     @Get('/:name/outbox')
-    async getOutbox(@Param('name') name: string) {
-        throw new NotImplementedException();
+    async getOutbox(@Param('name') name: string, @Query('page') page: number) {
+            return this.apUserService.getOutbox(name, page);
     }
 
     @HttpPost('/:name/outbox')
@@ -41,7 +41,6 @@ export class ApUserController {
     // @UseGuards(ContentTypeGuard) // TODO: Add in AuthGuard here, too
     @UseInterceptors(new LocationInterceptor)
     async postToOutbox(@Param('name') name: string, @Body() body) {
-
         return this.apUserService.acceptPostRequest(name, body);
     }
 

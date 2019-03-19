@@ -13,6 +13,7 @@ import * as URI from 'uri-js';
 import { ConfigService } from '../../config/config.service';
 import { Collection, CollectionPage } from '../definitions/activities/collection-object';
 import { compareDesc } from 'date-fns';
+import { User } from '../../user/user.entity';
 
 @Injectable()
 export class ActivityService {
@@ -165,6 +166,10 @@ export class ActivityService {
         return this.activityRepository.find({ targetPost: post });
     }
 
+    async getActivitiesForUser(user: User): Promise<Activity[]> {
+        return this.activityRepository.find({ targetUser: user });
+    }
+
     /**
      * Each activity also requires a unique ID, as per spec. This
      * method generates one based on the database ID.
@@ -242,7 +247,7 @@ export class ActivityService {
         baseUri: string | URI.URIComponents,
         pageNumber: number,
         pageLength: number) : CollectionPage {
-            if (pageNumber < 1 || pageNumber * pageLength > activities.length) {
+            if (pageNumber < 1 || (pageNumber - 1) * pageLength > activities.length) {
                 throw new RangeError(`Index ${pageNumber} out of range`);
             }
 
@@ -261,7 +266,7 @@ export class ActivityService {
                 type: 'CollectionPage',
                 partOf: uriString,
                 id: URI.normalize(URI.serialize(uri)),
-                items: activities.slice(startPos, endPos)
+                items: activities.slice(startPos, endPos).map((a: any) => a.activityObject)
             }
 
             if (startPos !== 0) {
@@ -280,16 +285,28 @@ export class ActivityService {
     createPagedCollection<Act>(
         activities: Act[],
         numberPerPage: number,
-        baseUri: string | URI.URIComponents): Collection {
+        baseUri: string | URI.URIComponents,
+        page?: number): Collection {
             const uri = (typeof baseUri == 'string') ? baseUri : URI.normalize(URI.serialize(baseUri));
 
-            return {
+            const collection = Object.assign(new Collection, {
                 '@context': AP.Context,
                 type: 'Collection',
                 totalItems: Math.min(activities.length, numberPerPage),
                 id: uri,
-                first: this.createCollectionPage(activities, baseUri, 1, numberPerPage)    
+                first: undefined,
+                current: undefined
+            });
+
+            if (page === undefined || page === 1) {
+                collection.first = this.createCollectionPage(activities, baseUri, 1, numberPerPage);
+                delete collection.current;
+            } else {
+                delete collection.first;
+                collection.current = this.createCollectionPage(activities, baseUri, page, numberPerPage);
             }
+
+            return collection;
     }
 
     pageQueryString(page: number) : string {
