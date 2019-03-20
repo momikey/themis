@@ -15,6 +15,7 @@ import { Server } from '../../server/server.entity';
 export interface Actor {
     readonly name: string;
     readonly server: string;
+    readonly port?: number;
 }
 
 /**
@@ -40,7 +41,8 @@ export function fromUri(uri: string): { actor: Actor, type: ActorType } {
     const result = {
         actor: {
             name: path[path.length - 1],
-            server: parsed.host
+            server: parsed.host,
+            port: +parsed.port
         },
         type: undefined
     };

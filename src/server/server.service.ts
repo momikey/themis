@@ -68,6 +68,14 @@ export class ServerService {
         });
     }
 
+    isLocal(server: Server): boolean {
+        return (
+            server.host == this.configService.serverAddress &&
+            server.port == this.configService.serverPort &&
+            server.scheme === (this.configService.isHttps ? 'https' : 'http')
+        );
+    }
+
     async insert(server: CreateServerDto): Promise<Server> {
         const serverEntity = this.serverRepository.create({
             host: server.host,

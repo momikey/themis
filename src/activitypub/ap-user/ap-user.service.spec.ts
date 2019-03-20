@@ -79,9 +79,16 @@ describe('ApUserService', () => {
         displayName: 'A user',
         summary: 'A user for testing',
         icon: '',
+        uri: 'http://example.com/user/user',
         posts: [],
         date: (new Date).toDateString()
       }));
+
+      const { UserService } = jest.requireActual('../../user/user.service');
+      const actual = new UserService;
+      
+      userService.createActor = jest.fn(actual.createActor);
+      userService.idForUser = jest.fn(actual.idForUser);
     });
 
     it('getting a local user should return a valid object', async () => {
@@ -94,6 +101,9 @@ describe('ApUserService', () => {
 
     it('getting the actor object should return a proper value', async () => {
       const result = await service.getActorForUser('user');
+
+      console.log(result);
+      
 
       expect(result).toBeDefined();
       expect(result['@context']).toBe(AP.Context);

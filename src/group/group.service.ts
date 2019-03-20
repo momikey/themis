@@ -9,6 +9,9 @@ import { UpdateGroupDto } from './update-group.dto';
 import { GroupFilterEntry, GroupFilter } from '../filter/group-filter';
 import { ServerService } from '../server/server.service';
 import { getIdForActor, ActorType } from '../activitypub/definitions/actor.interface';
+import { GroupActor } from '../activitypub/definitions/actors/group.actor';
+import { AP } from '../activitypub/definitions/constants';
+import * as URI from 'uri-js';
 
 @Injectable()
 export class GroupService {
@@ -155,5 +158,47 @@ export class GroupService {
         const filterRunner = new GroupFilter(filters);
 
         return filterRunner.execute(groups);
+    }
+
+    /**
+     * Creates an ActivityPub Actor object from a given group entity.
+     *
+     * @param group The database entity representing the group
+     * @returns A new Actor object for the group
+     * @memberof GroupService
+     */
+    createActor(group: Group): GroupActor {
+        const idAddress = this.idForGroup(group);
+
+        return {
+            '@context': AP.Context,
+            id: idAddress,
+            type: 'Group',
+            name: group.displayName || group.name,
+            preferredUsername: group.name,
+
+            summary: group.summary,
+
+            inbox: `${idAddress}/${AP.InboxAddress}/`,
+            outbox: `${idAddress}/${AP.OutboxAddress}/`,
+            followers: `${idAddress}/${AP.FollowersAddress}/`,
+            following: `${idAddress}/${AP.FollowingAddress}/`
+        }
+    }
+
+    idForGroup(group: Group): string {
+        if (group.uri) {
+            return group.uri;
+        } else {
+            // We'll need a lot of configuration stuff for this
+            const uri = URI.serialize({
+                scheme: group.server.scheme,
+                host: group.server.host,
+                port: group.server.port,
+                path: `/group/${group.name}`
+            })
+
+            return uri;
+        }
     }
 }

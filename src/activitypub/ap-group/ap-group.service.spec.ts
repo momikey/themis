@@ -53,6 +53,12 @@ describe('ApGroupService', () => {
         posts: [],
         date: (new Date).toDateString()
       }));
+
+      const { GroupService } = jest.requireActual('../../group/group.service');
+      const actual = new GroupService;
+      
+      groupService.createActor = jest.fn(actual.createActor);
+      groupService.idForGroup = jest.fn(actual.idForGroup);
     });
 
     it('getting a local group should return a valid object', async () => {

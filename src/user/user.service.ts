@@ -7,6 +7,9 @@ import { ConfigService } from '../config/config.service';
 import { ServerService } from '../server/server.service';
 import { getIdForActor, ActorType } from '../activitypub/definitions/actor.interface';
 import { Post } from '../post/post.entity';
+import { UserActor } from '../activitypub/definitions/actors/user.actor';
+import { AP } from '../activitypub/definitions/constants';
+import * as URI from 'uri-js';
 
 @Injectable()
 export class UserService {
@@ -119,5 +122,48 @@ export class UserService {
 
         result.liked.push(post);
         return this.userRepository.save(result);
+    }
+
+    /**
+     * Creates an ActivityPub Actor object for the given user entity.
+     *
+     * @param user The database entity representing the user
+     * @returns A new Actor object for the user
+     * @memberof UserService
+     */
+    createActor(user: User): UserActor {
+        const idAddress = this.idForUser(user);
+        return {
+            '@context': AP.Context,
+            id: idAddress,
+            type: 'Person',
+            name: user.displayName || user.name,
+            preferredUsername: user.name,
+            summary: user.summary,
+            icon: user.icon,
+
+            inbox: `${idAddress}/${AP.InboxAddress}/`,
+            outbox: `${idAddress}/${AP.OutboxAddress}/`,
+            followers: `${idAddress}/${AP.FollowersAddress}/`,
+            following: `${idAddress}/${AP.FollowingAddress}/`
+        }
+    }
+
+    idForUser(user: User): string {
+        console.log('*** User', user);
+        
+        if (user.uri) {
+            return user.uri;
+        } else {
+            // Same configuration needs as for groups
+            const uri = URI.serialize({
+                scheme: user.server.scheme,
+                host: user.server.host,
+                port: user.server.port,
+                path: `/user/${user.name}`
+            })
+
+            return uri;
+        }
     }
 }

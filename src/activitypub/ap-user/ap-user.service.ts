@@ -46,7 +46,7 @@ export class ApUserService {
         try {
             const user = await this.getLocalUser(name);
 
-            return this.createActor(user);
+            return this.userService.createActor(user);
         } catch (e) {
             return Promise.reject(e);
         }
@@ -131,9 +131,8 @@ export class ApUserService {
                     activityObject: activity
                 }
                 
-                // TODO: Handle delivery, etc.
-
-                return (await this.activityService.save(activityEntity)).activityObject;
+                const act = await this.activityService.save(activityEntity);
+                return (await this.activityService.deliver(act)).activityObject;
             }
             case 'Follow': {
                 const toFollow = fromUri(activity.object);
@@ -248,46 +247,5 @@ export class ApUserService {
      */
     async likePost(user: User, post: Post): Promise<User> {
         return this.userService.addLike(user, post);
-    }
-
-    /**
-     * Creates an ActivityPub Actor object for the given user entity.
-     *
-     * @param user The database entity representing the user
-     * @returns A new Actor object for the user
-     * @memberof ApUserService
-     */
-    createActor(user: User): UserActor {
-        const idAddress = this.idForUser(user);
-        return {
-            '@context': AP.Context,
-            id: idAddress,
-            type: 'Person',
-            name: user.displayName || user.name,
-            preferredUsername: user.name,
-            summary: user.summary,
-            icon: user.icon,
-
-            inbox: `${idAddress}/${AP.InboxAddress}/`,
-            outbox: `${idAddress}/${AP.OutboxAddress}/`,
-            followers: `${idAddress}/${AP.FollowersAddress}/`,
-            following: `${idAddress}/${AP.FollowingAddress}/`
-        }
-    }
-
-    idForUser(user: User): string {
-        if (user.uri) {
-            return user.uri;
-        } else {
-            // Same configuration needs as for groups
-            const uri = URI.serialize({
-                scheme: user.server.scheme,
-                host: user.server.host,
-                port: user.server.port,
-                path: `/user/${user.name}`
-            })
-
-            return uri;
-        }
     }
 }
