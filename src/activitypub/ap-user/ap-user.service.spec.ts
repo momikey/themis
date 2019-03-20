@@ -102,9 +102,6 @@ describe('ApUserService', () => {
     it('getting the actor object should return a proper value', async () => {
       const result = await service.getActorForUser('user');
 
-      console.log(result);
-      
-
       expect(result).toBeDefined();
       expect(result['@context']).toBe(AP.Context);
       expect(result.id).toMatch(/http:/);

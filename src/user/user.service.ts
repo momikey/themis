@@ -150,8 +150,6 @@ export class UserService {
     }
 
     idForUser(user: User): string {
-        console.log('*** User', user);
-        
         if (user.uri) {
             return user.uri;
         } else {
