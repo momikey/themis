@@ -92,22 +92,20 @@ describe('UserAuthenticationService', () => {
       email: 'user@example.com'
     };
 
-    const sampleUserData: User = {
+    const sampleUserData = Object.assign(new User, {
         id: 1,
         name: 'user',
         displayName: 'A user',
         summary: '',
         icon: '',
-        posts: [],
         date: '',
-        activities: [],
         uri: '',
         server: Object.assign(new Server(), {
           host: 'example.com',
         })
-    };
+    });
 
-    const sampleAuthentication: Account = {
+    const sampleAuthentication = Object.assign(new Account, {
       id: 1,
       user: sampleUserData,
       email: 'user@example.com',
@@ -116,7 +114,7 @@ describe('UserAuthenticationService', () => {
       token: '',
       role: UserRole.User,
       lastLoggedIn: new Date
-    };
+    });
 
     beforeAll(() => {
       jwtService.sign.mockReturnValue('secret');
