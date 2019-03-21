@@ -1,4 +1,4 @@
-import { Injectable, NotImplementedException } from '@nestjs/common';
+import { Injectable, NotImplementedException, HttpService, HttpException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Activity } from '../definitions/activities/activity.entity';
 import { Repository, InsertResult } from 'typeorm';
@@ -14,14 +14,21 @@ import { ConfigService } from '../../config/config.service';
 import { Collection, CollectionPage } from '../definitions/activities/collection-object';
 import { compareDesc } from 'date-fns';
 import { User } from '../../user/user.entity';
+import { GroupService } from '../../group/group.service';
+import { UserService } from '../../user/user.service';
+import { ServerService } from '../../server/server.service';
 
 @Injectable()
 export class ActivityService {
     constructor(
         @InjectRepository(Activity)
         private readonly activityRepository: Repository<Activity>,
+        private readonly groupService: GroupService,
+        private readonly userService: UserService,
         private readonly postService: PostService,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
+        private readonly serverService: ServerService,
+        private readonly httpService: HttpService
     ) {}
 
     async createPostFromActivity(activity: CreateActivity): Promise<Post> {
@@ -85,6 +92,60 @@ export class ActivityService {
         }
 
         return inserted;
+    }
+
+    async deliver(activityObject: object): Promise<object> {
+        // We use a set for deduplication purposes.
+        const targets = new Set<string>();
+        
+        // Targets can be in any of these properties.
+        for (const prop of ['to', 'cc', 'bto', 'bcc', 'audience']) {
+            const ap = activityObject[prop];
+            if (ap) {
+                if (typeof ap == 'string') {
+                    targets.add(ap);
+                } else if (ap instanceof Array) {
+                    ap.forEach((e) => targets.add(e));
+                }
+            }
+        }
+
+        // Deliver to each target in the set.
+        const deliveries = Array.from(targets).map(async (target) => {
+            if (target === AP.Public) {
+                /* TODO: Handle public addressing */
+            } else {
+                const {actor, type} = fromUri(target);
+
+                if (type === ActorType.Group) {
+                    // Target is a group
+                    const group = await this.groupService.findGlobalByName(actor.name, target);
+                    
+                    if (this.serverService.isLocal(group.server)) {
+                        // Local target for delivery
+
+                        return (this.httpService.post(
+                            this.groupService.createActor(group).inbox,
+                            activityObject
+                        ).toPromise());                    
+                    } else {
+                        // External server, so check for federation, etc.
+                        // TODO: All this
+                    }
+                } else {
+                    // Target is a user
+                    // TODO: All this
+                }
+            }
+        });
+
+        try {
+            await Promise.all(deliveries);
+        } catch (e) {
+            throw new HttpException(e.response.data.error, e.response.data.statusCode);
+        }
+
+        return activityObject;
     }
 
     /**
@@ -158,7 +219,7 @@ export class ActivityService {
     /**
      * Returns a list of all known activities that reference this post.
      *
-     * @param post The post whose activities you want to get
+     * @param post The post whose activities are wanted
      * @returns An array containing all activities connected to the post
      * @memberof ActivityService
      */
@@ -166,6 +227,13 @@ export class ActivityService {
         return this.activityRepository.find({ targetPost: post });
     }
 
+    /**
+     * Returns a list of all known activities that reference this user.
+     *
+     * @param user The user whose activities are wanted
+     * @returns An array containing all activities connected to the user
+     * @memberof ActivityService
+     */
     async getActivitiesForUser(user: User): Promise<Activity[]> {
         return this.activityRepository.find({ targetUser: user });
     }

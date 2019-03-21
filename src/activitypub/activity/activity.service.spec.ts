@@ -12,6 +12,8 @@ import { AP } from '../definitions/constants';
 import { ActorType, parseActor } from '../definitions/actor.interface';
 
 import { PostObject } from '../definitions/activities/post-object';
+import { ServerService } from '../../server/server.service';
+import { HttpService } from '@nestjs/common';
 
 
 jest.mock('../../group/group.service');
@@ -19,6 +21,8 @@ jest.mock('../../user/user.service');
 jest.mock('../../post/post.service');
 
 jest.mock('../../config/config.service');
+jest.mock('../../server/server.service');
+
 const ConfigServiceMock = <jest.Mock<ConfigService>>ConfigService as any;
 ConfigServiceMock.mockImplementation(() => {
   return {
@@ -28,6 +32,8 @@ ConfigServiceMock.mockImplementation(() => {
     isHttps: true
   }
 });
+
+const HttpMock = jest.fn();
 
 jest.mock('typeorm/repository/Repository');
 
@@ -46,7 +52,9 @@ describe('ActivityService', () => {
         GroupService,
         UserService,
         PostService,
+        ServerService,
         { provide: ConfigService, useClass: ConfigServiceMock },
+        { provide: HttpService, useClass: HttpMock },
         { provide: getRepositoryToken(Activity), useClass: Repository },
       ],
     }).compile();

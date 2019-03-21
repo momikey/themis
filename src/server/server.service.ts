@@ -76,6 +76,16 @@ export class ServerService {
         );
     }
 
+    localHostname(): string {
+        const parts = {
+            host: this.configService.serverAddress,
+            port: this.configService.serverPort,
+            scheme: (this.configService.isHttps ? 'https' : 'http')
+        };
+
+        return URI.normalize(URI.serialize(parts));
+    }
+
     async insert(server: CreateServerDto): Promise<Server> {
         const serverEntity = this.serverRepository.create({
             host: server.host,

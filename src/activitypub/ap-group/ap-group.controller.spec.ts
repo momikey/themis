@@ -2,9 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ApGroupController } from './ap-group.controller';
 import { ApGroupService } from './ap-group.service';
 import { ConfigService } from '../../config/config.service';
+import { FederationGuard } from '../federation.guard';
 
 jest.mock('./ap-group.service');
 jest.mock('../../config/config.service');
+jest.mock('../federation.guard');
 
 describe('ApGroup Controller', () => {
   let module: TestingModule;
@@ -17,7 +19,8 @@ describe('ApGroup Controller', () => {
       controllers: [ApGroupController],
       providers: [
         ApGroupService,
-        ConfigService
+        ConfigService,
+        FederationGuard
       ]
     }).compile();
 

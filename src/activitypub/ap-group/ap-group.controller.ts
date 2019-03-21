@@ -1,9 +1,10 @@
-import { Controller, Get, NotImplementedException, Post as HttpPost, Body, Param, MethodNotAllowedException } from '@nestjs/common';
+import { Controller, Get, NotImplementedException, Post as HttpPost, Body, Param, MethodNotAllowedException, UseGuards } from '@nestjs/common';
 import { ApGroupService } from './ap-group.service';
 import { Collection } from '../definitions/activities/collection-object';
 import { AP } from '../definitions/constants';
 import { ConfigService } from '../../config/config.service';
 import { GroupActor } from '../definitions/actors/group.actor';
+import { FederationGuard } from '../federation.guard';
 
 @Controller('group')
 export class ApGroupController {
@@ -22,13 +23,10 @@ export class ApGroupController {
         throw new NotImplementedException();        
     }
 
+    @UseGuards(FederationGuard)
     @HttpPost('/:name/inbox')
     async postToInbox(@Param('name') name: string, @Body() body) {
-        if (this.configService.isFederating) {
-            throw new NotImplementedException();
-        } else {
-            throw new MethodNotAllowedException();
-        }
+        throw new NotImplementedException();
     }
 
     @Get('/:name/outbox')

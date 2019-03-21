@@ -132,7 +132,12 @@ export class ApUserService {
                 }
                 
                 const act = await this.activityService.save(activityEntity);
-                return (await this.activityService.deliver(act)).activityObject;
+                try {
+                    const result = (await this.activityService.deliver(act.activityObject));
+                    return result;
+                } catch (e) {
+                    return Promise.reject(e);
+                }
             }
             case 'Follow': {
                 const toFollow = fromUri(activity.object);
