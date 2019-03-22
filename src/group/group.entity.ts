@@ -39,7 +39,7 @@ export class Group {
 
     // 'activities' is a list of all activities connected to this group.
     // We use it for inbox generation, etc.
-    @OneToMany(type => Activity, activity => activity.targetGroup)
+    @ManyToMany(type => Activity, activity => activity.targetGroups)
     activities: Activity[];
 
     // 'uri' is a unique identifying URI for this group, used in the

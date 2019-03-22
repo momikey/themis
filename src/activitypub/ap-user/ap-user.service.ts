@@ -105,9 +105,13 @@ export class ApUserService {
                     activityObject: activity
                 };
 
-                // TODO: Handle delivery, etc.
-
-                return (await this.activityService.save(activityEntity)).activityObject;
+                const act = await this.activityService.save(activityEntity);
+                try {
+                    const result = (await this.activityService.deliver(act.activityObject));
+                    return result;
+                } catch (e) {
+                    return Promise.reject(e);
+                }
             }
             case 'Delete': {
                 const deletedPost = await this.apPostService.deletePostFromActivity(activity);
@@ -148,10 +152,15 @@ export class ApUserService {
                     activityObject: activity
                 }
 
-                // TODO: Handle delivery, etc.
                 // Note that Follow activities are *requests*. We have to wait
                 // until we get an Accept reply to actually follow.
-                return (await this.activityService.save(activityEntity)).activityObject;
+                const act = await this.activityService.save(activityEntity);
+                try {
+                    const result = (await this.activityService.deliver(act.activityObject));
+                    return result;
+                } catch (e) {
+                    return Promise.reject(e);
+                }
             }
             case 'Add':
             case 'Remove':

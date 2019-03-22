@@ -113,6 +113,10 @@ export class UserService {
         }
     }
 
+    async findByUri(uri: string): Promise<User> {
+        return this.userRepository.findOneOrFail({ uri });
+    }
+
     async getLikes(user: User): Promise<User> {
         return this.userRepository.findOne(user.id, { relations: ['liked'] });
     }

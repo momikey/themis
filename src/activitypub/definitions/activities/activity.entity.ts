@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, Column, ManyToMany, JoinTable } from "typeorm";
 import { User } from "../../../user/user.entity";
 import { Group } from "../../../group/group.entity";
 import { Post } from "../../../post/post.entity";
@@ -15,13 +15,14 @@ export class Activity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(type => User, user => user.activities)
+    @ManyToOne(type => User, user => user.activities, { eager: true })
     targetUser: User;
 
-    @ManyToOne(type => Group, group => group.activities)
-    targetGroup: Group;
+    @ManyToMany(type => Group, group => group.activities, { eager: true })
+    @JoinTable()
+    targetGroups: Group[];
 
-    @ManyToOne(type =>Post, post => post.activities)
+    @ManyToOne(type =>Post, post => post.activities, { eager: true })
     targetPost: Post;
 
     @Column()

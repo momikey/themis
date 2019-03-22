@@ -1,10 +1,11 @@
-import { Controller, Get, NotImplementedException, Post as HttpPost, Body, Param, MethodNotAllowedException, UseGuards } from '@nestjs/common';
+import { Controller, Get, NotImplementedException, Post as HttpPost, Body, Param, MethodNotAllowedException, UseGuards, HttpCode, UseInterceptors } from '@nestjs/common';
 import { ApGroupService } from './ap-group.service';
 import { Collection } from '../definitions/activities/collection-object';
 import { AP } from '../definitions/constants';
 import { ConfigService } from '../../config/config.service';
 import { GroupActor } from '../definitions/actors/group.actor';
 import { FederationGuard } from '../federation.guard';
+import { LocationInterceptor } from '../location.interceptor';
 
 @Controller('group')
 export class ApGroupController {
@@ -26,7 +27,7 @@ export class ApGroupController {
     @UseGuards(FederationGuard)
     @HttpPost('/:name/inbox')
     async postToInbox(@Param('name') name: string, @Body() body) {
-        throw new NotImplementedException();
+       return this.apGroupService.handleIncoming(name, body);
     }
 
     @Get('/:name/outbox')
@@ -35,8 +36,11 @@ export class ApGroupController {
     }
 
     @HttpPost('/:name/outbox')
+    @HttpCode(201)
+    @UseInterceptors(new LocationInterceptor)
+    // TODO: How do we do auth guards? Groups are automatic.
     async postToOutbox(@Param('name') name: string, @Body() body) {
-        throw new NotImplementedException();
+        return this.apGroupService.acceptPostRequest(name, body);
     }
 
     @Get('/:name/followers')

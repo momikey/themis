@@ -6,8 +6,12 @@ import { GroupActor } from '../definitions/actors/group.actor';
 import { AP } from '../definitions/constants';
 import { ConfigService } from '../../config/config.service';
 import { Server } from '../../server/server.entity';
+import { UserService } from '../../user/user.service';
+import { ActivityService } from '../activity/activity.service';
 
 jest.mock('../../group/group.service');
+jest.mock('../../user/user.service');
+jest.mock('../activity/activity.service');
 jest.mock('../../config/config.service');
 
 describe('ApGroupService', () => {
@@ -20,6 +24,8 @@ describe('ApGroupService', () => {
       providers: [
         ApGroupService,
         GroupService,
+        UserService,
+        ActivityService,
         ConfigService
       ],
     }).compile();

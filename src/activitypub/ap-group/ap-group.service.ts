@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException, NotImplementedException } from '@nestjs/common';
 import { GroupService } from '../../group/group.service';
 import { Group } from '../../group/group.entity';
 import { GroupActor } from '../definitions/actors/group.actor';
 import { AP } from '../definitions/constants';
 import * as URI from 'uri-js';
 import { ConfigService } from '../../config/config.service';
+import { UserService } from '../../user/user.service';
+import { ActivityService } from '../activity/activity.service';
 
 /**
  * This class creates and handles Group Actors, connecting them
@@ -17,8 +19,34 @@ import { ConfigService } from '../../config/config.service';
 export class ApGroupService {
     constructor(
         private readonly groupService: GroupService,
+        private readonly userService: UserService,
+        private readonly activityService: ActivityService,
         private readonly configService: ConfigService
     ) {}
+
+    async acceptPostRequest(groupname: string, data: any): Promise<any> {
+
+    }
+    
+    async handleIncoming(groupname: string, data: any): Promise<any> {
+        const group = this.groupService.findLocalByName(groupname);
+
+        const activity = data;
+
+        switch (activity.type) {
+            case 'Create': {
+                // TODO
+                throw new NotImplementedException;
+            }
+            case 'Follow': {
+                const user = this.userService.findByUri(data.actor);
+                // TODO: Implement following
+            }
+            default:
+                throw new NotImplementedException;
+                // throw new BadRequestException(`Invalid activity type ${activity.type}`);
+        }
+    }
 
     /**
      * Retrieve a local group (i.e., one native to this server).
