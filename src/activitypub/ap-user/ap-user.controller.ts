@@ -4,6 +4,7 @@ import { ConfigService } from '../../config/config.service';
 import { UserActor } from '../definitions/actors/user.actor';
 import { LocationInterceptor } from '../location.interceptor';
 import { ContentTypeGuard } from '../content-type.guard';
+import { FederationGuard } from '../federation.guard';
 
 @Controller('user')
 export class ApUserController {
@@ -22,13 +23,10 @@ export class ApUserController {
         throw new NotImplementedException();        
     }
 
+    @UseGuards(FederationGuard)
     @HttpPost('/:name/inbox')
     async postToInbox(@Param('name') name: string, @Body() body) {
-        if (this.configService.isFederating) {
-            throw new NotImplementedException();
-        } else {
-            throw new MethodNotAllowedException();
-        }
+        throw new NotImplementedException();
     }
 
     @Get('/:name/outbox')
