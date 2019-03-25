@@ -86,9 +86,16 @@ export class ActivityService {
         }
 
         if (!inserted.activityObject['id']) {
-            inserted.activityObject['id'] = this.getIdForActivity(inserted);
+            if (!inserted.uri) {
+                inserted.uri = this.getIdForActivity(inserted);
+            }
+
+            inserted.activityObject['id'] = inserted.uri;
             const updated = await this.activityRepository.update(inserted.id, 
-                { activityObject: inserted.activityObject });
+                {
+                    uri: inserted.uri,
+                    activityObject: inserted.activityObject
+                });
         }
 
         return inserted;

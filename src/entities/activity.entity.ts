@@ -28,6 +28,9 @@ export class Activity {
     @Column()
     type: string;
 
+    @Column({nullable: true})
+    uri: string;
+
     @Column('simple-json')
     activityObject: object;
 
