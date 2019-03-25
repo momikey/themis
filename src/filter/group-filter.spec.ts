@@ -1,6 +1,5 @@
 import { GroupFilter, FilterProperty } from './group-filter';
-import { Group } from '../group/group.entity';
-import { Server } from '../server/server.entity';
+import { Group } from '../entities/group.entity';
 
 describe('GroupFilter', () => {
   let provider: GroupFilter;

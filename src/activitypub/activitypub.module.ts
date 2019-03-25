@@ -11,7 +11,7 @@ import { ApUserController } from './ap-user/ap-user.controller';
 import { ApPostController } from './ap-post/ap-post.controller';
 import { ApPostService } from './ap-post/ap-post.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Activity } from './definitions/activities/activity.entity';
+import { Activity } from '../entities/activity.entity';
 
 @Module({
   imports: [

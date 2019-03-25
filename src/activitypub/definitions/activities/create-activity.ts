@@ -1,5 +1,5 @@
 import { PostObject } from "./post-object";
-import { User } from "../../../user/user.entity";
+import { User } from "../../../entities/user.entity";
 import { AP } from "../constants";
 import { getActorUri, getIdForActor, ActorType } from "../actor.interface";
 

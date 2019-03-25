@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GroupController } from './group.controller';
 import { GroupService } from './group.service';
-import { CreateGroupDto } from './create-group.dto';
-import { UpdateGroupDto } from './update-group.dto';
-import { Group } from './group.entity';
 import { NotFoundException } from '@nestjs/common';
-import { Post } from '../post/post.entity';
+import { Group } from '../entities/group.entity';
+import { CreateGroupDto } from '../dtos/create-group.dto';
+import { UpdateGroupDto } from '../dtos/update-group.dto';
 
 jest.mock('./group.service');
 

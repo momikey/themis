@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotImplementedException } from '@nestjs/common';
 import { GroupService } from '../../group/group.service';
-import { Group } from '../../group/group.entity';
+import { Group } from '../../entities/group.entity';
 import { GroupActor } from '../definitions/actors/group.actor';
 import { AP } from '../definitions/constants';
 import * as URI from 'uri-js';

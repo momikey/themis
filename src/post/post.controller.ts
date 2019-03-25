@@ -1,10 +1,10 @@
 import { Controller, Get, Param, Delete, NotImplementedException, Body } from '@nestjs/common';
 import { Post  as HttpPost } from '@nestjs/common';
 import { PostService } from './post.service';
-import { Post } from './post.entity';
-import { CreatePostDto } from './create-post.dto';
-import { CreateTopLevelPostDto } from './create-top-level-post.dto';
-import { CreateReplyDto } from './create-reply.dto';
+import { Post } from '../entities/post.entity';
+import { CreatePostDto } from '../dtos/create-post.dto';
+import { CreateTopLevelPostDto } from '../dtos/create-top-level-post.dto';
+import { CreateReplyDto } from '../dtos/create-reply.dto';
 
 @Controller('internal/posts')
 export class PostController {

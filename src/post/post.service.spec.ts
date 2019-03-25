@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PostService } from './post.service';
-import { Post } from './post.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConfigService } from '../config/config.service';
 import { UserService } from '../user/user.service';
@@ -8,14 +7,15 @@ import { GroupService } from '../group/group.service';
 import { Repository } from 'typeorm/repository/Repository';
 import * as uuidv5 from 'uuid/v5';
 import * as URI from 'uri-js';
-import { CreatePostDto } from './create-post.dto';
-import { CreateTopLevelPostDto } from './create-top-level-post.dto';
-import { CreateReplyDto } from './create-reply.dto';
-import { User } from '../user/user.entity';
-import { Group } from '../group/group.entity';
-import { CreateGlobalPostDto } from './create-global-post.dto';
-import { Server } from '../server/server.entity';
 import { ServerService } from '../server/server.service';
+import { Post } from '../entities/post.entity';
+import { Server } from '../entities/server.entity';
+import { CreatePostDto } from '../dtos/create-post.dto';
+import { CreateTopLevelPostDto } from '../dtos/create-top-level-post.dto';
+import { CreateReplyDto } from '../dtos/create-reply.dto';
+import { User } from '../entities/user.entity';
+import { Group } from '../entities/group.entity';
+import { CreateGlobalPostDto } from '../dtos/create-global-post.dto';
 
 jest.mock('../user/user.service');
 jest.mock('../group/group.service');
@@ -109,12 +109,12 @@ describe('PostService', () => {
 
 
     const data: Post[] = [
-      {id: 1, uuid: sampleUuid, server: sampleServer, sender: new User, uri: '', parentUri: '',
+      Object.assign(new Post, {id: 1, uuid: sampleUuid, server: sampleServer, sender: new User, uri: '', parentUri: '',
         groups: [], subject: 'Subject', content: 'Content', source: '', timestamp: '',
-        deleted: false, children: [], parent: undefined, activities: [] },
-      {id: 2, uuid: '00000000-1234-5678-987654321cafe', server: sampleServer, sender: new User, 
+        deleted: false, children: [], parent: undefined, activities: [] }),
+      Object.assign(new Post, {id: 2, uuid: '00000000-1234-5678-987654321cafe', server: sampleServer, sender: new User, 
         uri: '', parentUri: '', groups: [], subject: 'Subject', content: 'Content', 
-        source: '', timestamp: '', deleted: false, children: [], parent: undefined, activities: [] }
+        source: '', timestamp: '', deleted: false, children: [], parent: undefined, activities: [] })
     ];
 
     beforeAll(() => {

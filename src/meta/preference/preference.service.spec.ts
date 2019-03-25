@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PreferenceService } from './preference.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Preference } from './preference.entity';
 import { Repository } from 'typeorm/repository/Repository';
+import { Preference } from '../../entities/preference.entity';
 
 jest.mock('typeorm/repository/Repository');
 

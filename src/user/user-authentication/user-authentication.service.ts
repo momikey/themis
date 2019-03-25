@@ -2,19 +2,19 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user.service';
 import { JwtPayload } from './jwt.interface';
-import { User } from '../user.entity';
-import { CreateAccountDto } from './create-account.dto';
+import { User } from '../../entities/user.entity';
+import { CreateAccountDto } from '../../dtos/create-account.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Account } from './account.entity';
+import { Account } from '../../entities/account.entity';
 import { Repository, useContainer } from 'typeorm';
 import { ConfigService } from '../../config/config.service';
 import * as bcrypt from 'bcrypt';
-import { LoginDto } from './login.dto';
-import { TokenDto } from './token.dto';
+import { LoginDto } from '../../dtos/login.dto';
+import { TokenDto } from '../../dtos/token.dto';
 import { UserRole } from './user-authentication.role';
 import { isAfter } from 'date-fns';
-import { Group } from '../../group/group.entity';
-import { Post } from '../../post/post.entity';
+import { Group } from '../../entities/group.entity';
+import { Post } from '../../entities/post.entity';
 
 // User authentication service. It does what it says.
 // This one's fairly important. It'll have to handle passwords, auth tokens,

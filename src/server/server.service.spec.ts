@@ -3,7 +3,7 @@ import { ServerService } from './server.service';
 import { ConfigService } from '../config/config.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Server } from './server.entity';
+import { Server } from '../entities/server.entity';
 
 jest.mock('typeorm/repository/Repository'); 
 jest.mock('../config/config.service');

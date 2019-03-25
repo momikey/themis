@@ -1,6 +1,6 @@
 import { Module, Global } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Server } from './server.entity';
+import { Server } from '../entities/server.entity';
 import { ServerService } from './server.service';
 
 @Global()

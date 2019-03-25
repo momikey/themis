@@ -1,6 +1,5 @@
 import { UserFilter, UserFilterEntry, FilterProperty } from './user-filter';
-import { User } from '../user/user.entity';
-import { Server } from '../server/server.entity';
+import { User } from '../entities/user.entity';
 
 describe('UserFilter', () => {
   let provider: UserFilter;

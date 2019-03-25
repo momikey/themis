@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import { UserService } from './user.service';
-import { CreateUserDto } from './create-user.dto';
 import { NotFoundException } from '@nestjs/common';
+import { User } from '../entities/user.entity';
+import { CreateUserDto } from '../dtos/create-user.dto';
 
 jest.mock('./user.service');
 

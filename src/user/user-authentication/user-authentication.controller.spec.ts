@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserAuthenticationController } from './user-authentication.controller';
 import { UserAuthenticationService } from './user-authentication.service';
-import { CreateAccountDto } from './create-account.dto';
 import { JwtPayload } from './jwt.interface';
-import { Account } from './account.entity';
-import { LoginDto } from './login.dto';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { CreateAccountDto } from '../../dtos/create-account.dto';
+import { Account } from '../../entities/account.entity';
+import { LoginDto } from '../../dtos/login.dto';
 
 jest.mock('./user-authentication.service');
 

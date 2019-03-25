@@ -1,5 +1,5 @@
 import { BaseFilter, FilterEntry } from "./base-filter";
-import { Post } from "../post/post.entity";
+import { Post } from "../entities/post.entity";
 
 // The allowed properties to filter on. This is a different
 // set for posts, because they have different content. Filtering

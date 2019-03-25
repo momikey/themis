@@ -1,11 +1,11 @@
 import { Injectable, MethodNotAllowedException, InternalServerErrorException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Group } from './group.entity';
-import { CreateGroupDto } from './create-group.dto';
-import { Post } from '../post/post.entity';
+import { Group } from '../entities/group.entity';
+import { CreateGroupDto } from '../dtos/create-group.dto';
+import { Post } from '../entities/post.entity';
 import { ConfigService } from '../config/config.service';
-import { UpdateGroupDto } from './update-group.dto';
+import { UpdateGroupDto } from '../dtos/update-group.dto';
 import { GroupFilterEntry, GroupFilter } from '../filter/group-filter';
 import { ServerService } from '../server/server.service';
 import { getIdForActor, ActorType } from '../activitypub/definitions/actor.interface';

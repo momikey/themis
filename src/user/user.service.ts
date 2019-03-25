@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './user.entity';
+import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './create-user.dto';
+import { CreateUserDto } from '../dtos/create-user.dto';
 import { ConfigService } from '../config/config.service';
 import { ServerService } from '../server/server.service';
 import { getIdForActor, ActorType } from '../activitypub/definitions/actor.interface';
-import { Post } from '../post/post.entity';
+import { Post } from '../entities/post.entity';
 import { UserActor } from '../activitypub/definitions/actors/user.actor';
 import { AP } from '../activitypub/definitions/constants';
 import * as URI from 'uri-js';

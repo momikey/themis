@@ -1,7 +1,7 @@
 import * as URI from 'uri-js';
-import { User } from 'src/user/user.entity';
-import { Group } from 'src/group/group.entity';
-import { Server } from '../../server/server.entity';
+import { User } from 'src/entities/user.entity';
+import { Group } from 'src/entities/group.entity';
+import { Server } from '../../entities/server.entity';
 
 /**
  * An actor can be any sender or recipient. They're identified

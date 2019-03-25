@@ -1,18 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserAuthenticationService } from './user-authentication.service';
 import { UserService } from '../user.service';
-import { Account } from './account.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConfigService } from '../../config/config.service';
 import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 import { Repository } from 'typeorm/repository/Repository';
 import { JwtPayload } from './jwt.interface';
-import { LoginDto } from './login.dto';
-import { CreateAccountDto } from './create-account.dto';
-import { User } from '../user.entity';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from './user-authentication.role';
-import { Server } from '../../server/server.entity';
+import { Account } from '../../entities/account.entity';
+import { LoginDto } from '../../dtos/login.dto';
+import { CreateAccountDto } from '../../dtos/create-account.dto';
+import { User } from '../../entities/user.entity';
+import { Server } from '../../entities/server.entity';
 
 jest.mock('../user.service');
 jest.mock('@nestjs/jwt/dist/jwt.service');

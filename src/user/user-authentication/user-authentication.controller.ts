@@ -1,13 +1,13 @@
 import { Controller, Post, Body, Get, UseGuards, Res, UnauthorizedException, BadRequestException, InternalServerErrorException, Param } from '@nestjs/common';
 import { UserAuthenticationService } from './user-authentication.service';
 import { JwtPayload } from './jwt.interface';
-import { CreateAccountDto } from './create-account.dto';
-import { LoginDto } from './login.dto';
+import { CreateAccountDto } from '../../dtos/create-account.dto';
+import { LoginDto } from '../../dtos/login.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { Account } from './account.entity';
-import { TokenDto } from './token.dto';
+import { Account } from '../../entities/account.entity';
+import { TokenDto } from '../../dtos/token.dto';
 import { UserRole } from './user-authentication.role';
-import { RoleDto } from './role.dto';
+import { RoleDto } from '../../dtos/role.dto';
 
 @Controller('internal/authenticate')
 export class UserAuthenticationController {

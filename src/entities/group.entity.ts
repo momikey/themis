@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToMany, OneToMany, ManyToOne } from 'typeorm';
-import { Post } from '../post/post.entity';
-import { Activity } from '../activitypub/definitions/activities/activity.entity';
-import { Server } from '../server/server.entity';
+import { Post } from './post.entity';
+import { Activity } from './activity.entity';
+import { Server } from './server.entity';
 
 // Note that we have to change the table name because "group" is a reserved word in SQL.
 @Entity("groups")

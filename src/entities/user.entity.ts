@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, CreateDateColumn, Column, OneToMany, ManyToOne, ManyToMany, JoinTable } from 'typeorm';
-import { Post } from '../post/post.entity';
-import { Activity } from '../activitypub/definitions/activities/activity.entity';
-import { Server } from '../server/server.entity';
+import { Post } from './post.entity';
+import { Activity } from './activity.entity';
+import { Server } from './server.entity';
 
 @Entity()
 export class User {

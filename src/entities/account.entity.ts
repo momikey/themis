@@ -1,8 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn, Column, ManyToMany, JoinTable } from "typeorm";
-import { User } from "../user.entity";
-import { UserRole } from "./user-authentication.role";
-import { Group } from "../../group/group.entity";
-import { Post } from "../../post/post.entity";
+import { User } from "./user.entity";
+import { UserRole } from "../user/user-authentication/user-authentication.role";
+import { Group } from "./group.entity";
+import { Post } from "./post.entity";
 
 @Entity()
 export class Account {

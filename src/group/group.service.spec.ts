@@ -2,10 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GroupService } from './group.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm/repository/Repository';
-import { Group } from './group.entity';
 import { ConfigService } from '../config/config.service';
 import { ServerService } from '../server/server.service';
-import { Server } from '../server/server.entity';
+import { Server } from '../entities/server.entity';
+import { Group } from '../entities/group.entity';
 
 
 jest.mock('../config/config.service');

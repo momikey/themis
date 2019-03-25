@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PostService } from '../../post/post.service';
 import { ConfigService } from '../../config/config.service';
-import { Post } from '../../post/post.entity';
+import { Post } from '../../entities/post.entity';
 import { TombstoneObject } from '../definitions/activities/tombstone-object';
 import { PostObject } from '../definitions/activities/post-object';
 import { ActivityService } from '../activity/activity.service';
 import * as URI from 'uri-js';
 import { CreateActivity } from '../definitions/activities/create-activity';
-import { CreateGlobalPostDto } from 'src/post/create-global-post.dto';
+import { CreateGlobalPostDto } from 'src/dtos/create-global-post.dto';
 import { fromUri, getActorUri, parseActor, ActorType } from '../definitions/actor.interface';
 import { DeleteActivity } from '../definitions/activities/delete-activity';
 import { UpdateActivity } from '../definitions/activities/update-activity';

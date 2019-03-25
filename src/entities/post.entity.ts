@@ -1,8 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, Tree, TreeChildren, TreeParent, ManyToMany, JoinTable } from "typeorm";
-import { User } from "../user/user.entity";
-import { Group } from "../group/group.entity";
-import { Activity } from "../activitypub/definitions/activities/activity.entity";
-import { Server } from "../server/server.entity";
+import { User } from "./user.entity";
+import { Group } from "./group.entity";
+import { Activity } from "./activity.entity";
+import { Server } from "./server.entity";
 
 @Entity()
 @Tree('materialized-path')

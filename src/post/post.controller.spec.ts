@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PostController } from './post.controller';
 import { PostService } from './post.service';
-import { Post } from './post.entity';
 import * as uuidv4 from 'uuid/v4';
-import { User } from '../user/user.entity';
-import { CreatePostDto } from './create-post.dto';
-import { CreateTopLevelPostDto } from './create-top-level-post.dto';
-import { CreateReplyDto } from './create-reply.dto';
-import { Group } from '../group/group.entity';
-import { Server } from '../server/server.entity';
+import { Server } from '../entities/server.entity';
+import { Post } from '../entities/post.entity';
+import { User } from '../entities/user.entity';
+import { Group } from '../entities/group.entity';
+import { CreatePostDto } from '../dtos/create-post.dto';
+import { CreateTopLevelPostDto } from '../dtos/create-top-level-post.dto';
+import { CreateReplyDto } from '../dtos/create-reply.dto';
 
 jest.mock('./post.service');
 
@@ -105,7 +105,7 @@ describe('Post Controller', () => {
     });
 
     it('find by group should return only top-level posts in that group', async () => {
-      const exampleGroup: Group = {
+      const exampleGroup = Object.assign(new Group, {
         id: 3,
         name: 'group',
         server: sampleServer,
@@ -115,8 +115,8 @@ describe('Post Controller', () => {
         posts: [],
         activities: [],
         uri: ''
-      };
-      const examplePost: Post = {
+      });
+      const examplePost = Object.assign(new Post, {
         id: 1,
         uuid: '00000000-0000-0000-0000-000000000000',
         server: sampleServer,
@@ -132,7 +132,7 @@ describe('Post Controller', () => {
         children: [],
         parent: undefined,
         activities: []
-      };
+      });
       service.findTopLevelByGroup.mockResolvedValueOnce([examplePost]);
 
       const result = await controller.findByGroup('group');
@@ -143,7 +143,7 @@ describe('Post Controller', () => {
     });
 
     it('find by user should return all posts by a user', async () => {
-      const exampleUser: User = {
+      const exampleUser = {
         id: 4,
         name: 'user',
         server: sampleServer,
@@ -155,7 +155,7 @@ describe('Post Controller', () => {
         activities: [],
         uri: ''
       };
-      const examplePost: Post = {
+      const examplePost = Object.assign(new Post, {
         id: 1,
         uuid: '00000000-0000-0000-0000-000000000000',
         server: sampleServer,
@@ -171,7 +171,7 @@ describe('Post Controller', () => {
         children: [],
         parent: undefined,
         activities: []
-      };
+      });
       service.findByUserId.mockResolvedValueOnce([examplePost]);
 
       const result = await controller.findAllByUser(4);
@@ -193,7 +193,7 @@ describe('Post Controller', () => {
         activities: [],
         uri: ''
       };
-      const examplePost: Post = {
+      const examplePost = Object.assign(new Post, {
         id: 1,
         uuid: '00000000-0000-0000-0000-000000000000',
         server: sampleServer,
@@ -209,7 +209,7 @@ describe('Post Controller', () => {
         children: [],
         parent: undefined,
         activities: []
-      };
+      });
       service.findByGroupId.mockResolvedValueOnce([examplePost]);
 
       const result = await controller.findAllInGroup(3);

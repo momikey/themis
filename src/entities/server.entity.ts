@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
-import { Group } from "../group/group.entity";
-import { User } from "../user/user.entity";
-import { Post } from "../post/post.entity";
+import { Group } from "./group.entity";
+import { User } from "./user.entity";
+import { Post } from "./post.entity";
 
 /**
  * This entity tracks a Themis server. Each entity contains

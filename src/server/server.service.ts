@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Server } from './server.entity';
+import { Server } from '../entities/server.entity';
 import { ConfigService } from '../config/config.service';
 import { Repository } from 'typeorm';
 import * as URI from 'uri-js';
-import { CreateServerDto } from './create-server.dto';
+import { CreateServerDto } from '../dtos/create-server.dto';
 
 /**
  * Despite the dumb name, this service allows us to work

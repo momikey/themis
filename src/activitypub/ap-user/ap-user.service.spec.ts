@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ApUserService } from './ap-user.service';
 import { UserService } from '../../user/user.service';
-import { User } from '../../user/user.entity';
 import { AP } from '../definitions/constants';
 import { ConfigService } from '../../config/config.service';
 import { ActivityService } from '../activity/activity.service';
 import { PostObject } from '../definitions/activities/post-object';
 import { ApPostService } from '../ap-post/ap-post.service';
-import { Server } from '../../server/server.entity';
-import { Activity } from '../definitions/activities/activity.entity';
 import { UserAuthenticationService } from '../../user/user-authentication/user-authentication.service';
+import { Server } from '../../entities/server.entity';
+import { User } from '../../entities/user.entity';
+import { Activity } from '../../entities/activity.entity';
 
 jest.mock('../../user/user.service');
 jest.mock('../../config/config.service');

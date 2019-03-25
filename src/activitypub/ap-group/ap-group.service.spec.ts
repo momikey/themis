@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ApGroupService } from './ap-group.service';
 import { GroupService } from '../../group/group.service';
-import { Group } from '../../group/group.entity';
 import { GroupActor } from '../definitions/actors/group.actor';
 import { AP } from '../definitions/constants';
 import { ConfigService } from '../../config/config.service';
-import { Server } from '../../server/server.entity';
 import { UserService } from '../../user/user.service';
 import { ActivityService } from '../activity/activity.service';
+import { Server } from '../../entities/server.entity';
+import { Group } from '../../entities/group.entity';
 
 jest.mock('../../group/group.service');
 jest.mock('../../user/user.service');

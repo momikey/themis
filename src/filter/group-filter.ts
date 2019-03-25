@@ -1,4 +1,4 @@
-import { Group } from '../group/group.entity';
+import { Group } from '../entities/group.entity';
 import { BaseFilter, FilterEntry } from './base-filter';
 
 // These are the properties of a Group entity that we can filter on.

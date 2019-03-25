@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from './user.entity';
 import { ConfigService } from '../config/config.service';
 import { Repository } from 'typeorm/repository/Repository';
-import { CreateUserDto } from './create-user.dto';
-import { Server } from '../server/server.entity';
 import { ServerService } from '../server/server.service';
+import { Server } from '../entities/server.entity';
+import { User } from '../entities/user.entity';
+import { CreateUserDto } from '../dtos/create-user.dto';
 
 jest.mock('../config/config.service');
 jest.mock('../server/server.service');
@@ -62,7 +62,7 @@ describe('UserService', () => {
       { id: 1, name: 'user', displayName: 'Test User', server: makeServer('example.com'), summary: '', icon: '', date: '', posts: [], activities: [], uri:''},
       { id: 2, name: 'other', displayName: 'Test User', server: makeServer('example.invalid'), summary: '', icon: '', date: '', posts: [], activities: [], uri:''},
       { id: 3, name: 'another', displayName: 'Test User', server: makeServer('local.local'), summary: '', icon: '', date: '', posts: [], activities: [], uri:''},
-      ]
+      ].map((_) => Object.assign(new User, _));
 
     beforeAll(() => {
       repository.create.mockImplementation((entity) => Object.assign(new User, entity));

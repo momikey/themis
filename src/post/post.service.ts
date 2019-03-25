@@ -1,18 +1,18 @@
 import { Injectable, BadRequestException, NotImplementedException } from '@nestjs/common';
 import { Repository, getRepository, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Post } from './post.entity';
-import { CreatePostDto } from './create-post.dto';
+import { Post } from '../entities/post.entity';
+import { CreatePostDto } from '../dtos/create-post.dto';
 import { ConfigService } from '../config/config.service';
 import * as uuidv5 from 'uuid/v5';
 import * as URI from 'uri-js';
-import { User } from '../user/user.entity';
+import { User } from '../entities/user.entity';
 import { UserService } from '../user/user.service';
 import { GroupService } from '../group/group.service';
-import { CreateTopLevelPostDto } from './create-top-level-post.dto';
-import { CreateReplyDto } from './create-reply.dto';
-import { Group } from '../group/group.entity';
-import { CreateGlobalPostDto } from './create-global-post.dto';
+import { CreateTopLevelPostDto } from '../dtos/create-top-level-post.dto';
+import { CreateReplyDto } from '../dtos/create-reply.dto';
+import { Group } from '../entities/group.entity';
+import { CreateGlobalPostDto } from '../dtos/create-global-post.dto';
 import { Actor } from '../activitypub/definitions/actor.interface';
 import { ServerService } from '../server/server.service';
 

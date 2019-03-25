@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Preference } from './preference.entity';
+import { Preference } from '../../entities/preference.entity';
 
 @Injectable()
 export class PreferenceService {

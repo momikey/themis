@@ -1,6 +1,6 @@
 import { Injectable, NotImplementedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { UserService } from '../../user/user.service';
-import { User } from '../../user/user.entity';
+import { User } from '../../entities/user.entity';
 import { UserActor } from '../definitions/actors/user.actor';
 import { AP } from '../definitions/constants';
 import * as URI from 'uri-js';
@@ -10,9 +10,9 @@ import { activityFromObject } from '../definitions/activities/create-activity';
 import { ApPostService } from '../ap-post/ap-post.service';
 import { UserAuthenticationService } from '../../user/user-authentication/user-authentication.service';
 import { Collection } from '../definitions/activities/collection-object';
-import { Group } from '../../group/group.entity';
+import { Group } from '../../entities/group.entity';
 import { compareDesc } from 'date-fns';
-import { Post } from '../../post/post.entity';
+import { Post } from '../../entities/post.entity';
 import { fromUri } from '../definitions/actor.interface';
 
 /**

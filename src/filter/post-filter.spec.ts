@@ -1,6 +1,5 @@
 import { PostFilter, FilterProperty } from './post-filter';
-import { Post } from '../post/post.entity';
-import { Server } from '../server/server.entity';
+import { Post } from '../entities/post.entity';
 
 describe('PostFilter', () => {
   let provider: PostFilter;

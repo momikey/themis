@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ActivityService } from './activity.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Activity } from '../definitions/activities/activity.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { GroupService } from '../../group/group.service';
 import { UserService } from '../../user/user.service';
@@ -14,6 +13,7 @@ import { ActorType, parseActor } from '../definitions/actor.interface';
 import { PostObject } from '../definitions/activities/post-object';
 import { ServerService } from '../../server/server.service';
 import { HttpService } from '@nestjs/common';
+import { Activity } from '../../entities/activity.entity';
 
 
 jest.mock('../../group/group.service');
@@ -135,7 +135,7 @@ describe('ActivityService', () => {
         created: new Date(),
 
         targetUser: undefined,
-        targetGroup: undefined,
+        targetGroups: undefined,
         targetPost: undefined,
       };
 

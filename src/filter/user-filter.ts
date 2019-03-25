@@ -1,5 +1,5 @@
 import { BaseFilter, FilterEntry } from "./base-filter";
-import { User } from "../user/user.entity";
+import { User } from "../entities/user.entity";
 
 // Valid properties for user filters.
 // We may add others later on, which is why we're not just
