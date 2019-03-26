@@ -13,7 +13,8 @@ import { Collection } from '../definitions/activities/collection-object';
 import { Group } from '../../entities/group.entity';
 import { compareDesc } from 'date-fns';
 import { Post } from '../../entities/post.entity';
-import { fromUri } from '../definitions/actor.interface';
+import { fromUri, Actor } from '../definitions/actor.interface';
+import { Activity } from '../../entities/activity.entity';
 
 /**
  * This class creates and handles actor objects representing users.
@@ -107,7 +108,7 @@ export class ApUserService {
 
                 const act = await this.activityService.save(activityEntity);
                 try {
-                    const result = (await this.activityService.deliver(act.activityObject));
+                    const result = (await this.activityService.deliver(act));
                     return result;
                 } catch (e) {
                     return Promise.reject(e);
@@ -137,7 +138,7 @@ export class ApUserService {
                 
                 const act = await this.activityService.save(activityEntity);
                 try {
-                    const result = (await this.activityService.deliver(act.activityObject));
+                    const result = (await this.activityService.deliver(act));
                     return result;
                 } catch (e) {
                     return Promise.reject(e);
@@ -156,7 +157,7 @@ export class ApUserService {
                 // until we get an Accept reply to actually follow.
                 const act = await this.activityService.save(activityEntity);
                 try {
-                    const result = (await this.activityService.deliver(act.activityObject));
+                    const result = (await this.activityService.sendFollowRequest(act, toFollow.actor));
                     return result;
                 } catch (e) {
                     return Promise.reject(e);
@@ -194,10 +195,10 @@ export class ApUserService {
      */
     async getFollowers(name: string): Promise<Collection> {
         try {
-            const account = await this.accountService.findOne(name);
+            const user = await this.userService.findLocalByName(name);
 
-            const withFollowers = await this.accountService.getFollowers(account);
-            const allFollowers: (Group | User)[] = withFollowers.groupFollowers
+            const withFollowers = await this.userService.getFollowers(user);
+            const allFollowers: (Group | User)[] = (withFollowers.groupFollowers as (Group|User)[])
                 .concat(...withFollowers.userFollowers)
                 .sort((a,b) => compareDesc(a.date, b.date));
 
@@ -217,16 +218,18 @@ export class ApUserService {
      */
     async getFollowing(name: string): Promise<Collection> {
         try {
-            const account = await this.accountService.findOne(name);
+            const user = await this.userService.findLocalByName(name);
 
-            const withFollowing = await this.accountService.getFollowers(account);
-            const allFollowing: (Group | User)[] = withFollowing.groupFollowing
+            const withFollowing = await this.userService.getFollowing(user);
+            const allFollowing: (Group | User)[] = (withFollowing.groupFollowing as (Group|User)[])
                 .concat(...withFollowing.userFollowing)
                 .sort((a,b) => compareDesc(a.date, b.date));
 
             const uris = allFollowing.map((f) => f.uri);
             return this.activityService.createCollection(uris);
         } catch (e) {
+            console.log(e);
+            
             throw new NotFoundException(`User ${name} does not exist on this server`);
         }
     }

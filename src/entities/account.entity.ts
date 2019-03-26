@@ -46,41 +46,5 @@ export class Account {
     @Column({nullable: true})
     lastLoggedIn: Date;
 
-    /**
-     * A list of all users who are following this account.
-     *
-     * @memberof Account
-     */
-    @ManyToMany(type => User)
-    @JoinTable()
-    userFollowers: User[];
-
-    /**
-     * A list of all users this account is following.
-     *
-     * @memberof Account
-     */
-    @ManyToMany(type => User)
-    @JoinTable()
-    userFollowing: User[];
-
-    /**
-     * A list of all groups following this account.
-     *
-     * @memberof Account
-     */
-    @ManyToMany(type => Group)
-    @JoinTable()
-    groupFollowers: Group[];
-
-    /**
-     * A list of all groups this account is following.
-     *
-     * @memberof Account
-     */
-    @ManyToMany(type => Group)
-    @JoinTable()
-    groupFollowing: Group[];
-
     // TODO: Do we need a date field here? Might be useful for password expiration.
 }

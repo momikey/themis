@@ -1,11 +1,11 @@
-import { Injectable, NotImplementedException, HttpService, HttpException } from '@nestjs/common';
+import { Injectable, NotImplementedException, HttpService, HttpException, ImATeapotException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Activity } from '../../entities/activity.entity';
 import { Repository, InsertResult } from 'typeorm';
 import { PostService } from '../../post/post.service';
 import { Post } from '../../entities/post.entity';
 import { CreateActivity } from '../definitions/activities/create-activity';
-import { fromUri, ActorType, parseActor, getActorUri, getIdForActor } from '../definitions/actor.interface';
+import { fromUri, ActorType, parseActor, getActorUri, getIdForActor, Actor } from '../definitions/actor.interface';
 import { PostObject } from '../definitions/activities/post-object';
 import { AP } from '../definitions/constants';
 import { TombstoneObject } from '../definitions/activities/tombstone-object';
@@ -101,7 +101,11 @@ export class ActivityService {
         return inserted;
     }
 
-    async deliver(activityObject: object): Promise<object> {
+    async deliver(activity: Activity): Promise<object> {
+        const activityObject = activity.activityObject;
+        console.log("*** Deliver", activity);
+        
+
         // We use a set for deduplication purposes.
         const targets = new Set<string>();
         
@@ -121,12 +125,23 @@ export class ActivityService {
         const deliveries = Array.from(targets).map(async (target) => {
             if (target === AP.Public) {
                 /* TODO: Handle public addressing */
-            } else {
+            } else if (target.includes('followers')) {
+                /* TODO: Deliver to a collection of followers */
+                console.log(activityObject);
+                return Promise.resolve(true);
+            }else {
                 const {actor, type} = fromUri(target);
 
                 if (type === ActorType.Group) {
                     // Target is a group
                     const group = await this.groupService.findGlobalByName(actor.name, target);
+                    console.log("*** Group", group, activity.targetGroups);
+                    
+
+                    if (activity.targetGroups && activity.targetGroups.includes(group)) {
+                        // Already processed this group
+                        return Promise.resolve(true);
+                    }
                     
                     if (this.serverService.isLocal(group.server)) {
                         // Local target for delivery
@@ -134,7 +149,7 @@ export class ActivityService {
                         return (this.httpService.post(
                             this.groupService.createActor(group).inbox,
                             activityObject
-                        ).toPromise());                    
+                        ).toPromise());
                     } else {
                         // External server, so check for federation, etc.
                         // TODO: All this
@@ -153,6 +168,22 @@ export class ActivityService {
         }
 
         return activityObject;
+    }
+
+    async sendFollowRequest(activity: Activity, target: Actor): Promise<any> {
+        // TODO
+        throw new ImATeapotException();
+    }
+
+    /**
+     * Get an Activity entity based on a URI.
+     *
+     * @param uri The URI of the desired activity
+     * @returns The database entity for the activity
+     * @memberof ActivityService
+     */
+    async findByUri(uri: string): Promise<Activity> {
+        return this.activityRepository.findOne({ uri });
     }
 
     /**

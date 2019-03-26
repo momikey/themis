@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotImplementedException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotImplementedException, HttpException, ImATeapotException } from '@nestjs/common';
 import { GroupService } from '../../group/group.service';
 import { Group } from '../../entities/group.entity';
 import { GroupActor } from '../definitions/actors/group.actor';
@@ -7,6 +7,7 @@ import * as URI from 'uri-js';
 import { ConfigService } from '../../config/config.service';
 import { UserService } from '../../user/user.service';
 import { ActivityService } from '../activity/activity.service';
+import { Activity } from '../../entities/activity.entity';
 
 /**
  * This class creates and handles Group Actors, connecting them
@@ -29,23 +30,54 @@ export class ApGroupService {
     }
     
     async handleIncoming(groupname: string, data: any): Promise<any> {
-        const group = this.groupService.findLocalByName(groupname);
+        const group = await this.groupService.findLocalByName(groupname);
+        const groupFollowers = this.groupService.createActor(group).followers;
 
         const activity = data;
+        const activityEntity = await this.activityService.findByUri(activity.id);
+
+        console.log("*** Activity", data);
+        
 
         switch (activity.type) {
             case 'Create': {
-                // TODO
-                throw new NotImplementedException;
+                if (activityEntity) {
+                    
+                    // Activity is already in the DB
+                    activityEntity.targetGroups.push(group);
+
+                    // I'm not sure if we can use the `audience` property
+                    // for this, but 
+                    if (!activity.audience) {
+                        activity.audience = [groupFollowers];
+                    } else if (activity.audience instanceof Array) {
+                        activity.audience.push(groupFollowers);
+                    } else {
+                        throw new BadRequestException;
+                    }
+
+                    const saved = await this.activityService.save(activityEntity);
+                    return this.deliverToFollowers(saved, group);
+                } else {
+                    // New activity, so from an outside server
+                    // TODO: Handle this
+                }
+                break;
             }
             case 'Follow': {
                 const user = this.userService.findByUri(data.actor);
-                // TODO: Implement following
+                
+                console.log("*** Follow", user);
+                throw new ImATeapotException();
             }
             default:
                 throw new NotImplementedException;
                 // throw new BadRequestException(`Invalid activity type ${activity.type}`);
         }
+    }
+
+    async deliverToFollowers(activity: Activity, group: Group): Promise<Activity> {
+        throw new ImATeapotException;
     }
 
     /**

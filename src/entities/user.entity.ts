@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, CreateDateColumn, Column, OneToMany, Ma
 import { Post } from './post.entity';
 import { Activity } from './activity.entity';
 import { Server } from './server.entity';
+import { Group } from './group.entity';
 
 @Entity()
 export class User {
@@ -57,4 +58,40 @@ export class User {
     @ManyToMany(type => Post, post => post.likes)
     @JoinTable()
     liked: Post[];
+
+
+    /**
+     * A list of all users who are following this account.
+     *
+     * @memberof User
+     */
+    @ManyToMany(type => User, user => user.userFollowing)
+    @JoinTable()
+    userFollowers: User[];
+
+    /**
+     * A list of all users this account is following.
+     *
+     * @memberof User
+     */
+    @ManyToMany(type => User, user => user.userFollowers)
+    userFollowing: User[];
+
+    /**
+     * A list of all groups following this account.
+     *
+     * @memberof User
+     */
+    @ManyToMany(type => Group)
+    @JoinTable()
+    groupFollowers: Group[];
+
+    /**
+     * A list of all groups this account is following.
+     *
+     * @memberof User
+     */
+    @ManyToMany(type => Group, group => group.followingUsers)
+    @JoinTable()
+    groupFollowing: Group[];
 }

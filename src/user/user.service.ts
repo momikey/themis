@@ -10,6 +10,7 @@ import { Post } from '../entities/post.entity';
 import { UserActor } from '../activitypub/definitions/actors/user.actor';
 import { AP } from '../activitypub/definitions/constants';
 import * as URI from 'uri-js';
+import { Group } from '../entities/group.entity';
 
 @Injectable()
 export class UserService {
@@ -125,6 +126,60 @@ export class UserService {
         const result = await this.getLikes(user);
 
         result.liked.push(post);
+        return this.userRepository.save(result);
+    }
+
+    /**
+     * Get all groups and users following this user.
+     * (Groups don't actually follow at present, but this may change,
+     * and it doesn't really hurt.)
+     *
+     * @param user The user entity
+     * @returns The same entity, but with followers loaded into it
+     * @memberof User
+     */
+    async getFollowers(user: User): Promise<User> {
+        return this.userRepository.findOne(user.id,
+             { relations: ['userFollowers', 'groupFollowers'] });
+    }
+
+    async addFollowerToAccount(user: User, follower: User | Group): Promise<User> {
+        const result = await this.getFollowers(user);
+
+        if (follower instanceof User) {
+            result.userFollowers.push(follower);
+        } else if (follower instanceof Group) {
+            result.groupFollowers.push(follower);
+        } else {
+            throw new Error("This can't happen");
+        }
+
+        return this.userRepository.save(result);
+    }
+
+    /**
+     * Get all users or groups this user is following.
+     *
+     * @param user The user entity
+     * @returns The same entity, but with following users/groups loaded into it
+     * @memberof User
+     */
+    async getFollowing(user: User): Promise<User> {
+        return this.userRepository.findOne(user.id,
+             { relations: ['userFollowing', 'groupFollowing'] });
+    }
+
+    async addFollowingToAccount(user: User, follow: User | Group): Promise<User> {
+        const result = await this.getFollowing(user);
+        
+        if (follow instanceof User) {
+            result.userFollowing.push(follow);
+        } else if (follow instanceof Group) {
+            result.groupFollowing.push(follow);
+        } else {
+            throw new Error("This can't happen");
+        }
+
         return this.userRepository.save(result);
     }
 

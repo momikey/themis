@@ -153,6 +153,11 @@ export class GroupService {
         return response.posts;
     }
 
+    async getFollowers(group: Group): Promise<Group> {
+        return this.groupRepository.findOne(group.id,
+            { relations: ['followingUsers'] });
+    }
+
     // Run a set of filters on a group list.
     filterGroups(groups: Group[], filters: GroupFilterEntry[]): Group[] {
         const filterRunner = new GroupFilter(filters);

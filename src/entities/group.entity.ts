@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToMany, O
 import { Post } from './post.entity';
 import { Activity } from './activity.entity';
 import { Server } from './server.entity';
+import { User } from './user.entity';
 
 // Note that we have to change the table name because "group" is a reserved word in SQL.
 @Entity("groups")
@@ -51,4 +52,7 @@ export class Group {
     // This isn't as necessary as for users, but it might come in handy.
     @CreateDateColumn({readonly: true })
     date: string;
+
+    @ManyToMany(type => User, user => user.groupFollowing)
+    followingUsers: User[];
 }
