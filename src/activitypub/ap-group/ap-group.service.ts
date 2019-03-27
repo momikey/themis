@@ -36,9 +36,6 @@ export class ApGroupService {
         const activity = data;
         const activityEntity = await this.activityService.findByUri(activity.id);
 
-        console.log("*** Activity", data);
-        
-
         switch (activity.type) {
             case 'Create': {
                 if (activityEntity) {
@@ -65,10 +62,20 @@ export class ApGroupService {
                 break;
             }
             case 'Follow': {
-                const user = this.userService.findByUri(data.actor);
-                
-                console.log("*** Follow", user);
-                throw new ImATeapotException();
+                const user = await this.userService.findByUri(data.actor);
+
+                const result = await this.groupService.addFollower(group, user);
+                if (result) {
+                    // Send an Accept request if updated
+                    const accept = this.activityService.createAcceptActivity(
+                        group.uri,
+                        data.actor
+                    )
+
+                    return this.acceptPostRequest(group.name, accept);
+                }
+
+                return result;
             }
             default:
                 throw new NotImplementedException;

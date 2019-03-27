@@ -12,6 +12,7 @@ import { getIdForActor, ActorType } from '../activitypub/definitions/actor.inter
 import { GroupActor } from '../activitypub/definitions/actors/group.actor';
 import { AP } from '../activitypub/definitions/constants';
 import * as URI from 'uri-js';
+import { User } from '../entities/user.entity';
 
 @Injectable()
 export class GroupService {
@@ -156,6 +157,24 @@ export class GroupService {
     async getFollowers(group: Group): Promise<Group> {
         return this.groupRepository.findOne(group.id,
             { relations: ['followingUsers'] });
+    }
+
+    async addFollower(group: Group, user: User): Promise<boolean> {
+        const fullGroup = await this.groupRepository.findOne(group.id,
+            { relations: ['followingUsers'] });
+
+        if (!fullGroup.followingUsers) {
+            fullGroup.followingUsers = [user];
+        } else if (!fullGroup.followingUsers.includes(user)) {
+            fullGroup.followingUsers.push(user);
+        } else {
+            return false;
+        }
+
+        console.log("*** Group", fullGroup);
+        
+        await this.groupRepository.save(fullGroup);
+        return true;
     }
 
     // Run a set of filters on a group list.

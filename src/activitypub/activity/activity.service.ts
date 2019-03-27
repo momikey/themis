@@ -17,6 +17,7 @@ import { User } from '../../entities/user.entity';
 import { GroupService } from '../../group/group.service';
 import { UserService } from '../../user/user.service';
 import { ServerService } from '../../server/server.service';
+import { AcceptActivity } from '../definitions/activities/accept-activity';
 
 @Injectable()
 export class ActivityService {
@@ -56,6 +57,17 @@ export class ActivityService {
 
         // return this.postService.createTopLevel(post);
         throw new NotImplementedException();
+    }
+
+    createAcceptActivity(actorUri: string, targetUri: string): AcceptActivity {
+        const accept: AcceptActivity = {
+            '@context': AP.Context,
+            type: 'Accept',
+            actor: actorUri,
+            object: targetUri
+        }
+
+        return accept;
     }
 
     /**
@@ -99,6 +111,42 @@ export class ActivityService {
         }
 
         return inserted;
+    }
+
+    async deliverTo(activity: Activity, targets: Array<string>): Promise<any> {
+        const activityObject = activity.activityObject;
+
+        const results = targets.map(async (t) => {
+            if (t === AP.Public) {
+                // Public address doesn't need to be delivered
+                return Promise.resolve(true);
+            } else {
+                const uri = URI.parse(t);
+                const server = await this.serverService.find({
+                    host: uri.host,
+                    scheme: uri.scheme,
+                    port: +uri.port
+                });
+                const path = uri.path.split('/');
+
+                if (this.serverService.isLocal(server)) {
+                    const actor = (path[1] === 'group')
+                    ? this.groupService.createActor(await this.groupService.findLocalByName(path[2]))
+                    : this.userService.createActor(await this.userService.findLocalByName(path[2]));
+
+                    return (this.httpService.post(
+                        actor.inbox,
+                        activityObject
+                    )).toPromise();
+                } else {
+                    // Federated
+                    // TODO: Implement this
+                    throw new NotImplementedException();
+                }
+            }
+        });
+
+        return Promise.all(results);
     }
 
     async deliver(activity: Activity): Promise<object> {
@@ -171,8 +219,7 @@ export class ActivityService {
     }
 
     async sendFollowRequest(activity: Activity, target: Actor): Promise<any> {
-        // TODO
-        throw new ImATeapotException();
+        return this.deliverTo(activity, [activity.activityObject['object']]);
     }
 
     /**
