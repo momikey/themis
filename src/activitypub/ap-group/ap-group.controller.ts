@@ -45,7 +45,7 @@ export class ApGroupController {
 
     @Get('/:name/followers')
     async getFollowers(@Param('name') name: string) {
-        throw new NotImplementedException();
+        return this.apGroupService.getFollowers(name);
     }
 
     /**

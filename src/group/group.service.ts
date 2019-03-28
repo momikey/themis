@@ -171,8 +171,6 @@ export class GroupService {
             return false;
         }
 
-        console.log("*** Group", fullGroup);
-        
         await this.groupRepository.save(fullGroup);
         return true;
     }

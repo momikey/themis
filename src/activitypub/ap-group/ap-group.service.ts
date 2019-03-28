@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotImplementedException, HttpException, ImATeapotException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotImplementedException, HttpException, ImATeapotException, NotFoundException } from '@nestjs/common';
 import { GroupService } from '../../group/group.service';
 import { Group } from '../../entities/group.entity';
 import { GroupActor } from '../definitions/actors/group.actor';
@@ -8,6 +8,9 @@ import { ConfigService } from '../../config/config.service';
 import { UserService } from '../../user/user.service';
 import { ActivityService } from '../activity/activity.service';
 import { Activity } from '../../entities/activity.entity';
+import { User } from '../../entities/user.entity';
+import { compareDesc } from 'date-fns';
+import { Collection } from '../definitions/activities/collection-object';
 
 /**
  * This class creates and handles Group Actors, connecting them
@@ -26,7 +29,7 @@ export class ApGroupService {
     ) {}
 
     async acceptPostRequest(groupname: string, data: any): Promise<any> {
-
+        throw new ImATeapotException();
     }
     
     async handleIncoming(groupname: string, data: any): Promise<any> {
@@ -71,7 +74,7 @@ export class ApGroupService {
                         group.uri,
                         data.actor
                     )
-
+                    
                     return this.acceptPostRequest(group.name, accept);
                 }
 
@@ -80,6 +83,28 @@ export class ApGroupService {
             default:
                 throw new NotImplementedException;
                 // throw new BadRequestException(`Invalid activity type ${activity.type}`);
+        }
+    }
+
+    /**
+     * Get the followers for this actor in an AP Collection.
+     *
+     * @param name The name of a local group
+     * @returns An AP Collection object holding all following actors
+     * @memberof ApGroupService
+     */
+    async getFollowers(name: string): Promise<Collection> {
+        try {
+            const group = await this.groupService.findLocalByName(name);
+
+            const withFollowers = await this.groupService.getFollowers(group);
+            const allFollowers: User[] = withFollowers.followingUsers
+                .sort((a,b) => compareDesc(a.date, b.date));
+
+            const uris = allFollowers.map((f) => f.uri);
+            return this.activityService.createCollection(uris);
+        } catch (e) {
+            throw new NotFoundException(`User ${name} does not exist on this server`);
         }
     }
 
