@@ -1,8 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToMany, OneToMany, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToMany, OneToMany, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
 import { Post } from './post.entity';
 import { Activity } from './activity.entity';
 import { Server } from './server.entity';
 import { User } from './user.entity';
+import { ActorEntity } from './actor.entity';
 
 // Note that we have to change the table name because "group" is a reserved word in SQL.
 @Entity("groups")
@@ -55,4 +56,8 @@ export class Group {
 
     @ManyToMany(type => User, user => user.groupFollowing)
     followingUsers: User[];
+
+    @OneToOne(type => ActorEntity, { cascade: true })
+    @JoinColumn()
+    actor: ActorEntity;
 }

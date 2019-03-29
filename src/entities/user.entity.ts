@@ -1,8 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, CreateDateColumn, Column, OneToMany, ManyToOne, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, CreateDateColumn, Column, OneToMany, ManyToOne, ManyToMany, JoinTable, OneToOne, JoinColumn } from 'typeorm';
 import { Post } from './post.entity';
 import { Activity } from './activity.entity';
 import { Server } from './server.entity';
 import { Group } from './group.entity';
+import { ActorEntity } from './actor.entity';
 
 @Entity()
 export class User {
@@ -94,4 +95,8 @@ export class User {
     @ManyToMany(type => Group, group => group.followingUsers)
     @JoinTable()
     groupFollowing: Group[];
+
+    @OneToOne(type => ActorEntity, { cascade: true })
+    @JoinColumn()
+    actor: ActorEntity;
 }

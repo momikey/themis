@@ -13,6 +13,7 @@ import { GroupActor } from '../activitypub/definitions/actors/group.actor';
 import { AP } from '../activitypub/definitions/constants';
 import * as URI from 'uri-js';
 import { User } from '../entities/user.entity';
+import { ActorEntity } from '../entities/actor.entity';
 
 @Injectable()
 export class GroupService {
@@ -35,6 +36,14 @@ export class GroupService {
         });
 
         groupEntity.uri = groupEntity.uri || getIdForActor(groupEntity, ActorType.Group);
+
+        if (this.serverService.isLocal(server)) {
+            const actor = this.createActor(groupEntity);
+            groupEntity.actor = this.createActorEntity(actor);
+        } else {
+            // Non-local server, so we need to fetch actor info,
+            // but that probably should be handled by the AP layer.
+        }
 
         return await this.groupRepository.save(groupEntity);
     }
@@ -173,6 +182,28 @@ export class GroupService {
 
         await this.groupRepository.save(fullGroup);
         return true;
+    }
+
+    async attachActor(group: Group, actor: GroupActor): Promise<Group> {
+        const withActor = await this.groupRepository.findOne(group.id,
+            { relations: ['actor'] });
+        
+        withActor.actor = this.createActorEntity(actor);
+        
+        return this.groupRepository.save(withActor);
+    }
+
+    createActorEntity(actor: GroupActor): ActorEntity {
+        const entity = new ActorEntity();
+
+        entity.uri = actor.id;
+        entity.inbox = actor.inbox;
+        entity.outbox = actor.outbox;
+        entity.followers = actor.followers;
+        entity.following = actor.following;
+        entity.object = actor;
+
+        return entity;
     }
 
     // Run a set of filters on a group list.

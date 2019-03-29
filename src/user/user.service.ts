@@ -11,6 +11,7 @@ import { UserActor } from '../activitypub/definitions/actors/user.actor';
 import { AP } from '../activitypub/definitions/constants';
 import * as URI from 'uri-js';
 import { Group } from '../entities/group.entity';
+import { ActorEntity } from '../entities/actor.entity';
 
 @Injectable()
 export class UserService {
@@ -35,6 +36,14 @@ export class UserService {
 
         userEntity.uri = userEntity.uri || getIdForActor(userEntity, ActorType.User);
 
+        if (this.serverService.isLocal(server)) {
+            const actor = this.createActor(userEntity);
+            userEntity.actor = this.createActorEntity(actor);
+        } else {
+            // Non-local server, so we need to fetch actor info,
+            // but that probably should be handled by the AP layer.
+        }
+
         return this.userRepository.save(userEntity);
     }
 
@@ -52,6 +61,7 @@ export class UserService {
         });
 
         userEntity.uri = userEntity.uri || getIdForActor(userEntity, ActorType.User);
+        userEntity.actor = this.createActorEntity(this.createActor(userEntity));
 
         return this.userRepository.save(userEntity);
     }
@@ -181,6 +191,28 @@ export class UserService {
         }
 
         return this.userRepository.save(result);
+    }
+
+    async attachActor(user: User, actor: UserActor): Promise<User> {
+        const withActor = await this.userRepository.findOne(user.id,
+            { relations: ['actor'] });
+        
+        withActor.actor = this.createActorEntity(actor);
+        
+        return this.userRepository.save(withActor);
+    }
+
+    createActorEntity(actor: UserActor): ActorEntity {
+        const entity = new ActorEntity();
+
+        entity.uri = actor.id;
+        entity.inbox = actor.inbox;
+        entity.outbox = actor.outbox;
+        entity.followers = actor.followers;
+        entity.following = actor.following;
+        entity.object = actor;
+
+        return entity;
     }
 
     /**
