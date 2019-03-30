@@ -202,6 +202,13 @@ export class UserService {
         return this.userRepository.save(withActor);
     }
 
+    async getWithActor(user: User): Promise<User> {
+        const withActor = await this.userRepository.findOne(user.id,
+            { relations: ['actor'] });
+
+        return withActor;
+    }
+
     createActorEntity(actor: UserActor): ActorEntity {
         const entity = new ActorEntity();
 

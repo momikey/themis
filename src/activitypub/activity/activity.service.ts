@@ -130,12 +130,12 @@ export class ActivityService {
                 const path = uri.path.split('/');
 
                 if (this.serverService.isLocal(server)) {
-                    const actor = (path[1] === 'group')
-                    ? this.groupService.createActor(await this.groupService.findLocalByName(path[2]))
-                    : this.userService.createActor(await this.userService.findLocalByName(path[2]));
+                    const entity = (path[1] === 'group')
+                    ? await this.groupService.getWithActor(await this.groupService.findLocalByName(path[2]))
+                    : await this.userService.getWithActor(await this.userService.findLocalByName(path[2]));
 
                     return (this.httpService.post(
-                        actor.inbox,
+                        entity.actor.inbox,
                         activityObject
                     )).toPromise();
                 } else {
@@ -182,7 +182,9 @@ export class ActivityService {
 
                 if (type === ActorType.Group) {
                     // Target is a group
-                    const group = await this.groupService.findGlobalByName(actor.name, target);
+                    const group = (await this.groupService.getWithActor(
+                        await this.groupService.findGlobalByName(actor.name, target)
+                    ));
                     console.log("*** Group", group, activity.targetGroups);
                     
 
@@ -195,7 +197,7 @@ export class ActivityService {
                         // Local target for delivery
 
                         return (this.httpService.post(
-                            this.groupService.createActor(group).inbox,
+                            group.actor.inbox,
                             activityObject
                         ).toPromise());
                     } else {

@@ -50,7 +50,12 @@ describe('ApGroupService', () => {
     });
 
     beforeAll(() => {
-      groupService.findLocalByName.mockResolvedValue(Object.assign(new Group, {
+      const { GroupService } = jest.requireActual('../../group/group.service');
+      const actual = new GroupService();
+      groupService.createActor = jest.fn(actual.createActor);
+      groupService.idForGroup = jest.fn(actual.idForGroup);
+
+      const sampleGroup = Object.assign(new Group, {
         id: 1,
         name: 'group',
         server: sampleServer,
@@ -58,13 +63,13 @@ describe('ApGroupService', () => {
         summary: 'A testing group',
         posts: [],
         date: (new Date).toDateString()
-      }));
+      });
 
-      const { GroupService } = jest.requireActual('../../group/group.service');
-      const actual = new GroupService;
-      
-      groupService.createActor = jest.fn(actual.createActor);
-      groupService.idForGroup = jest.fn(actual.idForGroup);
+      groupService.findLocalByName.mockResolvedValue(sampleGroup);
+
+      groupService.getWithActor.mockResolvedValue(Object.assign(sampleGroup,
+        { actor: { object: groupService.createActor(sampleGroup) } }
+      ));
     });
 
     it('getting a local group should return a valid object', async () => {

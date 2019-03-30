@@ -72,23 +72,29 @@ describe('ApUserService', () => {
     }
 
     beforeAll(() => {
-      userService.findLocalByName.mockResolvedValue(Object.assign(new User, {
+      const { UserService } = jest.requireActual('../../user/user.service');
+      const actual = new UserService;
+      
+      userService.createActor = jest.fn(actual.createActor);
+      userService.idForUser = jest.fn(actual.idForUser);
+
+      const sampleUser = Object.assign(new User, {
         id: 1,
         name: 'user',
-        server: Object.assign(new Server, {host: 'example.com', scheme: 'http'}),
+        server: Object.assign(new Server, { host: 'example.com', scheme: 'http' }),
         displayName: 'A user',
         summary: 'A user for testing',
         icon: '',
         uri: 'http://example.com/user/user',
         posts: [],
         date: (new Date).toDateString()
-      }));
+      });
 
-      const { UserService } = jest.requireActual('../../user/user.service');
-      const actual = new UserService;
-      
-      userService.createActor = jest.fn(actual.createActor);
-      userService.idForUser = jest.fn(actual.idForUser);
+      userService.findLocalByName.mockResolvedValue(sampleUser);
+
+      userService.getWithActor.mockResolvedValue(Object.assign(sampleUser,
+        { actor: { object: userService.createActor(sampleUser) } }
+      ));
     });
 
     it('getting a local user should return a valid object', async () => {

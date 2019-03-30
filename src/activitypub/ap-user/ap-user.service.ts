@@ -47,7 +47,7 @@ export class ApUserService {
         try {
             const user = await this.getLocalUser(name);
 
-            return this.userService.createActor(user);
+            return (await this.userService.getWithActor(user)).actor.object as UserActor;
         } catch (e) {
             return Promise.reject(e);
         }

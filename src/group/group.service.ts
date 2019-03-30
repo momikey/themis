@@ -193,6 +193,13 @@ export class GroupService {
         return this.groupRepository.save(withActor);
     }
 
+    async getWithActor(group: Group): Promise<Group> {
+        const withActor = await this.groupRepository.findOne(group.id,
+            { relations: ['actor'] });
+        
+        return withActor;
+    }
+
     createActorEntity(actor: GroupActor): ActorEntity {
         const entity = new ActorEntity();
 

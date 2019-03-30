@@ -33,8 +33,8 @@ export class ApGroupService {
     }
     
     async handleIncoming(groupname: string, data: any): Promise<any> {
-        const group = await this.groupService.findLocalByName(groupname);
-        const groupFollowers = this.groupService.createActor(group).followers;
+        const group = await (this.groupService.getWithActor(
+            await this.groupService.findLocalByName(groupname)));
 
         const activity = data;
         const activityEntity = await this.activityService.findByUri(activity.id);
@@ -49,9 +49,9 @@ export class ApGroupService {
                     // I'm not sure if we can use the `audience` property
                     // for this, but 
                     if (!activity.audience) {
-                        activity.audience = [groupFollowers];
+                        activity.audience = [group.actor.followers];
                     } else if (activity.audience instanceof Array) {
-                        activity.audience.push(groupFollowers);
+                        activity.audience.push(group.actor.followers);
                     } else {
                         throw new BadRequestException;
                     }
@@ -140,7 +140,7 @@ export class ApGroupService {
         try {
             const group = await this.getLocalGroup(name);
 
-            return this.groupService.createActor(group);
+            return (await this.groupService.getWithActor(group)).actor.object as GroupActor;
         } catch (e) {
             return Promise.reject(e);
         }
