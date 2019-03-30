@@ -10,6 +10,7 @@ import { UserAuthenticationService } from '../../user/user-authentication/user-a
 import { Server } from '../../entities/server.entity';
 import { User } from '../../entities/user.entity';
 import { Activity } from '../../entities/activity.entity';
+import { ActorEntity } from '../../entities/actor.entity';
 
 jest.mock('../../user/user.service');
 jest.mock('../../config/config.service');
@@ -90,11 +91,10 @@ describe('ApUserService', () => {
         date: (new Date).toDateString()
       });
 
-      userService.findLocalByName.mockResolvedValue(sampleUser);
+      sampleUser.actor = Object.assign(new ActorEntity,
+        { object: userService.createActor(sampleUser) });
 
-      userService.getWithActor.mockResolvedValue(Object.assign(sampleUser,
-        { actor: { object: userService.createActor(sampleUser) } }
-      ));
+      userService.findLocalByName.mockResolvedValue(sampleUser);
     });
 
     it('getting a local user should return a valid object', async () => {

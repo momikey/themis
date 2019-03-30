@@ -8,6 +8,7 @@ import { UserService } from '../../user/user.service';
 import { ActivityService } from '../activity/activity.service';
 import { Server } from '../../entities/server.entity';
 import { Group } from '../../entities/group.entity';
+import { ActorEntity } from '../../entities/actor.entity';
 
 jest.mock('../../group/group.service');
 jest.mock('../../user/user.service');
@@ -65,11 +66,10 @@ describe('ApGroupService', () => {
         date: (new Date).toDateString()
       });
 
-      groupService.findLocalByName.mockResolvedValue(sampleGroup);
+      sampleGroup.actor = Object.assign(new ActorEntity, 
+        { object: groupService.createActor(sampleGroup) });
 
-      groupService.getWithActor.mockResolvedValue(Object.assign(sampleGroup,
-        { actor: { object: groupService.createActor(sampleGroup) } }
-      ));
+      groupService.findLocalByName.mockResolvedValue(sampleGroup);
     });
 
     it('getting a local group should return a valid object', async () => {

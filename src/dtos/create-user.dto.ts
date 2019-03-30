@@ -6,7 +6,7 @@ export class CreateUserDto {
     readonly name: string;
     readonly server: string;
     readonly displayName: string;
-    readonly summary: string;
-    readonly iconUrl: string;
+    readonly summary?: string;
+    readonly iconUrl?: string;
     readonly uri?: string;
 }

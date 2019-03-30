@@ -37,12 +37,20 @@ export class GroupService {
 
         groupEntity.uri = groupEntity.uri || getIdForActor(groupEntity, ActorType.Group);
 
-        if (this.serverService.isLocal(server)) {
-            const actor = this.createActor(groupEntity);
-            groupEntity.actor = this.createActorEntity(actor);
+        const existingActor = await this.groupRepository.manager.findOne(ActorEntity, {
+            uri: groupEntity.uri
+        });
+
+        if (!existingActor) {
+            if (this.serverService.isLocal(server)) {
+                const actor = this.createActor(groupEntity);
+                groupEntity.actor = this.createActorEntity(actor);
+            } else {
+                // Non-local server, so we need to fetch actor info,
+                // but that probably should be handled by the AP layer.
+            }
         } else {
-            // Non-local server, so we need to fetch actor info,
-            // but that probably should be handled by the AP layer.
+            groupEntity.actor = existingActor;
         }
 
         return await this.groupRepository.save(groupEntity);
@@ -191,13 +199,6 @@ export class GroupService {
         withActor.actor = this.createActorEntity(actor);
         
         return this.groupRepository.save(withActor);
-    }
-
-    async getWithActor(group: Group): Promise<Group> {
-        const withActor = await this.groupRepository.findOne(group.id,
-            { relations: ['actor'] });
-        
-        return withActor;
     }
 
     createActorEntity(actor: GroupActor): ActorEntity {

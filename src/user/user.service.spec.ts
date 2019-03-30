@@ -7,6 +7,7 @@ import { ServerService } from '../server/server.service';
 import { Server } from '../entities/server.entity';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from '../dtos/create-user.dto';
+import { EntityManager } from 'typeorm/entity-manager/EntityManager';
 
 jest.mock('../config/config.service');
 jest.mock('../server/server.service');
@@ -20,11 +21,19 @@ ConfigServiceMock.mockImplementation(() => {
 
 jest.mock('typeorm/repository/Repository');
 
+// jest.mock('typeorm/entity-manager/EntityManager');
+const EntityManagerMock = jest.fn();
+EntityManagerMock.mockReturnValue({
+  findOne: jest.fn().mockResolvedValue(undefined),
+});
+
 describe('UserService', () => {
   let service: UserService;
   let repository: jest.Mocked<Repository<User>>;
   let configService: jest.Mocked<ConfigService>;
   let serverService: jest.Mocked<ServerService>;
+
+  let entityManager = EntityManagerMock();
   
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -40,6 +49,8 @@ describe('UserService', () => {
     repository = module.get<Repository<User>>(getRepositoryToken(User)) as jest.Mocked<Repository<User>>;
     configService = module.get<ConfigService>(ConfigService) as jest.Mocked<ConfigService>;
     serverService = module.get<ServerService>(ServerService) as jest.Mocked<ServerService>;
+
+    Object.defineProperty(repository, 'manager',  { get: jest.fn().mockReturnValue(entityManager) } );
   });
   
   it('should be defined', () => {

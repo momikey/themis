@@ -6,6 +6,7 @@ import { ConfigService } from '../config/config.service';
 import { ServerService } from '../server/server.service';
 import { Server } from '../entities/server.entity';
 import { Group } from '../entities/group.entity';
+import { EntityManager } from 'typeorm/entity-manager/EntityManager';
 
 
 jest.mock('../config/config.service');
@@ -18,6 +19,12 @@ ConfigServiceMock.mockImplementation(() => {
   }
 });
 
+// jest.mock('typeorm/entity-manager/EntityManager');
+const EntityManagerMock = jest.fn();
+EntityManagerMock.mockReturnValue({
+  findOne: jest.fn().mockResolvedValue(undefined),
+});
+
 jest.mock('typeorm/repository/Repository');
 
 describe('GroupService', () => {
@@ -25,6 +32,8 @@ describe('GroupService', () => {
   let repository: jest.Mocked<Repository<Group>>;
   let configService: jest.Mocked<ConfigService>;
   let serverService: jest.Mocked<ServerService>;
+
+  let entityManager = EntityManagerMock();
 
   const testData = [
       { id: 1, name: 'first', server: {host: 'example.com'}, displayName: 'Testing', summary: '' },
@@ -38,7 +47,8 @@ describe('GroupService', () => {
         GroupService,
         { provide: getRepositoryToken(Group), useClass: Repository },
         { provide: ConfigService, useClass: ConfigServiceMock },
-        ServerService
+        ServerService,
+        { provide: EntityManager, useClass: EntityManagerMock }
       ],
     }).compile();
 
@@ -50,6 +60,8 @@ describe('GroupService', () => {
     repository.count.mockResolvedValue(testData.length);
     repository.find.mockResolvedValue(testData as Group[]);
     repository.save.mockImplementation(async (entity) => entity as Group);
+
+    Object.defineProperty(repository, 'manager',  { get: jest.fn().mockReturnValue(entityManager) } );
   });
 
   it('should be defined', () => {

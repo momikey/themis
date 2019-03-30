@@ -36,12 +36,22 @@ export class UserService {
 
         userEntity.uri = userEntity.uri || getIdForActor(userEntity, ActorType.User);
 
-        if (this.serverService.isLocal(server)) {
-            const actor = this.createActor(userEntity);
-            userEntity.actor = this.createActorEntity(actor);
+        const existingActor = await this.userRepository.manager.findOne(ActorEntity, {
+            uri: userEntity.uri
+        });       
+
+        if (!existingActor) {
+            // This is a new user
+            if (this.serverService.isLocal(server)) {
+                const actor = this.createActor(userEntity);
+                userEntity.actor = this.createActorEntity(actor);
+            } else {
+                // Non-local server, so we need to fetch actor info,
+                // but that probably should be handled by the AP layer.
+            }
         } else {
-            // Non-local server, so we need to fetch actor info,
-            // but that probably should be handled by the AP layer.
+            // User already exists as an actor in the DB, so just use that
+            userEntity.actor = existingActor;
         }
 
         return this.userRepository.save(userEntity);
@@ -52,18 +62,26 @@ export class UserService {
             throw new Error(`Username ${username} already in database`);
         }
 
-        const userEntity = this.userRepository.create({
+        const userObject: CreateUserDto = {
             name: username,
-            server: await this.serverService.local(),
+            server: this.serverService.localHostname(),
             displayName: username,
-            summary: '',
-            icon: ''
-        });
+        }
 
-        userEntity.uri = userEntity.uri || getIdForActor(userEntity, ActorType.User);
-        userEntity.actor = this.createActorEntity(this.createActor(userEntity));
+        return this.create(userObject);
 
-        return this.userRepository.save(userEntity);
+        // const userEntity = this.userRepository.create({
+        //     name: username,
+        //     server: await this.serverService.local(),
+        //     displayName: username,
+        //     summary: '',
+        //     icon: ''
+        // });
+
+        // userEntity.uri = userEntity.uri || getIdForActor(userEntity, ActorType.User);
+        // userEntity.actor = this.createActorEntity(this.createActor(userEntity));
+
+        // return this.userRepository.save(userEntity);
     }
 
     async delete(name: string): Promise<User> {
@@ -200,13 +218,6 @@ export class UserService {
         withActor.actor = this.createActorEntity(actor);
         
         return this.userRepository.save(withActor);
-    }
-
-    async getWithActor(user: User): Promise<User> {
-        const withActor = await this.userRepository.findOne(user.id,
-            { relations: ['actor'] });
-
-        return withActor;
     }
 
     createActorEntity(actor: UserActor): ActorEntity {

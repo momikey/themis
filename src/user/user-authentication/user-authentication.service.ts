@@ -95,7 +95,7 @@ export class UserAuthenticationService {
     async validateAccount(account: CreateAccountDto): Promise<boolean> {
         // TODO: Add validation logic
         const user = await this.userService.findByName(account.username)
-
+        
         if (user) {
             // User already exists
             return false;

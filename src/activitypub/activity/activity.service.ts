@@ -131,8 +131,8 @@ export class ActivityService {
 
                 if (this.serverService.isLocal(server)) {
                     const entity = (path[1] === 'group')
-                    ? await this.groupService.getWithActor(await this.groupService.findLocalByName(path[2]))
-                    : await this.userService.getWithActor(await this.userService.findLocalByName(path[2]));
+                    ? await this.groupService.findLocalByName(path[2])
+                    : await this.userService.findLocalByName(path[2]);
 
                     return (this.httpService.post(
                         entity.actor.inbox,
@@ -182,9 +182,7 @@ export class ActivityService {
 
                 if (type === ActorType.Group) {
                     // Target is a group
-                    const group = (await this.groupService.getWithActor(
-                        await this.groupService.findGlobalByName(actor.name, target)
-                    ));
+                    const group = await this.groupService.findGlobalByName(actor.name, target);
                     console.log("*** Group", group, activity.targetGroups);
                     
 

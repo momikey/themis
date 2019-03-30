@@ -33,8 +33,7 @@ export class ApGroupService {
     }
     
     async handleIncoming(groupname: string, data: any): Promise<any> {
-        const group = await (this.groupService.getWithActor(
-            await this.groupService.findLocalByName(groupname)));
+        const group = await this.groupService.findLocalByName(groupname);
 
         const activity = data;
         const activityEntity = await this.activityService.findByUri(activity.id);
@@ -140,7 +139,7 @@ export class ApGroupService {
         try {
             const group = await this.getLocalGroup(name);
 
-            return (await this.groupService.getWithActor(group)).actor.object as GroupActor;
+            return group.actor.object as GroupActor;
         } catch (e) {
             return Promise.reject(e);
         }

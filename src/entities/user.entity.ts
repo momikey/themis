@@ -96,7 +96,7 @@ export class User {
     @JoinTable()
     groupFollowing: Group[];
 
-    @OneToOne(type => ActorEntity, { cascade: true })
+    @OneToOne(type => ActorEntity, { cascade: true, eager: true })
     @JoinColumn()
     actor: ActorEntity;
 }

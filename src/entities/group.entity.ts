@@ -57,7 +57,7 @@ export class Group {
     @ManyToMany(type => User, user => user.groupFollowing)
     followingUsers: User[];
 
-    @OneToOne(type => ActorEntity, { cascade: true })
+    @OneToOne(type => ActorEntity, { cascade: true, eager: true })
     @JoinColumn()
     actor: ActorEntity;
 }
