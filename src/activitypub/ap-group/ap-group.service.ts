@@ -43,7 +43,7 @@ export class ApGroupService {
                 if (activityEntity) {
                     
                     // Activity is already in the DB
-                    activityEntity.targetGroups.push(group);
+                    activityEntity.destinationGroups.push(group);
 
                     // I'm not sure if we can use the `audience` property
                     // for this, but 

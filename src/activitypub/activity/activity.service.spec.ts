@@ -133,9 +133,12 @@ describe('ActivityService', () => {
         type: 'Create',
         activityObject: {},
         created: new Date(),
+        uri: '',
 
-        targetUser: undefined,
-        targetGroups: undefined,
+        sourceUser: undefined,
+        sourceGroup: undefined,
+        destinationGroups: [],
+        destinationUsers: [],
         targetPost: undefined,
       };
 

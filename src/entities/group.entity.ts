@@ -39,10 +39,13 @@ export class Group {
     @ManyToMany(type => Post, post => post.groups)
     posts: Post[];
 
-    // 'activities' is a list of all activities connected to this group.
-    // We use it for inbox generation, etc.
-    @ManyToMany(type => Activity, activity => activity.targetGroups)
-    activities: Activity[];
+    // The activities in this group's outbox
+    @OneToMany(type => Activity, activity => activity.sourceGroup)
+    outbox: Activity[];
+
+    // The activities in this group's inbox
+    @ManyToMany(type => Activity, activity => activity.destinationGroups)
+    inbox: Activity[];
 
     // 'uri' is a unique identifying URI for this group, used in the
     // ActivityPub portion of Themis.

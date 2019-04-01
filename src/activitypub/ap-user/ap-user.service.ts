@@ -64,7 +64,7 @@ export class ApUserService {
             
             try {
                 return this.activityService.createPagedCollection(
-                    await this.activityService.getActivitiesForUser(user),
+                    await this.activityService.getOutboxActivitiesForUser(user),
                     100, // TODO: Configuration
                     outbox,
                     page || 1
@@ -100,7 +100,7 @@ export class ApUserService {
                 const postObject = this.apPostService.createNewGlobalPost(activity);
                 const postEntity = await this.apPostService.submitNewGlobalPost(postObject);
                 const activityEntity = {
-                    targetUser: user,
+                    sourceUser: user,
                     targetPost: postEntity,
                     type: activity.type,
                     activityObject: activity
@@ -117,7 +117,7 @@ export class ApUserService {
             case 'Delete': {
                 const deletedPost = await this.apPostService.deletePostFromActivity(activity);
                 const activityEntity = {
-                    targetUser: user,
+                    sourceUser: user,
                     targetPost: deletedPost,
                     type: activity.type,
                     activityObject: activity
@@ -130,7 +130,7 @@ export class ApUserService {
             case 'Update': {                
                 const updatedPost = await this.apPostService.updatePostFromActivity(activity);
                 const activityEntity = {
-                    targetUser: user,
+                    sourceUser: user,
                     targetPost: updatedPost,
                     type: activity.type,
                     activityObject: activity
@@ -148,7 +148,7 @@ export class ApUserService {
                 const toFollow = fromUri(activity.object);
 
                 const activityEntity = {
-                    targetUser: user,
+                    sourceUser: user,
                     type: activity.type,
                     activityObject: activity
                 }
@@ -170,7 +170,7 @@ export class ApUserService {
                 const likedPost = await this.apPostService.getPostEntityByUri(activity.object);
 
                 const activityEntity = {
-                    targetUser: await this.likePost(user, likedPost),
+                    sourceUser: await this.likePost(user, likedPost),
                     targetPost: likedPost,
                     type: activity.type,
                     activityObject: activity

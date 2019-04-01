@@ -15,12 +15,19 @@ export class Activity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(type => User, user => user.activities, { eager: true })
-    targetUser: User;
+    @ManyToOne(type => User, user => user.outbox, { eager: true })
+    sourceUser: User;
 
-    @ManyToMany(type => Group, group => group.activities, { eager: true })
+    @ManyToOne(type => Group, group => group.outbox, { eager: true })
+    sourceGroup: Group;
+
+    @ManyToMany(type => User, user => user.inbox, { eager: true })
     @JoinTable()
-    targetGroups: Group[];
+    destinationUsers: User[];
+
+    @ManyToMany(type => Group, group => group.inbox, { eager: true })
+    @JoinTable()
+    destinationGroups: Group[];
 
     @ManyToOne(type =>Post, post => post.activities, { eager: true })
     targetPost: Post;

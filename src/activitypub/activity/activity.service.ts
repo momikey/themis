@@ -183,10 +183,8 @@ export class ActivityService {
                 if (type === ActorType.Group) {
                     // Target is a group
                     const group = await this.groupService.findGlobalByName(actor.name, target);
-                    console.log("*** Group", group, activity.targetGroups);
                     
-
-                    if (activity.targetGroups && activity.targetGroups.includes(group)) {
+                    if (activity.destinationGroups && activity.destinationGroups.includes(group)) {
                         // Already processed this group
                         return Promise.resolve(true);
                     }
@@ -319,8 +317,8 @@ export class ActivityService {
      * @returns An array containing all activities connected to the user
      * @memberof ActivityService
      */
-    async getActivitiesForUser(user: User): Promise<Activity[]> {
-        return this.activityRepository.find({ targetUser: user });
+    async getOutboxActivitiesForUser(user: User): Promise<Activity[]> {
+        return this.activityRepository.find({ sourceUser: user });
     }
 
     /**

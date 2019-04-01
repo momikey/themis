@@ -39,10 +39,11 @@ export class User {
     @OneToMany(type => Post, post => post.sender)
     posts: Post[];
 
-    // 'activities' is a list of all activities connected to this user.
-    // We use it for inbox generation, etc.
-    @OneToMany(type => Activity, activity => activity.targetUser)
-    activities: Activity[];
+    @OneToMany(type => Activity, activity => activity.sourceUser)
+    outbox: Activity[];
+
+    @ManyToMany(type => Activity, activity => activity.destinationUsers)
+    inbox: Activity[];
 
     // 'uri' is a unique identifying URI for this group, used in the
     // ActivityPub portion of Themis.
@@ -59,7 +60,6 @@ export class User {
     @ManyToMany(type => Post, post => post.likes)
     @JoinTable()
     liked: Post[];
-
 
     /**
      * A list of all users who are following this account.
