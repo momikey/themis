@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotImplementedException, HttpException, ImATeapotException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotImplementedException, HttpException, ImATeapotException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { GroupService } from '../../group/group.service';
 import { Group } from '../../entities/group.entity';
 import { GroupActor } from '../definitions/actors/group.actor';
@@ -11,6 +11,7 @@ import { Activity } from '../../entities/activity.entity';
 import { User } from '../../entities/user.entity';
 import { compareDesc } from 'date-fns';
 import { Collection } from '../definitions/activities/collection-object';
+import { fromUri } from '../definitions/actor.interface';
 
 /**
  * This class creates and handles Group Actors, connecting them
@@ -29,7 +30,52 @@ export class ApGroupService {
     ) {}
 
     async acceptPostRequest(groupname: string, data: any): Promise<any> {
-        throw new ImATeapotException();
+        const group = await this.groupService.findLocalByName(groupname);
+
+        // Note that groups, since they're auto-controlled, won't send
+        // bare objects without a surrounding activity. But we'll still
+        // set up a new variable here, just in case we need to do some
+        // processing later on. (Or when we get better types.)
+        const activity = data;
+
+        switch (activity.type) {
+            case "Accept": {
+                const toAccept = await this.userService.findByUri(activity.object);
+
+                const acceptEntity = {
+                    sourceGroup: group,
+                    destinationUsers: [toAccept],
+                    type: activity.type,
+                    activityObject: activity
+                };
+
+                const act = await this.activityService.save(acceptEntity);
+                try {
+                    const result = (await this.activityService.deliverTo(act, [activity.actor]));
+                    console.log(`*** Result: ${result}`);
+                    
+                    return result;
+                } catch (e) {
+                    console.log(`*** Error: ${e}`);
+                    return Promise.reject(e);
+                }
+
+            }
+            case "Create":
+            case "Update":
+            case "Delete":
+            case "Follow":
+            case "Add":
+            case "Remove":
+            case "Like":
+            case "Block":
+            case "Undo":
+            case "Reject":
+                throw new ImATeapotException();
+            default:
+                throw new BadRequestException(`Invalid activity type ${activity.type}`);
+        }
+        throw new InternalServerErrorException("Something went wrong");
     }
     
     async handleIncoming(groupname: string, data: any): Promise<any> {

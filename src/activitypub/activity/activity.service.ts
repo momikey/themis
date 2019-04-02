@@ -150,9 +150,7 @@ export class ActivityService {
     }
 
     async deliver(activity: Activity): Promise<object> {
-        const activityObject = activity.activityObject;
-        console.log("*** Deliver", activity);
-        
+        const activityObject = activity.activityObject;        
 
         // We use a set for deduplication purposes.
         const targets = new Set<string>();
