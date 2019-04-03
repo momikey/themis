@@ -95,6 +95,10 @@ export class GroupService {
         return response;
     }
 
+    async findByUri(uri: string): Promise<Group> {
+        return this.groupRepository.findOne({ uri });
+    }
+
     /**
      * Returns a Group entity representing the group with the given name
      * on this server.

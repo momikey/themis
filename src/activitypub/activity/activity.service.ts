@@ -114,6 +114,8 @@ export class ActivityService {
     }
 
     async deliverTo(activity: Activity, targets: Array<string>): Promise<any> {
+        console.log("*** Deliver", activity, targets);
+        
         const activityObject = activity.activityObject;
 
         const results = targets.map(async (t) => {
@@ -129,6 +131,9 @@ export class ActivityService {
                 });
                 const path = uri.path.split('/');
 
+                console.log("*** Destination", server);
+                
+
                 if (this.serverService.isLocal(server)) {
                     const entity = (path[1] === 'group')
                     ? await this.groupService.findLocalByName(path[2])
@@ -141,6 +146,8 @@ export class ActivityService {
                 } else {
                     // Federated
                     // TODO: Implement this
+                    console.log("*** Federated", server);
+                    
                     throw new NotImplementedException();
                 }
             }
@@ -227,6 +234,23 @@ export class ActivityService {
      */
     async findByUri(uri: string): Promise<Activity> {
         return this.activityRepository.findOne({ uri });
+    }
+
+    /**
+     * Creates a new Activity entity, but does *not* add it
+     * to the database.
+     *
+     * @param activity The AP activity object
+     * @returns A new Activity DB entity, ready to be inserted
+     * @memberof ActivityService
+     */
+    create(activity: any): Activity {
+        const entity = {
+            object: activity,
+            type: activity.type,
+        }
+
+        return this.activityRepository.create(entity);
     }
 
     /**

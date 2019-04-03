@@ -13,8 +13,9 @@ import { Collection } from '../definitions/activities/collection-object';
 import { Group } from '../../entities/group.entity';
 import { compareDesc } from 'date-fns';
 import { Post } from '../../entities/post.entity';
-import { fromUri, Actor } from '../definitions/actor.interface';
+import { fromUri, Actor, ActorType } from '../definitions/actor.interface';
 import { Activity } from '../../entities/activity.entity';
+import { GroupService } from '../../group/group.service';
 
 /**
  * This class creates and handles actor objects representing users.
@@ -27,6 +28,7 @@ import { Activity } from '../../entities/activity.entity';
 export class ApUserService {
     constructor(
         private readonly userService: UserService,
+        private readonly groupService: GroupService,
         private readonly configService: ConfigService,
         private readonly apPostService: ApPostService,
         private readonly activityService: ActivityService,
@@ -183,6 +185,46 @@ export class ApUserService {
                 throw new NotImplementedException;
             default:
                 throw new BadRequestException(`Invalid activity type ${activity.type}`);
+        }
+    }
+
+    async handleIncoming(username: string, data: any): Promise<any> {
+        console.log("*** Incoming for user", username, data);
+        
+        const user = await this.userService.findLocalByName(username);
+
+        const activity = data;
+        const activityEntity = (await this.activityService.findByUri(activity.id)) || 
+            this.activityService.create(activity);
+
+        console.log("*** Entity", activityEntity);
+        
+
+        if (activityEntity.destinationUsers) {
+            activityEntity.destinationUsers.push(user);
+        } else {
+            activityEntity.destinationUsers = [user];
+        }
+
+        switch (activity.type) {
+            case 'Accept': {
+                const request = await this.activityService.findByUri(activity.object);
+                const source = fromUri(activity.actor);
+                const withFollowers = await this.userService.getFollowers(user);
+
+                if (source.type == ActorType.Group) {
+                    this.userService.addFollowingToAccount(user, await this.groupService.findByUri(activity.actor));
+                } else if (source.type == ActorType.User) {
+                    this.userService.addFollowingToAccount(user, await this.userService.findByUri(activity.actor));
+                } else {
+                    throw new BadRequestException(`Invalid actor ${activity.activityObject.actor}`);
+                }
+
+                await this.userService.update(withFollowers);
+                return (await this.activityService.save(activityEntity)).activityObject;
+            }
+            default:
+                throw new NotImplementedException(`Invalid activity type ${activity.type}`);
         }
     }
 

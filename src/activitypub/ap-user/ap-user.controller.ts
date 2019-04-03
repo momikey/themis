@@ -26,7 +26,7 @@ export class ApUserController {
     @UseGuards(FederationGuard)
     @HttpPost('/:name/inbox')
     async postToInbox(@Param('name') name: string, @Body() body) {
-        throw new NotImplementedException();
+        return this.apUserService.handleIncoming(name, body);
     }
 
     @Get('/:name/outbox')

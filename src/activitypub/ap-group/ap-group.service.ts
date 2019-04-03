@@ -51,9 +51,7 @@ export class ApGroupService {
 
                 const act = await this.activityService.save(acceptEntity);
                 try {
-                    const result = (await this.activityService.deliverTo(act, [activity.actor]));
-                    console.log(`*** Result: ${result}`);
-                    
+                    const result = (await this.activityService.deliverTo(act, [activity.object]));                    
                     return result;
                 } catch (e) {
                     console.log(`*** Error: ${e}`);
@@ -79,14 +77,23 @@ export class ApGroupService {
     }
     
     async handleIncoming(groupname: string, data: any): Promise<any> {
+        console.log("*** Incoming to group", groupname, data);
+        
         const group = await this.groupService.findLocalByName(groupname);
 
         const activity = data;
-        const activityEntity = await this.activityService.findByUri(activity.id);
+        const activityEntity = await this.activityService.findByUri(activity.id) || 
+            this.activityService.create(activity);
+
+        if (activityEntity.destinationGroups) {
+            activityEntity.destinationGroups.push(group);
+        } else {
+            activityEntity.destinationGroups = [group];
+        }
 
         switch (activity.type) {
             case 'Create': {
-                if (activityEntity) {
+                if (activityEntity.uri) {
                     
                     // Activity is already in the DB
                     activityEntity.destinationGroups.push(group);
@@ -119,6 +126,9 @@ export class ApGroupService {
                         group.uri,
                         data.actor
                     )
+
+                    console.log("*** Sending Accept", accept);
+                    
                     
                     return this.acceptPostRequest(group.name, accept);
                 }

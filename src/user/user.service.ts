@@ -84,6 +84,10 @@ export class UserService {
         // return this.userRepository.save(userEntity);
     }
 
+    async update(user: User): Promise<User> {
+        return this.userRepository.save(user);
+    }
+
     async delete(name: string): Promise<User> {
         try {
             const user = await this.findByName(name);
