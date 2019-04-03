@@ -208,6 +208,7 @@ export class ApUserService {
 
         switch (activity.type) {
             case 'Accept': {
+                // TODO: This might be from something *other* than a follow.
                 const request = await this.activityService.findByUri(activity.object);
                 const source = fromUri(activity.actor);
                 const withFollowers = await this.userService.getFollowers(user);

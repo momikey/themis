@@ -71,6 +71,17 @@ export class ActivityService {
     }
 
     /**
+     * Find an activity by its database ID. Used for retrieving by URI.
+     *
+     * @param id
+     * @returns
+     * @memberof ActivityService
+     */
+    async findById(id: number): Promise<Activity> {
+        return this.activityRepository.findOne({id});
+    }
+
+    /**
      * Save an activity to the database. The activity can be
      * associated with one or more groups, users, or posts.
      * It will be given an ID and timestamp if those aren't

@@ -12,6 +12,7 @@ import { ApPostController } from './ap-post/ap-post.controller';
 import { ApPostService } from './ap-post/ap-post.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Activity } from '../entities/activity.entity';
+import { ActivityController } from './activity/activity.controller';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { Activity } from '../entities/activity.entity';
     PostModule,
     GroupModule
   ],
-  controllers: [NodeinfoController, ApGroupController, ApUserController, ApPostController],
+  controllers: [NodeinfoController, ApGroupController, ApUserController, ApPostController, ActivityController],
   providers: [ApGroupService, ApUserService, ActivityService, ApPostService]
 })
 export class ActivityPubModule {}
