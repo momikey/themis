@@ -11,8 +11,10 @@ import { Server } from '../../entities/server.entity';
 import { User } from '../../entities/user.entity';
 import { Activity } from '../../entities/activity.entity';
 import { ActorEntity } from '../../entities/actor.entity';
+import { GroupService } from '../../group/group.service';
 
 jest.mock('../../user/user.service');
+jest.mock('../../group/group.service');
 jest.mock('../../config/config.service');
 jest.mock('../activity/activity.service');
 jest.mock('../ap-post/ap-post.service');
@@ -30,6 +32,7 @@ describe('ApUserService', () => {
       providers: [
         ApUserService,
         UserService,
+        GroupService,
         ConfigService,
         ApPostService,
         ActivityService,
