@@ -41,7 +41,7 @@ export class ApUserService {
 
             return user;
         } catch (e) {
-            Promise.reject(e);
+            return Promise.reject(e);
         }
     }
 
@@ -51,29 +51,53 @@ export class ApUserService {
 
             return user.actor.object as UserActor;
         } catch (e) {
-            return Promise.reject(e);
+            throw new NotFoundException(`User ${name} does not exist on this server`);
         }
     }
 
     async getOutbox(username: string, page?: number): Promise<Collection> {
-        const user = await this.getLocalUser(username);
+        const user = this.getLocalUser(username);
 
-        if (user === undefined) {
-            return Promise.reject(`User ${username} does not exist on this server`);
-        } else {
-            const actor = await this.getActorForUser(username);
-            const outbox = actor.outbox;
+        try {
+            (await user);
+        } catch (e) {
+            throw new NotFoundException(`User ${username} does not exist on this server`);
+        }
+
+        try {
+            const outbox = (await this.getActorForUser(username)).outbox;
             
-            try {
-                return this.activityService.createPagedCollection(
-                    await this.activityService.getOutboxActivitiesForUser(user),
-                    100, // TODO: Configuration
-                    outbox,
-                    page || 1
-                );
-            } catch (e) {
-                throw new BadRequestException('Unable to fetch activities');
-            }
+            return this.activityService.createPagedCollection(
+                await this.activityService.getOutboxActivitiesForUser(await user),
+                100, // TODO: Configuration
+                outbox,
+                page || 1
+            );
+        } catch (e) {
+            throw new BadRequestException('Unable to fetch activities');
+        }
+    }
+
+    async getInbox(username: string, page?: number): Promise<Collection> {
+        const user = this.getLocalUser(username);
+
+        try {
+            (await user);
+        } catch (e) {
+            throw new NotFoundException(`User ${username} does not exist on this server`);
+        }
+
+        try {
+            const inbox = (await this.getActorForUser(username)).inbox;
+            
+            return this.activityService.createPagedCollection(
+                await this.activityService.getInboxActivitiesForUser(await user),
+                100, // TODO: Configuration
+                inbox,
+                page || 1
+            );
+        } catch (e) {
+            throw new BadRequestException('Unable to fetch activities');
         }
     }
 
@@ -141,7 +165,7 @@ export class ApUserService {
                 const act = await this.activityService.save(activityEntity);
                 try {
                     const result = (await this.activityService.deliver(act));
-                    return result;
+                    return act.activityObject;
                 } catch (e) {
                     return Promise.reject(e);
                 }
@@ -160,7 +184,7 @@ export class ApUserService {
                 const act = await this.activityService.save(activityEntity);
                 try {
                     const result = (await this.activityService.sendFollowRequest(act, toFollow.actor));
-                    return result;
+                    return act.activityObject;
                 } catch (e) {
                     return Promise.reject(e);
                 }
@@ -189,16 +213,11 @@ export class ApUserService {
     }
 
     async handleIncoming(username: string, data: any): Promise<any> {
-        console.log("*** Incoming for user", username, data);
-        
         const user = await this.userService.findLocalByName(username);
 
         const activity = data;
         const activityEntity = (await this.activityService.findByUri(activity.id)) || 
             this.activityService.create(activity);
-
-        console.log("*** Entity", activityEntity);
-        
 
         if (activityEntity.destinationUsers) {
             activityEntity.destinationUsers.push(user);
@@ -209,7 +228,7 @@ export class ApUserService {
         switch (activity.type) {
             case 'Accept': {
                 // TODO: This might be from something *other* than a follow.
-                const request = await this.activityService.findByUri(activity.object);
+                const request = await this.activityService.findByUri(activity.id);
                 const source = fromUri(activity.actor);
                 const withFollowers = await this.userService.getFollowers(user);
 
@@ -271,8 +290,6 @@ export class ApUserService {
             const uris = allFollowing.map((f) => f.uri);
             return this.activityService.createCollection(uris);
         } catch (e) {
-            console.log(e);
-            
             throw new NotFoundException(`User ${name} does not exist on this server`);
         }
     }

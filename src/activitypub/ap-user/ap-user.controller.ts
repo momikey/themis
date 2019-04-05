@@ -19,8 +19,8 @@ export class ApUserController {
     }
 
     @Get('/:name/inbox')
-    async getInbox(@Param('name') name: string) {
-        throw new NotImplementedException();        
+    async getInbox(@Param('name') name: string, @Query('page') page: number) {
+        return this.apUserService.getInbox(name, page);
     }
 
     @UseGuards(FederationGuard)

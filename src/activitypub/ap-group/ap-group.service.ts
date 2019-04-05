@@ -40,7 +40,8 @@ export class ApGroupService {
 
         switch (activity.type) {
             case "Accept": {
-                const toAccept = await this.userService.findByUri(activity.object);
+                const request = await this.activityService.findByUri(activity.object);
+                const toAccept = request.sourceUser;
 
                 const acceptEntity = {
                     sourceGroup: group,
@@ -50,14 +51,14 @@ export class ApGroupService {
                 };
 
                 const act = await this.activityService.save(acceptEntity);
+
                 try {
-                    const result = (await this.activityService.deliverTo(act, [activity.object]));                    
-                    return result;
+                    const result = (await this.activityService.deliverTo(act, [activity.target]));
+
+                    return act.activityObject;
                 } catch (e) {
-                    console.log(`*** Error: ${e}`);
                     return Promise.reject(e);
                 }
-
             }
             case "Create":
             case "Update":
@@ -77,8 +78,6 @@ export class ApGroupService {
     }
     
     async handleIncoming(groupname: string, data: any): Promise<any> {
-        console.log("*** Incoming to group", groupname, data);
-        
         const group = await this.groupService.findLocalByName(groupname);
 
         const activity = data;
@@ -118,19 +117,19 @@ export class ApGroupService {
             }
             case 'Follow': {
                 const user = await this.userService.findByUri(data.actor);
+                const saved = await this.activityService.save(activityEntity);
 
                 const result = await this.groupService.addFollower(group, user);
                 if (result) {
                     // Send an Accept request if updated
                     const accept = this.activityService.createAcceptActivity(
                         group.uri,
-                        data.actor
+                        activity.id,
+                        user.uri
                     )
 
-                    console.log("*** Sending Accept", accept);
-                    
-                    
-                    return this.acceptPostRequest(group.name, accept);
+                    const response = await this.acceptPostRequest(group.name, accept);
+                    return response;
                 }
 
                 return result;
@@ -138,6 +137,60 @@ export class ApGroupService {
             default:
                 throw new NotImplementedException;
                 // throw new BadRequestException(`Invalid activity type ${activity.type}`);
+        }
+    }
+
+    /**
+     * Get the activities in a group's outbox, as per AP spec.
+     *
+     * @param groupname The name of the local group
+     * @param [page]
+     * @returns
+     * @memberof ApGroupService
+     */
+    async getOutbox(groupname: string, page?: number): Promise<Collection> {
+        const group = this.getLocalGroup(groupname);
+
+        try {
+            (await group);
+        } catch (e) {
+            throw new NotFoundException(`Group ${groupname} does not exist on this server`);
+        }
+
+        try {
+            const outbox = (await this.getActorForGroup(groupname)).outbox;
+
+            return this.activityService.createPagedCollection(
+                await this.activityService.getOutboxActivitiesForGroup(await group),
+                100, // TODO configuration
+                outbox,
+                page || 1
+            );
+        } catch (e) {
+            throw new BadRequestException("Unable to fetch activities");
+        }
+    }
+
+    async getInbox(groupname: string, page?: number): Promise<Collection> {
+        const group = this.getLocalGroup(groupname);
+
+        try {
+            (await group);
+        } catch (e) {
+            throw new NotFoundException(`Group ${groupname} does not exist on this server`);
+        }
+
+        try {
+            const inbox = (await this.getActorForGroup(groupname)).inbox;
+
+            return this.activityService.createPagedCollection(
+                await this.activityService.getInboxActivitiesForGroup(await group),
+                100, // TODO configuration
+                inbox,
+                page || 1
+            );
+        } catch (e) {
+            throw new BadRequestException("Unable to fetch activities");
         }
     }
 
@@ -159,7 +212,7 @@ export class ApGroupService {
             const uris = allFollowers.map((f) => f.uri);
             return this.activityService.createCollection(uris);
         } catch (e) {
-            throw new NotFoundException(`User ${name} does not exist on this server`);
+            throw new NotFoundException(`Group ${name} does not exist on this server`);
         }
     }
 
@@ -197,7 +250,7 @@ export class ApGroupService {
 
             return group.actor.object as GroupActor;
         } catch (e) {
-            return Promise.reject(e);
+            throw new NotFoundException(`Group ${name} does not exist on this server`);
         }
     }
 

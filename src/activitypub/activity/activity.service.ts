@@ -18,6 +18,8 @@ import { GroupService } from '../../group/group.service';
 import { UserService } from '../../user/user.service';
 import { ServerService } from '../../server/server.service';
 import { AcceptActivity } from '../definitions/activities/accept-activity';
+import { Group } from '../../entities/group.entity';
+import { AxiosResponse } from 'axios';
 
 @Injectable()
 export class ActivityService {
@@ -59,12 +61,13 @@ export class ActivityService {
         throw new NotImplementedException();
     }
 
-    createAcceptActivity(actorUri: string, targetUri: string): AcceptActivity {
+    createAcceptActivity(actor: string, object: string, target: string): AcceptActivity {
         const accept: AcceptActivity = {
             '@context': AP.Context,
             type: 'Accept',
-            actor: actorUri,
-            object: targetUri
+            actor,
+            object,
+            target
         }
 
         return accept;
@@ -124,15 +127,13 @@ export class ActivityService {
         return inserted;
     }
 
-    async deliverTo(activity: Activity, targets: Array<string>): Promise<any> {
-        console.log("*** Deliver", activity, targets);
-        
+    async deliverTo(activity: Activity, targets: Array<string>): Promise<AxiosResponse<any>[]> {
         const activityObject = activity.activityObject;
 
         const results = targets.map(async (t) => {
             if (t === AP.Public) {
                 // Public address doesn't need to be delivered
-                return Promise.resolve(true);
+                return Promise.resolve(undefined);
             } else {
                 const uri = URI.parse(t);
                 const server = await this.serverService.find({
@@ -141,9 +142,6 @@ export class ActivityService {
                     port: +uri.port
                 });
                 const path = uri.path.split('/');
-
-                console.log("*** Destination", server);
-                
 
                 if (this.serverService.isLocal(server)) {
                     const entity = (path[1] === 'group')
@@ -157,8 +155,6 @@ export class ActivityService {
                 } else {
                     // Federated
                     // TODO: Implement this
-                    console.log("*** Federated", server);
-                    
                     throw new NotImplementedException();
                 }
             }
@@ -191,7 +187,6 @@ export class ActivityService {
                 /* TODO: Handle public addressing */
             } else if (target.includes('followers')) {
                 /* TODO: Deliver to a collection of followers */
-                console.log(activityObject);
                 return Promise.resolve(true);
             }else {
                 const {actor, type} = fromUri(target);
@@ -344,14 +339,52 @@ export class ActivityService {
     }
 
     /**
-     * Returns a list of all known activities that reference this user.
+     * Returns a list of all known activities sent by this user.
      *
      * @param user The user whose activities are wanted
-     * @returns An array containing all activities connected to the user
+     * @returns An array containing all activities where the user is the sender
      * @memberof ActivityService
      */
     async getOutboxActivitiesForUser(user: User): Promise<Activity[]> {
         return this.activityRepository.find({ sourceUser: user });
+    }
+
+    async getInboxActivitiesForUser(user: User): Promise<Activity[]> {
+        // return this.activityRepository.find({ destinationUsers: [user] });
+        const result = this.activityRepository.createQueryBuilder("activity")
+            .leftJoinAndSelect("activity.destinationUsers", "user")
+            .where("user.id = :id", { id: user.id })
+            .getMany();
+
+        return result;
+    }
+
+    /**
+     * Returns a list of all known activities sent by this group.
+     *
+     * @param group The group whose activities are wanted
+     * @returns An array containing all activities where the group is the sender
+     * @memberof ActivityService
+     */
+    async getOutboxActivitiesForGroup(group: Group): Promise<Activity[]> {
+        return this.activityRepository.find({ sourceGroup: group });
+    }
+
+    /**
+     * Returns a list of all known activities targeting this group.
+     *
+     * @param group The group whose activities are wanted
+     * @returns An array containing all activities sent to this group
+     * @memberof ActivityService
+     */
+    async getInboxActivitiesForGroup(group: Group): Promise<Activity[]> {
+        // return this.activityRepository.find({ destinationGroups: [group] });
+        const result = this.activityRepository.createQueryBuilder("activity")
+            .leftJoinAndSelect("activity.destinationGroups", "groups")
+            .where("groups.id = :id", { id: group.id })
+            .getMany();
+
+        return result;
     }
 
     /**

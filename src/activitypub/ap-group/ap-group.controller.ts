@@ -1,4 +1,4 @@
-import { Controller, Get, NotImplementedException, Post as HttpPost, Body, Param, MethodNotAllowedException, UseGuards, HttpCode, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, NotImplementedException, Post as HttpPost, Body, Param, MethodNotAllowedException, UseGuards, HttpCode, UseInterceptors, Query, BadRequestException, HttpException } from '@nestjs/common';
 import { ApGroupService } from './ap-group.service';
 import { Collection } from '../definitions/activities/collection-object';
 import { AP } from '../definitions/constants';
@@ -20,19 +20,20 @@ export class ApGroupController {
     }
 
     @Get('/:name/inbox')
-    async getInbox(@Param('name') name: string) {
-        throw new NotImplementedException();        
+    // TODO Auth guards, etc.
+    async getInbox(@Param('name') name: string, @Query('page') page: number) {
+        return this.apGroupService.getInbox(name, page);
     }
 
     @UseGuards(FederationGuard)
     @HttpPost('/:name/inbox')
     async postToInbox(@Param('name') name: string, @Body() body) {
-       return this.apGroupService.handleIncoming(name, body);
+        return this.apGroupService.handleIncoming(name, body);
     }
 
     @Get('/:name/outbox')
-    async getOutbox(@Param('name') name: string) {
-        throw new NotImplementedException();
+    async getOutbox(@Param('name') name: string, @Query('page') page: number) {
+        return this.apGroupService.getOutbox(name, page);
     }
 
     @HttpPost('/:name/outbox')
