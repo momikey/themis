@@ -226,6 +226,27 @@ export class ApUserService {
         }
 
         switch (activity.type) {
+            case 'Create': {
+                const existing = this.activityService.findByUri(activity.id);
+
+                const addDestination = (act: Activity, user: User) => {
+                    if (!act.destinationUsers) {
+                        act.destinationUsers = [user];
+                    } else {
+                        act.destinationUsers.push(user);
+                    }
+
+                    return this.activityService.save(act);
+                }
+
+                try {
+                    const entity = await existing;
+                    return (await addDestination(entity, user)).activityObject;
+                } catch (e) {
+                    // Federated origin
+                    // TODO Handle
+                }
+            }
             case 'Accept': {
                 // TODO: This might be from something *other* than a follow.
                 const request = await this.activityService.findByUri(activity.id);

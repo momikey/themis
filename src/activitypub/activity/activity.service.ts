@@ -143,7 +143,7 @@ export class ActivityService {
                 });
                 const path = uri.path.split('/');
 
-                if (this.serverService.isLocal(server)) {
+                if (this.serverService.isLocal(server)) {                    
                     const entity = (path[1] === 'group')
                     ? await this.groupService.findLocalByName(path[2])
                     : await this.userService.findLocalByName(path[2]);

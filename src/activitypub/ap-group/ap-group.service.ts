@@ -107,6 +107,8 @@ export class ApGroupService {
                         throw new BadRequestException;
                     }
 
+                    activityEntity.activityObject = activity;
+
                     const saved = await this.activityService.save(activityEntity);
                     return this.deliverToFollowers(saved, group);
                 } else {
@@ -216,8 +218,31 @@ export class ApGroupService {
         }
     }
 
+    /**
+     * Deliver an activity object to all of a group's followers,
+     * except the original sender.
+     *
+     * @param activity The activity object
+     * @param group The sending group
+     * @returns The activity
+     * @memberof ApGroupService
+     */
     async deliverToFollowers(activity: Activity, group: Group): Promise<Activity> {
-        throw new ImATeapotException;
+        console.log("*** Delivering", activity);
+        
+        const withFollowers = await this.groupService.getFollowers(group);
+
+        const urisWithoutSender = withFollowers.followingUsers
+            .filter((_) => _.uri !== activity.sourceUser.uri)
+            .map((e) => e.uri);
+
+        try {
+            const result = this.activityService.deliverTo(activity, urisWithoutSender);
+            return activity;
+        } catch (e) {
+            console.log("*** Deliver error", e);
+            throw new InternalServerErrorException(e);
+        }
     }
 
     /**
