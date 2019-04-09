@@ -6,7 +6,7 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 module.exports = {
     mode: 'development',
     entry: {
-        index:   './src/views/index.ts',
+        index:   './src/frontend/index.ts',
     },
     output: {
         path: path.resolve(__dirname, './public'),
@@ -25,19 +25,13 @@ module.exports = {
                 }
             },
             {
-                test: /\.styl$/,
-                use: ['vue-style-loader', 'css-loader', 'stylus-loader']
-            },
-            {
                 test: /\.tsx?$/,
                 loader: 'ts-loader',
                 include: [
                     path.resolve(__dirname, 'src/'),
-                    // path.resolve(__dirname, 'src/shared')
                 ],
                 options: {
                     appendTsSuffixTo: [/\.vue$/],
-                    // reportFiles: ['src/views/**/*.{ts,tsx}'],
                     reportFiles: ['src/**/*.{ts,tsx}'],
                     transpileOnly: true
                 }
