@@ -11,9 +11,10 @@ import { ConfigModule } from './config/config.module';
 import { MetaModule } from './meta/meta.module';
 import { FilterModule } from './filter/filter.module';
 import { ServerModule } from './server/server.module';
+import { ApiModule } from './api/api.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(), UserModule, GroupModule, PostModule, ActivityPubModule, ConfigModule, MetaModule, FilterModule, ServerModule],
+  imports: [TypeOrmModule.forRoot(), UserModule, GroupModule, PostModule, ActivityPubModule, ConfigModule, MetaModule, FilterModule, ServerModule, ApiModule],
   controllers: [AppController],
   providers: [AppService],
 })
