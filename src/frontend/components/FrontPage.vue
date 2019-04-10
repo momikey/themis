@@ -1,8 +1,7 @@
 <template>
     <!-- <div class="front-page-container"> -->
     <v-container fluid><v-layout justify-start row fill-height wrap>
-        <v-flex xs3>
-        <div class="front-column login">
+        <v-flex xs12 sm4 lg3>
             <v-container fluid><v-layout justify-start column fill-height>
                 <v-window
                     class="login-or-create"
@@ -27,7 +26,7 @@
                     <v-btn color="orange darken-4"
                         id="login-submit"
                         class="button login"
-                        @click="loginSubmit">
+                        @click="login">
                         Log in
                     </v-btn>
                     <v-btn
@@ -89,50 +88,90 @@
                     </v-form>
                     </v-window-item>
                 </v-window>
-            </v-layout></v-container>
-        </div>
+            </v-layout>
+            </v-container>
         </v-flex>
 
-        <v-flex xs9 pl-2>
+        <v-flex xs12 sm8 lg6 pl-2>
         <div class="front-column site-info">
             <p>Put your site's info here...</p>
             <p>(Eventually, we'll bring that in from the server.)</p>
-            {{ groupList }}
         </div>
 
-        <v-flex xs4 offset-xs2>
-        <v-sheet dark v-if="nodeinfo"
-            class="d-flex"
-            color="blue-grey darken-2"
-            elevation="4"
-            max-height="150"
-        >
-            <v-card>
-                <v-card-title dark class="text-xs-right display-1">
-                    {{ serverTotalUsers }}
-                </v-card-title>
-                <v-card-text class="text-uppercase">
-                    total users
-                </v-card-text>
-            </v-card>
+            <v-flex xs12 sm10 md8 offset-sm1 offset-md2 class="pt-5">
+            <v-sheet dark v-if="nodeinfo"
+                class="d-flex"
+                color="blue-grey darken-2"
+                elevation="4"
+                max-height="150"
+            >
+                <v-card class="pr-4">
+                    <v-card-title dark class="justify-end display-1">
+                        {{ serverTotalUsers }}
+                    </v-card-title>
+                    <v-card-text class="text-uppercase text-xs-right">
+                        total users
+                    </v-card-text>
+                </v-card>
 
-            <v-card>
-                <v-card-title dark class="text-xs-right display-1">
-                    {{ serverTotalPosts }}
-                </v-card-title>
-                <v-card-text class="text-uppercase">
-                    total posts
-                </v-card-text>
-            </v-card>
-        </v-sheet>
+                <v-card class="pr-4">
+                    <v-card-title dark class="justify-end display-1">
+                        {{ serverTotalPosts }}
+                    </v-card-title>
+                    <v-card-text class="text-uppercase text-xs-right">
+                        total posts
+                    </v-card-text>
+                </v-card>
+            </v-sheet>
+            </v-flex>
         </v-flex>
 
+        <v-flex xs12 lg3>
+            <v-toolbar dark>
+                <v-spacer />
+                <v-toolbar-title>What we're talking about</v-toolbar-title>
+            </v-toolbar>
+            <v-list three-line>
+                <v-list-tile avatar v-for="group in groupList" :key="group.id">                    
+                    <v-list-tile-content>
+                        <v-list-tile-title>{{ group.displayName }}</v-list-tile-title>
+                        <v-list-tile-sub-title>{{ formatGroupName(group) }}</v-list-tile-sub-title>
+                        <v-list-tile-action-text>{{ group.summary }}</v-list-tile-action-text>
+                    </v-list-tile-content>
+                </v-list-tile>
+            </v-list>
         </v-flex>
-
-    <!-- </div> -->
     </v-layout>
 
     <site-footer/>
+
+    <!-- Popup for invalid account info -->
+    <v-snackbar bottom left
+        v-model="invalidLogin"
+        color="error"
+        :timeout="5000"
+    >
+        {{ invalidLoginText }}
+    <v-btn dark flat
+        @click = 'invalidLogin = false'
+    >
+        Close
+    </v-btn>
+    </v-snackbar>
+
+    <!-- Popup for successful account creation -->
+    <v-snackbar bottom left
+        v-model="createdAccount.flag"
+        color="success"
+        :timeout="5000"
+    >
+        {{ createdAccount.message }}
+    <v-btn dark flat
+        @click = 'createdAccount.flag = false'
+    >
+        Close
+    </v-btn>
+    </v-snackbar>
 
     </v-container>
 </template>
@@ -140,6 +179,7 @@
 <script lang="ts">
 import Vue, { VueConstructor } from 'vue'
 import axios from 'axios'
+import * as httpStatus from 'http-status';
 import { FrontendService } from '../frontend.service';
 
 import SiteFooter from './SiteFooter.vue';
@@ -163,12 +203,18 @@ export default Vue.extend({
             retypePassword: '',
 
             invalidLogin: false,
+            invalidLoginText: '',
+
+            createdAccount: {
+                flag: false,
+                message: ''
+            }
         }
     },
     computed: {
         serverTotalUsers() {
             if (this.nodeinfo.usage) {
-                return this.nodeinfo.usage.users.total;
+                return FrontendService.formatNumber(this.nodeinfo.usage.users.total);
             } else {                
                 return "...";
             }
@@ -176,7 +222,7 @@ export default Vue.extend({
 
         serverTotalPosts() {
             if (this.nodeinfo.usage) {
-                return this.nodeinfo.usage.localPosts;
+                return FrontendService.formatNumber(this.nodeinfo.usage.localPosts);
             } else {
                 return "...";
             }
@@ -234,7 +280,45 @@ export default Vue.extend({
             }
         },
 
-        validateAccount: function () {
+        async login() {
+            try {
+                // Try to log in. If there are any errors (wrong password,
+                // wrong username, etc.), then we'll deal with them below.
+                const loginResponse = (await FrontendService.login(
+                    this.loginName, this.loginPassword)).data;
+
+                this.invalidLogin = false;
+
+                // Logging in returns an API token, which we'll use
+                // throughout the frontend.
+                // TODO: Have a way to refresh the token.
+                this.$warehouse.set('themis_login_token', loginResponse.accessToken);
+                this.$warehouse.set('themis_login_user', this.loginName);
+
+                // Get the role for this user, to store for later.
+                // This will determine whether the user can access
+                // the admin panel, create groups, etc.
+                const userRole = (await FrontendService.getUserRole(
+                    this.loginName, loginResponse.accessToken
+                )).data;
+
+                this.$warehouse.set('themis_login_role', userRole);
+                this.$router.push('web');
+            } catch (e) {
+                // Something went wrong with one of the two API calls.
+                // Either way, it's technically a login failure.
+                this.invalidLogin = true;
+
+                if (e.response.status == httpStatus.UNAUTHORIZED) {
+                    // 401 Unauthorized means the user did not enter
+                    // the correct username or password. For security
+                    // reasons, we're not supposed to tell them which.
+                    this.invalidLoginText = "Invalid username or password";
+                }
+            }
+        },
+
+        validateAccount() {
             // A potential account must have all parts valid.
             // Of course, we'll eventually need to do a lot of checking to see
             // if e.g., passwords are secure, the username isn't duplicated,
@@ -269,7 +353,7 @@ export default Vue.extend({
             return result;
         },
 
-        createAccount: function () {
+        async createAccount() {
             const validationResult = this.validateAccount();
 
             if (!validationResult.isValid) {
@@ -277,56 +361,36 @@ export default Vue.extend({
                 console.log(validationResult.reason);
             } else {
                 // Looks like we're good. The back end can handle it from here.
-                axios.post('/internal/authenticate/create-account', this.newAccount)
-                .then(response => console.log(response.data))
-                .catch(error => console.log(error));
+                // axios.post('/internal/authenticate/create-account', this.newAccount)
+                // .then(response => console.log(response.data))
+                // .catch(error => console.log(error));
+                try {
+                    const createResponse =
+                        (await FrontendService.createAccount(this.newAccount)).data;
+
+                    this.createdAccount.flag = true;
+                    this.createdAccount.message =
+                        `Successfully created account "${this.newAccount.username}"`;
+                } catch (e) {
+                    if (e.response.status == httpStatus.BAD_REQUEST) {
+                        this.invalidLogin = true;
+                        this.invalidLoginText = e.repsonse.message;
+                    }
+                }
             }
         },
 
-        cancelCreate: function () {
+        cancelCreate() {
             this.isCreating = false;
         },
 
-        loginSubmit: function () {
-            axios.post('/internal/authenticate/login', {
-                username: this.loginName,
-                password: this.loginPassword
-            })
-            .then(response => {
-                this.$warehouse.set('themis_login_token', response.data.accessToken);
-                this.$warehouse.set('themis_login_user', this.loginName);
-                this.invalidLogin = false;
-                // this.$router.push('web');
-
-                axios.get(`/internal/authenticate/user-role/${this.loginName}`, {
-                    headers: {'Authorization': `bearer ${response.data.accessToken}`}
-                })
-                .then(response => {
-                    this.$warehouse.set('themis_login_role', response.data)
-                    this.$router.push('web');
-                    return response;
-                })
-                .catch(error => console.log(error.response.data));
-                // // Very hacky, but I don't want to set up a whole router just for this,
-                // // and the back end is giving me trouble.
-                // axios.get('/internal/authenticate/post-login', {
-                //     headers: { "Authorization": `Bearer ${this.$warehouse.get('themis_login_token')}` }
-                // })
-                // // .then(response => location.assign(response.data))
-                // .then(response => this.$router.push('web'))
-                // .catch(error => console.log(error.response));
-            })
-            .catch(error => {               
-                if (error.response.status === 401) {
-                    // 401 Unauthorized
-                    this.invalidLogin = true;
-                    console.log(error.response.data);
-                }
-            });
+        showCreateForm() {
+            this.isCreating = true;
         },
 
-        showCreateForm: function () {
-            this.isCreating = true;
+        formatGroupName(group) {
+            const address = `@${group.name}@${FrontendService.prettyServer(group.server)}`
+            return address;
         }
     },
     async mounted() {
