@@ -17,8 +17,6 @@ export class GroupController {
 
     @Get('list')
     getGroupList(): Promise<Group[]> {
-        console.log("API call: list");
-        
         return this.groupService.findAll();
     }
 }
