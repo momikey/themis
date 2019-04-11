@@ -177,8 +177,9 @@
 </template>
 
 <script lang="ts">
-import Vue, { VueConstructor } from 'vue'
-import axios from 'axios'
+
+import Vue, { VueConstructor } from 'vue';
+import axios from 'axios';
 import * as httpStatus from 'http-status';
 import { FrontendService } from '../frontend.service';
 

@@ -2,6 +2,7 @@ import Vue from "vue";
 import VueRouter from 'vue-router';
 
 import FrontPage from "./components/FrontPage.vue";
+import ClientContainer from "./components/ClientContainer.vue";
 
 Vue.use(VueRouter);
 
@@ -10,7 +11,12 @@ const router = new VueRouter({
         {
             path: '/',
             component: FrontPage,
-            name: 'Front'
+            name: 'front'
+        },
+        {
+            path: '/web',
+            component: ClientContainer,
+            name: 'client'
         },
     ]
 });
