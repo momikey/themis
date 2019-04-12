@@ -35,10 +35,41 @@ export class FrontendService {
      * a list of Group entities (see API documentation for format)
      * @memberof FrontendService
      */
-    static getGroupList(): Promise<any> {
-        return Axios.get('/api/v1/group/list');
+    static getGroupList(sortBy? : string, descending? : boolean): Promise<any> {
+        const sortQuery = sortBy ? `?sort=${sortBy}` : '';
+        const descQuery = descending ? '&desc=1' : '';
+
+        if (descQuery && !sortQuery) {
+            // Can't ask for descending order with no sort criteria
+            throw new Error("You must specify a sort column");
+        }
+
+        return Axios.get(`/api/v1/group/list${sortQuery}${descQuery}`);
     }
 
+    /**
+     * Retrieve whether a user has permission to perform a given action.
+     *
+     * @static
+     * @param username The name of the user
+     * @param permission The name of the permission
+     * @returns An Axios response whose `data` member is a boolean indicaing
+     * whether the user has the given permission
+     * @memberof FrontendService
+     */
+    static getUserPermission(username: string, permission: string): Promise<any> {
+        return Axios.get(`/api/v1/user/get-permission/${username}/${permission}`);
+    }
+
+    /**
+     * Attmpt to create an account on the server.
+     *
+     * @static
+     * @param accountInfo A structure containing the username and password of the user
+     * @returns An Axios response whose `data` member contains the info
+     * for the new account, or an error if it could not be created
+     * @memberof FrontendService
+     */
     static createAccount(accountInfo: CreateAccountDto): Promise<any> {
         return Axios.post('/api/v1/authentication/create-account', accountInfo);
     }
@@ -90,7 +121,7 @@ export class FrontendService {
     }
 
     /**
-     * Format a server object into a URI
+     * Format a server object into a URI.
      *
      * @static
      * @param server A Server object
@@ -101,7 +132,27 @@ export class FrontendService {
         return URI.normalize(URI.serialize(server));
     }
 
+    /**
+     * Pretty-print a server URI
+     *
+     * @static
+     * @param server An object containing the server's host info
+     * @returns A formatted string suitable for use in Webfinger-like contexts
+     * @memberof FrontendService
+     */
     static prettyServer(server: Server): string {
         return formatServer(server);
+    }
+
+    /**
+     * Format a group object into a Webfinger-style string.
+     *
+     * @param group The group object, as returned by the server
+     * @returns A string in the format "@group@server"
+     * @memberof FrontendService
+     */
+    static formatGroupName(group) {
+        const address = `@${group.name}@${this.prettyServer(group.server)}`
+        return address;
     }
 }

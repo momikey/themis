@@ -275,7 +275,7 @@ export default Vue.extend({
 
         async getGroupList() {
             try {
-                this.groupList = (await FrontendService.getGroupList()).data;
+                this.groupList = (await FrontendService.getGroupList('name')).data;
             } catch (e) {
                 console.log(`Error fetching group list: ${e}`);
             }
@@ -390,8 +390,7 @@ export default Vue.extend({
         },
 
         formatGroupName(group) {
-            const address = `@${group.name}@${FrontendService.prettyServer(group.server)}`
-            return address;
+            return FrontendService.formatGroupName(group);
         }
     },
     async mounted() {

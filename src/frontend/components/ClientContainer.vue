@@ -1,8 +1,13 @@
 <template>
-
-<v-container>
+<!--
+    We need a wrapper div because Vue doesn't let us use
+    <template> tags as root elements, but an app toolbar
+    can't go inside the layout container. Also, we have to
+    move the nav drawer out so its height is set correctly.
+-->
+<div>
     <!-- Toolbar: user menu -->
-    <v-toolbar app dense dark color="primary darken-4">
+    <v-toolbar app absolute dense dark color="primary darken-4">
         <v-toolbar-side-icon @click.stop="drawerClicked"></v-toolbar-side-icon>
         <v-toolbar-title>
             <v-avatar color="secondary" size=32>
@@ -14,23 +19,8 @@
         </v-toolbar-title>
     </v-toolbar>
 
-    <!-- Main layout: three columns by default, but change on mobile -->
-    <v-layout justify-start row fill-height wrap>
-        <!-- Left column: group list -->
-        <v-flex xs12 sm6 md4>
-        </v-flex>
-
-        <!-- Middle column: thread list -->
-        <v-flex xs12 sm6 md4>
-        </v-flex>
-
-        <!-- Right column: post and reply -->
-        <v-flex xs12 md4>
-        </v-flex>
-    </v-layout>
-
     <!-- Navigation: this is hidden until the user clicks the menu button -->
-    <v-navigation-drawer dark absolute temporary
+    <v-navigation-drawer app dark absolute temporary
         v-model="showDrawer"
     >
         <!--
@@ -92,14 +82,36 @@
 
         </v-list>
     </v-navigation-drawer>
-</v-container>
 
+    <!-- Main layout: three columns by default, but change on mobile -->
+    <v-content>
+    <v-container fluid fill-height grid-list-sm>
+        <v-layout justify-start row wrap>
+            <!-- Left column: group list -->
+            <v-flex xs12 sm6 md3>
+                <column-group-list
+                />
+            </v-flex>
+
+            <!-- Middle column: thread list -->
+            <v-flex xs12 sm6 md3>
+            </v-flex>
+
+            <!-- Right column: post and reply -->
+            <v-flex xs12 md6>
+            </v-flex>
+        </v-layout>
+    </v-container>
+    </v-content>
+</div>
 </template>
 
 <script lang="ts">
 
 import Vue, { VueConstructor } from 'vue';
 import { UserRole } from '../../user/user-authentication/user-authentication.role';
+
+import ColumnGroupList from './ColumnGroupList.vue';
 
 export default Vue.extend({
     data() {
@@ -117,6 +129,7 @@ export default Vue.extend({
             ],
         }
     },
+
     computed: {
         userName() {
             return this.$warehouse.get('themis_login_user') || '';
@@ -135,6 +148,7 @@ export default Vue.extend({
             return this.userRole.role == UserRole.Admin;
         },
     },
+
     methods: {
         drawerClicked() {
             this.showDrawer = !this.showDrawer;
@@ -151,13 +165,17 @@ export default Vue.extend({
             this.$router.push('/');
         },
     },
+
     async mounted() {
 
+    },
+
+    components: {
+        ColumnGroupList
     }
 })
 
 </script>
-
 
 <style>
 
