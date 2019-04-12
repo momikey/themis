@@ -182,7 +182,7 @@ describe('Post Controller', () => {
     });
 
     it('find all by group should return all posts in a group', async () => {
-      const exampleGroup: Group = {
+      const exampleGroup = Object.assign(new Group, {
         id: 3,
         name: 'group',
         server: sampleServer,
@@ -190,9 +190,8 @@ describe('Post Controller', () => {
         summary: '',
         date: '',
         posts: [],
-        activities: [],
         uri: ''
-      };
+      });
       const examplePost = Object.assign(new Post, {
         id: 1,
         uuid: '00000000-0000-0000-0000-000000000000',
