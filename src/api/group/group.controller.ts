@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { GroupService } from '../../group/group.service';
 import { Group } from '../../entities/group.entity';
 
@@ -16,7 +16,14 @@ export class GroupController {
     ) {}
 
     @Get('list')
-    getGroupList(): Promise<Group[]> {
-        return this.groupService.findAll();
+    getGroupList(@Query('sort') sortBy? : string, @Query('desc') descending? : boolean): Promise<Group[]> {
+        switch (sortBy) {
+            case 'date':
+            case 'name':
+            case 'server':
+                return this.groupService.findAllSorted(sortBy, descending || false);
+            default:
+                return this.groupService.findAll();
+        }
     }
 }

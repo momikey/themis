@@ -85,6 +85,13 @@ export class GroupService {
         return this.groupRepository.find();
     }
 
+    async findAllSorted(sortBy: string, descending?: boolean) {
+        const order: any = {};
+        order[`${sortBy}`] = descending ? 'DESC' : 'ASC';
+
+        return this.groupRepository.find({ order });
+    }
+
     async find(id: number): Promise<Group> {
         return await this.groupRepository.findOne(id);
     }
