@@ -290,13 +290,42 @@ export class PostService {
         return response;
     }
 
-    async countChildren(parent: Post): Promise<number> {
+    async countChildren(id: number): Promise<number> {
+        const treeRepository = this.postRepository.manager.getTreeRepository(Post);
+        const post = await this.find(id);
+
+        // TypeORM counts the root entity as a descendant
+        // for some strange reason, so -1 to account for that.
+        return (await treeRepository.countDescendants(post)) - 1;
+    }
+
+    async findChildren(id: number): Promise<Post[]> {
+        const treeRepository = this.postRepository.manager.getTreeRepository(Post);
+        const parent = await this.find(id);
+
+        const withChildren = await this.postRepository.find({
+            parent
+        })
+
+        // const withChildren = await treeRepository.findDescendantsTree(parent);
+        // const withChildren = treeRepository
+        //     .createDescendantsQueryBuilder('post', 'postClosure', parent)
+        //     .leftJoinAndSelect('post.sender', 'sender')
+        //     .leftJoinAndSelect('post.groups', 'groups')
+        //     .leftJoinAndSelect('post.server', 'server')
+        //     .getMany();
+        // const withChildren = await this.loadRelations(parent);
+
+        return withChildren;
+    }
+
+    async countChildrenOld(parent: Post): Promise<number> {
         const treeRepository = this.postRepository.manager.getTreeRepository(Post);
 
         return treeRepository.countDescendants(parent);
     }
 
-    async findChildren(parent: Post): Promise<Post> {
+    async findChildrenOld(parent: Post): Promise<Post> {
         const treeRepository = this.postRepository.manager.getTreeRepository(Post);
 
         const response = await treeRepository.findDescendantsTree(parent);

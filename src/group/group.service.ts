@@ -158,7 +158,7 @@ export class GroupService {
 
     // Get all "top-level" posts in a group (i.e., those without a parent).
     // We can do this by either database ID or group name.
-    async getTopLevelPosts(group: string | number): Promise<Post[]> {
+    async getTopLevelPostsOld(group: string | number): Promise<Post[]> {
         // const groupEntity = await (typeof group === 'number'
         //     ? this.find(group)
         //     : this.findByName(group)
@@ -180,6 +180,23 @@ export class GroupService {
             .getOne();
 
         return response.posts;
+    }
+
+    async getTopLevelPosts(group: number, since? : number): Promise<Post[]> {
+        const sinceDate = new Date(since || 0).toJSON();
+
+        const response = this.groupRepository
+            .createQueryBuilder('groups')
+            .leftJoinAndSelect('groups.posts', 'post')
+            .leftJoinAndSelect('post.sender', 'sender')
+            .orderBy('post.timestamp', 'DESC')
+            .where('groups.id = :id', { id: group })
+            .andWhere('post.parentId is null')
+            .andWhere('post.timestamp >= :time', { time: sinceDate });
+
+        const posts = (await response.getOne()).posts;
+
+        return posts;
     }
 
     async getFollowers(group: Group): Promise<Group> {
