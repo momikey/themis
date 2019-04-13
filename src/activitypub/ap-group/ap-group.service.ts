@@ -227,9 +227,7 @@ export class ApGroupService {
      * @returns The activity
      * @memberof ApGroupService
      */
-    async deliverToFollowers(activity: Activity, group: Group): Promise<Activity> {
-        console.log("*** Delivering", activity);
-        
+    async deliverToFollowers(activity: Activity, group: Group): Promise<Activity> {        
         const withFollowers = await this.groupService.getFollowers(group);
 
         const urisWithoutSender = withFollowers.followingUsers
