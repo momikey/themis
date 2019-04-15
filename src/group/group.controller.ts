@@ -44,7 +44,7 @@ export class GroupController {
 
     @Get('/get-top-level-posts/:name')
     async getTopLevelByName(@Param('name') name: string): Promise<Post[]> {
-        const response = await this.groupService.getTopLevelPosts(name);
+        const response = await this.groupService.getTopLevelPostsOld(name);
 
         if (response) {
             return response;

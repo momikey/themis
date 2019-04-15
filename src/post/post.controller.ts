@@ -49,7 +49,7 @@ export class PostController {
     @Get('/get-children/:uuid')
     async findChildren(@Param('uuid') parent: string): Promise<Post> {
         const entity = await this.postService.findByUuid(parent);
-        const response = await this.postService.findChildren(entity);
+        const response = await this.postService.findChildrenOld(entity);
 
         return response;
     }
