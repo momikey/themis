@@ -130,7 +130,7 @@ describe('Group Controller', () => {
     });
     
     it('asking for top-level posts of a nonexistent group should return 404', async () => {
-      service.getTopLevelPosts.mockImplementation(async (name: string) => {
+      service.getTopLevelPostsOld.mockImplementation(async (name: string) => {
         if (name === 'good') {
           return [];
         } else {
