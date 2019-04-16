@@ -36,6 +36,11 @@ export class GroupController {
         }
     }
 
+    @Get('get-by-id/:id')
+    async getById(@Param('id') id: number): Promise<Group> {
+        return this.groupService.find(id);
+    }
+
     @Get('get-top-level-posts/:group')
     async getTopLevelPosts(@Param('group') group: number, @Query('since') since?: number): Promise<Post[]> {
         return this.groupService.getTopLevelPosts(group, +since || 0);

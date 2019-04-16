@@ -4,6 +4,8 @@ import * as URI from 'uri-js';
 import { CreateAccountDto } from "../dtos/create-account.dto";
 import { Server } from "../entities/server.entity";
 import { formatServer } from "../server/format-server";
+import { Group } from "../entities/group.entity";
+import { Post } from "../entities/post.entity";
 
 /**
  * This service functions as a layer of indirection betweent
@@ -45,6 +47,20 @@ export class FrontendService {
         }
 
         return Axios.get(`/api/v1/group/list${sortQuery}${descQuery}`);
+    }
+
+    static getGroupFromId(id: number): Promise<any> {
+        return Axios.get(`/api/v1/group/get-by-id/${id}`);
+    }
+
+    static getGroupThreads(group: Group, since?: number): Promise<any> {
+        const sinceQuery = since ? `?since=${since}` : '';
+
+        return Axios.get(`/api/v1/group/get-top-level-posts/${group.id}${sinceQuery}`);
+    }
+
+    static getChildrenOfPost(post: Post): Promise<any> {
+        return Axios.get(`/api/v1/post/get-children/${post.id}`);
     }
 
     /**
@@ -151,8 +167,8 @@ export class FrontendService {
      * @returns A string in the format "@group@server"
      * @memberof FrontendService
      */
-    static formatGroupName(group) {
-        const address = `@${group.name}@${this.prettyServer(group.server)}`
+    static formatGroupName(group: Group) {
+        const address = `@group-${group.name}@${this.prettyServer(group.server)}`
         return address;
     }
 }
