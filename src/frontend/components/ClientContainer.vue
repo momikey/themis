@@ -85,20 +85,24 @@
 
     <!-- Main layout: three columns by default, but change on mobile -->
     <v-content>
-    <v-container fluid fill-height grid-list-sm>
-        <v-layout justify-start row wrap>
+    <v-container fluid fill-height grid-list-sm class="main-container">
+        <v-layout justify-start row wrap class="main-layout">
             <!-- Left column: group list -->
-            <v-flex xs12 sm6 md3>
+            <v-flex xs12 sm6 md3 grow>
                 <column-group-list
+                    @group-selected="onGroupSelected"
                 />
             </v-flex>
 
             <!-- Middle column: thread list -->
-            <v-flex xs12 sm6 md3>
+            <v-flex xs12 sm6 md3 grow>
+                <column-thread-list v-if="selectedGroup"
+                    :group="selectedGroup"
+                />
             </v-flex>
 
             <!-- Right column: post and reply -->
-            <v-flex xs12 md6>
+            <v-flex xs12 md6 grow>
             </v-flex>
         </v-layout>
     </v-container>
@@ -112,6 +116,7 @@ import Vue, { VueConstructor } from 'vue';
 import { UserRole } from '../../user/user-authentication/user-authentication.role';
 
 import ColumnGroupList from './ColumnGroupList.vue';
+import ColumnThreadList from './ColumnThreadList.vue';
 
 export default Vue.extend({
     data() {
@@ -127,6 +132,8 @@ export default Vue.extend({
                 { title: 'Filters', icon: 'filter_list', route: 'settings/filters' },
                 { title: 'Preferences', icon: 'settings', route: 'settings/preferences' },
             ],
+
+            selectedGroup: null,
         }
     },
 
@@ -164,6 +171,10 @@ export default Vue.extend({
             // TODO: Remove auth stuff, so we're *really* logged out
             this.$router.push('/');
         },
+
+        onGroupSelected(groupId) {
+            this.selectedGroup = groupId;
+        }
     },
 
     async mounted() {
@@ -171,12 +182,20 @@ export default Vue.extend({
     },
 
     components: {
-        ColumnGroupList
+        ColumnGroupList,
+        ColumnThreadList
     }
 })
 
 </script>
 
 <style>
+    .main-container {
+        padding: 12px;
+    }
 
+    .v-list.full-height {
+        /* account for padding */
+        max-height: calc(100vh - 72px);
+    }
 </style>

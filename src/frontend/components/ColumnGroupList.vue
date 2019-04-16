@@ -2,7 +2,7 @@
     <v-layout column justify-start fill-height>
         <v-flex>
             <!-- List of all groups known to this server -->
-            <v-list three-line subheader>
+            <v-list three-line subheader class="scroll-y full-height">
                 <v-subheader>
                     {{ groupSubheader }}
                 </v-subheader>
@@ -99,9 +99,7 @@ export default Vue.extend({
         },
 
         onSelectGroup(group) {
-            // TODO
-            console.log(group);
-            
+            this.$emit('group-selected', group.id);
         }
     },
 
