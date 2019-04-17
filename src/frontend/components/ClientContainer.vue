@@ -98,11 +98,15 @@
             <v-flex xs12 sm6 md3 grow>
                 <column-thread-list v-if="selectedGroup"
                     :group="selectedGroup"
+                    @thread-selected="onThreadSelected"
                 />
             </v-flex>
 
             <!-- Right column: post and reply -->
             <v-flex xs12 md6 grow>
+                <column-post-view v-if="selectedThread"
+                    :post="selectedThread"
+                />
             </v-flex>
         </v-layout>
     </v-container>
@@ -117,6 +121,7 @@ import { UserRole } from '../../user/user-authentication/user-authentication.rol
 
 import ColumnGroupList from './ColumnGroupList.vue';
 import ColumnThreadList from './ColumnThreadList.vue';
+import ColumnPostView from './ColumnPostView.vue';
 
 export default Vue.extend({
     data() {
@@ -134,6 +139,7 @@ export default Vue.extend({
             ],
 
             selectedGroup: null,
+            selectedThread: null,
         }
     },
 
@@ -174,6 +180,10 @@ export default Vue.extend({
 
         onGroupSelected(groupId) {
             this.selectedGroup = groupId;
+        },
+
+        onThreadSelected(thread) {
+            this.selectedThread = thread;
         }
     },
 
@@ -183,7 +193,8 @@ export default Vue.extend({
 
     components: {
         ColumnGroupList,
-        ColumnThreadList
+        ColumnThreadList,
+        ColumnPostView
     }
 })
 

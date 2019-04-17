@@ -6,6 +6,7 @@ import { Server } from "../entities/server.entity";
 import { formatServer } from "../server/format-server";
 import { Group } from "../entities/group.entity";
 import { Post } from "../entities/post.entity";
+import { User } from "../entities/user.entity";
 
 /**
  * This service functions as a layer of indirection betweent
@@ -57,6 +58,10 @@ export class FrontendService {
         const sinceQuery = since ? `?since=${since}` : '';
 
         return Axios.get(`/api/v1/group/get-top-level-posts/${group.id}${sinceQuery}`);
+    }
+
+    static getFullPost(post: Post): Promise<any> {
+        return Axios.get(`/api/v1/post/get-with-children/${post.id}`);
     }
 
     static getChildrenOfPost(post: Post): Promise<any> {
@@ -163,12 +168,26 @@ export class FrontendService {
     /**
      * Format a group object into a Webfinger-style string.
      *
+     * @static
      * @param group The group object, as returned by the server
-     * @returns A string in the format "@group@server"
+     * @returns A string in the format "@group-*name*@server"
      * @memberof FrontendService
      */
     static formatGroupName(group: Group) {
         const address = `@group-${group.name}@${this.prettyServer(group.server)}`
+        return address;
+    }
+
+    /**
+     * Format a user object into a Webfinger-style string.
+     *
+     * @static
+     * @param user The user object, as returned by the server
+     * @returns A string in the format "@username@server"
+     * @memberof FrontendService
+     */
+    static formatUserName(user: User) {
+        const address = `@${user.name}@${this.prettyServer(user.server)}`;
         return address;
     }
 }
