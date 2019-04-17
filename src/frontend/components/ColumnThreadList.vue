@@ -17,8 +17,23 @@
                     <v-card dark flat tile
                         elevation="0"
                         color="rgba(0,0,0,0)"
+                        width="100%"
                     >
-                        <v-card-title>{{ thread.subject }}</v-card-title>
+                        <v-container fluid class="pa-0"><v-layout row wrap justify-start>
+                        <v-flex xs9 grow>
+                            <v-card-text class="pa-0 body-2">{{ thread.subject }}</v-card-text>
+                            <v-card-text class="pt-0 body-1">
+                                {{ formatFrom(thread.sender) }}
+                            </v-card-text>
+                        </v-flex>
+
+                        <v-spacer />
+
+                        <v-flex xs2>
+                            <span class="caption">{{ formatTime(thread.timestamp) }}</span>
+                        </v-flex>
+
+                        </v-layout></v-container>
                     </v-card>
                 </v-list-tile>
             </v-list>
@@ -29,6 +44,8 @@
 <script lang="ts">
 
 import Vue, { VueConstructor } from 'vue';
+
+import { distanceInWordsToNow } from 'date-fns';
 
 import { FrontendService } from '../frontend.service';
 
@@ -69,8 +86,16 @@ export default Vue.extend({
             }
         },
 
+        formatTime(timestamp) {
+            return distanceInWordsToNow(timestamp);
+        },
+
+        formatFrom(sender) {
+            return `by ${sender.displayName || sender.name}`;
+        },
+
         onSelectThread (post) {
-            console.log(post);
+            this.$emit('thread-selected', post);
         },
     },
 
