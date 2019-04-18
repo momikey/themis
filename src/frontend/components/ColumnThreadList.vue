@@ -29,8 +29,8 @@
 
                         <v-spacer />
 
-                        <v-flex xs2>
-                            <span class="caption">{{ formatTime(thread.timestamp) }}</span>
+                        <v-flex xs1>
+                            <span class="caption narrow">{{ formatTime(thread.timestamp) }}</span>
                         </v-flex>
 
                         </v-layout></v-container>
@@ -45,7 +45,7 @@
 
 import Vue, { VueConstructor } from 'vue';
 
-import { distanceInWordsToNow } from 'date-fns';
+import { distanceInWordsStrict, format } from 'date-fns';
 
 import { FrontendService } from '../frontend.service';
 
@@ -87,7 +87,24 @@ export default Vue.extend({
         },
 
         formatTime(timestamp) {
-            return distanceInWordsToNow(timestamp);
+            const distance = distanceInWordsStrict(new Date, timestamp);
+            const [num, unit] = distance.split(' ');
+            switch (unit) {
+                case 'seconds':
+                    return num + 's';
+                case 'minutes':
+                    return num + 'm';
+                case 'hours':
+                    return num + 'h';
+                case 'days':
+                    return num + 'd';
+                case 'months':
+                    return format(timestamp, "MMM D");
+                case 'years':
+                    return format(timestamp, "MMM D, YY");
+                default:
+                    throw new Error("Invalid date");
+            }
         },
 
         formatFrom(sender) {
@@ -107,5 +124,7 @@ export default Vue.extend({
 </script>
 
 <style>
-
+    .narrow {
+        line-height: 0.5;
+    }
 </style>

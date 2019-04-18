@@ -162,7 +162,7 @@ export class FrontendService {
      * @memberof FrontendService
      */
     static prettyServer(server: Server): string {
-        return formatServer(server);
+        return server ? formatServer(server) : "unknown server";
     }
 
     /**
