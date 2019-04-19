@@ -87,7 +87,7 @@ export default Vue.extend({
         },
 
         formatTime(timestamp) {
-            const distance = distanceInWordsStrict(new Date, timestamp);
+            const distance = distanceInWordsStrict(new Date, timestamp, { partialMethod: 'round' });
             const [num, unit] = distance.split(' ');
             switch (unit) {
                 case 'seconds':

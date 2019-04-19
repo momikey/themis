@@ -1,5 +1,9 @@
 <template>
-    <post-tree-node v-if="post" :post="post" />
+    <v-layout column justify-start fill-height>
+        <v-flex>
+            <post-tree-node v-if="post" :post="post" />
+        </v-flex>
+    </v-layout>
 </template>
 
 <script lang="ts">
@@ -20,7 +24,16 @@ export default Vue.extend({
     ],
 
     methods: {
+        replyTo(post, reply) {
+            console.log(post.id, reply);
+            
+        },
+    },
 
+    provide() {
+        return {
+            replyTo: this.replyTo,
+        }
     },
 
     async mounted() {
