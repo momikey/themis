@@ -1,5 +1,5 @@
 <template>
-    <v-layout column justify-start fill-height>
+    <v-layout column justify-start fill-height class="thread-list-layout">
         <v-flex>
             <!-- List of threads in this group -->
             <v-list three-line subheader class="scroll-y full-height"

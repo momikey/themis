@@ -85,7 +85,7 @@
 
     <!-- Main layout: three columns by default, but change on mobile -->
     <v-content>
-    <v-container fluid fill-height grid-list-sm class="main-container">
+    <v-container fluid fill-height grid-list-md class="main-container">
         <v-layout justify-start row wrap class="main-layout">
             <!-- Left column: group list -->
             <v-flex xs12 sm6 md3 grow>

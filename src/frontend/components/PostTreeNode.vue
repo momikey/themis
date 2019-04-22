@@ -1,35 +1,34 @@
 <template>
     <v-card dark tile elevation="12" class="pl-2">
-        <v-card-title>
-            <v-layout wrap>
-            <v-flex grow xs10>
-                <span class="title">{{ thePost.subject }}</span>
-            </v-flex>
-            <v-flex xs2>
-                <v-tooltip bottom open-delay="600">
+        <v-card-title class="pt-2 pb-0">
+            <v-layout column wrap justify-start>
+            <v-flex shrink align-self-end>
+                    <v-tooltip bottom open-delay="600">
                     <template v-slot:activator="{ on }">
-                        <span v-on="on">{{ formatTime(thePost.timestamp) }}</span>
+                        <span v-on="on" class="caption">{{ formatTime(thePost.timestamp) }}</span>
                     </template>
 
                     <span>{{ formatTimeTooltip(thePost.timestamp) }}</span>
                 </v-tooltip>
-            </v-flex>
-
-            <v-flex xs12>
-                <v-tooltip bottom open-delay="600">
+                 <v-tooltip bottom nudge-left="24" open-delay="600">
                     <template v-slot:activator="{ on }">
-                        <span v-on="on">by {{ thePost.sender && thePost.sender.displayName || thePost.sender.name }}</span>
+                        <span v-on="on" class="caption">
+                            by {{ thePost.sender && thePost.sender.displayName || thePost.sender.name }}
+                        </span>
                     </template>
 
                     <span>{{ formatSender(thePost.sender) }}</span>
                 </v-tooltip>
-            </v-flex>
-            </v-layout>
+           </v-flex>
+
+           </v-layout>
         </v-card-title>
-        <v-card-text>{{ thePost.content }}</v-card-text>
+        <v-card-text>
+            {{ thePost.content }}
+        </v-card-text>
 
         <v-card-actions>
-            <v-container fluid>
+            <v-container fluid pa-2>
                 <v-layout justify-end>
                     <v-flex shrink>
                         <span class="my-0 py-0">
@@ -49,33 +48,13 @@
                     </v-flex>
                 </v-layout>
 
-                <v-expand-transition>
-                <v-layout column v-show="isReplying">
-                        <v-flex grow>
-                        <v-textarea box dark autofocus
-                            :label="replyBoxLabel"
-                            v-model="replyText"
-                        />
-                        </v-flex>
-
-                        <v-flex shrink align-self-end>
-                        <v-btn dark
-                            @click="sendReply"
-                        >
-                            <v-icon>send</v-icon>
-                            <span class="ml-2">Post</span>
-                        </v-btn>
-
-                        <v-btn dark
-                            @click="cancelReply"
-                        >
-                            <v-icon>clear</v-icon>
-                            <span class="ml-2">Cancel</span>
-                        </v-btn>
-
-                        </v-flex>
-                </v-layout>
-                </v-expand-transition>
+                <component
+                    :show="isReplying"
+                    :replyTo="thePost.id"
+                    :is="(isReplying) ? 'post-reply' : ''"
+                    @send-reply="sendReply"
+                    @cancel-reply="cancelReply"
+                />
             </v-container>
         </v-card-actions>
 
@@ -92,6 +71,7 @@ import Vue, { VueConstructor } from 'vue';
 import { distanceInWordsToNow, format } from 'date-fns';
 
 import { FrontendService } from '../frontend.service';
+import PostReply from './PostReply.vue';
 
 export default Vue.extend({
     name: 'post-tree-node',
@@ -101,11 +81,8 @@ export default Vue.extend({
             thePost: this.post,
 
             isReplying: false,
-            replyText: '',
 
             // TODO: Make this locale-aware
-            // We'll put that on the list with the other localization stuff
-            replyBoxLabel: "Write your reply here",
             tooltipTimeFormat: "MMM D, YYYY, HH:mm",
         }
     },
@@ -140,11 +117,10 @@ export default Vue.extend({
 
         cancelReply () {
             this.isReplying = false;
-            this.replyText = '';
         },
 
-        sendReply () {
-            this.replyTo(this.thePost, this.replyText);
+        sendReply (reply) {
+            this.replyTo(this.thePost, reply);
 
             // Clear out the reply textarea for future use
             this.cancelReply();
@@ -165,6 +141,10 @@ export default Vue.extend({
     
     async mounted () {
         await this.loadPost();
+    },
+
+    components: {
+        PostReply
     }
 })
 </script>

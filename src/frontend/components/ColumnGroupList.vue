@@ -1,5 +1,5 @@
 <template>
-    <v-layout column justify-start fill-height>
+    <v-layout column justify-start fill-height class="group-list-layout">
         <v-flex>
             <!-- List of all groups known to this server -->
             <v-list three-line subheader class="scroll-y full-height">
