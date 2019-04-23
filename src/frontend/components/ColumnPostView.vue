@@ -30,10 +30,15 @@ export default Vue.extend({
         'post'
     ],
 
+    watch: {
+        post () {
+            this.$emit('update-progress', 100);
+        }
+    },
+
     methods: {
         replyTo(post, reply) {
-            console.log(post.id, reply);
-            
+            this.$emit('create-reply', post, reply);
         },
     },
 
@@ -44,7 +49,7 @@ export default Vue.extend({
     },
 
     async mounted() {
-        
+        this.$emit('update-progress', 100);
     },
 
     components: {

@@ -7,6 +7,19 @@
             >
                 <v-subheader>
                     {{ threadListSubheader }}
+                    <v-spacer />
+                    <v-tooltip bottom close-delay="100">
+                        <template #activator="{ on }">
+                            <v-btn icon dark
+                                @click="onCreateNewThread"
+                                v-on="on"
+                            >
+                                <v-icon>create</v-icon>
+                            </v-btn>
+                        </template>
+
+                        <span>New thread</span>
+                    </v-tooltip>
                 </v-subheader>
 
                 <v-list-tile dark
@@ -71,8 +84,11 @@ export default Vue.extend({
     methods: {
         async loadGroup(id) {
             try {
+                this.$emit('update-progress', 10);
                 this.groupEntity = (await FrontendService.getGroupFromId(this.group)).data;
+                this.$emit('update-progress', 40);
                 await this.loadThreads(this.groupEntity);
+                this.$emit('update-progress', 100);
             } catch (e) {
                 console.log(`Could not load group ${this.group}`);
             }
@@ -114,6 +130,10 @@ export default Vue.extend({
         onSelectThread (post) {
             this.$emit('thread-selected', post);
         },
+
+        onCreateNewThread () {
+            this.$emit('thread-create-started');
+        }
     },
 
     async mounted() {

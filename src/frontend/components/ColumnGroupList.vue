@@ -105,8 +105,11 @@ export default Vue.extend({
 
     async mounted() {
         this.user = this.$warehouse.get('themis_login_user');
+        this.$emit('update-progress', 10);
         await this.getGroupList();
+        this.$emit('update-progress', 75);
         await this.userCanCreateGroup();
+        this.$emit('update-progress', 100);
     }
 })
 </script>

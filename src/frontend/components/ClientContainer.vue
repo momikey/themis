@@ -85,31 +85,51 @@
 
     <!-- Main layout: three columns by default, but change on mobile -->
     <v-content>
-    <v-container fluid fill-height grid-list-md class="main-container">
-        <v-layout justify-start row wrap class="main-layout">
-            <!-- Left column: group list -->
-            <v-flex xs12 sm6 md3 grow>
-                <column-group-list
-                    @group-selected="onGroupSelected"
-                />
-            </v-flex>
 
-            <!-- Middle column: thread list -->
-            <v-flex xs12 sm6 md3 grow>
-                <column-thread-list v-if="selectedGroup"
-                    :group="selectedGroup"
-                    @thread-selected="onThreadSelected"
-                />
-            </v-flex>
+        <!-- Progress bar, used for posting, etc. -->
+        <v-progress-linear
+            v-model="progress"
+            :active="progress > 0"
+            height="4"
+            color="success"
+            class="ma-0"
+        />
 
-            <!-- Right column: post and reply -->
-            <v-flex xs12 md6 grow>
-                <column-post-view v-if="selectedThread"
-                    :post="selectedThread"
-                />
-            </v-flex>
-        </v-layout>
-    </v-container>
+        <v-container fluid fill-height grid-list-md class="main-container">
+            <v-layout justify-start row wrap class="main-layout">
+                <!-- Left column: group list -->
+                <v-flex xs12 sm6 md3 grow>
+                    <column-group-list
+                        @group-selected="onGroupSelected"
+                        @update-progress="onProgressUpdated"
+                    />
+                </v-flex>
+
+                <!-- Middle column: thread list -->
+                <v-flex xs12 sm6 md3 grow>
+                    <column-thread-list v-if="selectedGroup"
+                        :group="selectedGroup"
+                        @thread-selected="onThreadSelected"
+                        @thread-create-started="onThreadStarted"
+                        @update-progress="onProgressUpdated"
+                    />
+                </v-flex>
+
+                <!-- Right column: post and reply -->
+                <v-flex xs12 md6 grow>
+                    <column-post-view v-if="selectedThread"
+                        :post="selectedThread"
+                        @create-reply="onReplyCreated"
+                        @update-progress="onProgressUpdated"
+                    />
+                    <column-post-compose v-else-if="newThread"
+                        @create-thread="onThreadCreated"
+                        @cancel-create-thread="onThreadCanceled"
+                        @update-progress="onProgressUpdated"
+                    />
+                </v-flex>
+            </v-layout>
+        </v-container>
     </v-content>
 </div>
 </template>
@@ -122,6 +142,7 @@ import { UserRole } from '../../user/user-authentication/user-authentication.rol
 import ColumnGroupList from './ColumnGroupList.vue';
 import ColumnThreadList from './ColumnThreadList.vue';
 import ColumnPostView from './ColumnPostView.vue';
+import ColumnPostCompose from './ColumnPostCompose.vue';
 
 export default Vue.extend({
     data() {
@@ -129,6 +150,8 @@ export default Vue.extend({
             showDrawer: false,
 
             userAvatar: null,
+
+            progress: 0,
 
             navigationActions: [
                 { title: 'Home', icon: 'dashboard', route: ''},     // TODO
@@ -140,15 +163,16 @@ export default Vue.extend({
 
             selectedGroup: null,
             selectedThread: null,
+            newThread: null,
         }
     },
 
     computed: {
-        userName() {
+        userName () {
             return this.$warehouse.get('themis_login_user') || '';
         },
 
-        userRole() {
+        userRole () {
             const role = this.$warehouse.get('themis_login_role');
 
             return {
@@ -163,7 +187,7 @@ export default Vue.extend({
     },
 
     methods: {
-        drawerClicked() {
+        drawerClicked () {
             this.showDrawer = !this.showDrawer;
         },
 
@@ -178,23 +202,55 @@ export default Vue.extend({
             this.$router.push('/');
         },
 
-        onGroupSelected(groupId) {
+        onProgressUpdated (newVal) {
+            this.progress = newVal;
+
+            if (this.progress >= 100) {
+                setTimeout(() => {
+                    this.progress = 0;
+                }, 200);
+            }
+        },
+
+        onGroupSelected( groupId) {
             this.selectedGroup = groupId;
         },
 
-        onThreadSelected(thread) {
+        onThreadSelected (thread) {
             this.selectedThread = thread;
+        },
+
+        onThreadStarted () {
+            this.selectedThread = null;
+            this.newThread = true;
+        },
+
+        onThreadCreated (thread) {
+            // TODO: Add in proper metadata and actually submit
+            // Also probably reload the thread list, so it shows up.
+            console.log(thread);
+            this.newThread = false;
+        },
+
+        onThreadCanceled () {
+            this.newThread = false;
+        },
+
+        onReplyCreated (post, reply) {
+            // TODO: Everything needed to submit
+            console.log(`Reply to Post #${post.id}:`, reply);
         }
     },
 
-    async mounted() {
+    async mounted () {
 
     },
 
     components: {
         ColumnGroupList,
         ColumnThreadList,
-        ColumnPostView
+        ColumnPostView,
+        ColumnPostCompose
     }
 })
 

@@ -107,7 +107,11 @@ export default Vue.extend({
             if (this.post.children) {
                 this.thePost = this.post;
             } else {
-                this.thePost = (await FrontendService.getFullPost(this.post)).data;
+                try {
+                    this.thePost = (await FrontendService.getFullPost(this.post)).data;
+                } catch (e) {
+                    console.log(`Unable to fetch post ${this.post.id}`);
+                }
             }
         },
 
