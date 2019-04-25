@@ -72,7 +72,8 @@ export default Vue.extend({
     },
 
     props: [
-        'group'
+        'group',
+        'reload'
     ],
 
     computed: {
@@ -81,16 +82,26 @@ export default Vue.extend({
         },
     },
 
+    watch: {
+        async reload () {
+            if (this.reload) {
+                await this.loadGroup(this.group);
+            }
+        }
+    },
+
     methods: {
         async loadGroup(id) {
-            try {
-                this.$emit('update-progress', 10);
-                this.groupEntity = (await FrontendService.getGroupFromId(this.group)).data;
-                this.$emit('update-progress', 40);
-                await this.loadThreads(this.groupEntity);
-                this.$emit('update-progress', 100);
-            } catch (e) {
-                console.log(`Could not load group ${this.group}`);
+            if (id) {
+                try {
+                    this.$emit('update-progress', 10);
+                    this.groupEntity = (await FrontendService.getGroupFromId(this.group)).data;
+                    this.$emit('update-progress', 40);
+                    await this.loadThreads(this.groupEntity);
+                    this.$emit('update-progress', 100);
+                } catch (e) {
+                    console.log(`Could not load group ${this.group}`);
+                }
             }
         },
 
@@ -105,18 +116,20 @@ export default Vue.extend({
         formatTime(timestamp) {
             const distance = distanceInWordsStrict(new Date, timestamp, { partialMethod: 'round' });
             const [num, unit] = distance.split(' ');
-            switch (unit) {
-                case 'seconds':
+            const singular = (unit.endsWith('s')) ? unit.substring(0, unit.length-1) : unit;
+
+            switch (singular) {
+                case 'second':
                     return num + 's';
-                case 'minutes':
+                case 'minute':
                     return num + 'm';
-                case 'hours':
+                case 'hour':
                     return num + 'h';
-                case 'days':
+                case 'day':
                     return num + 'd';
-                case 'months':
+                case 'month':
                     return format(timestamp, "MMM D");
-                case 'years':
+                case 'year':
                     return format(timestamp, "MMM D, YY");
                 default:
                     throw new Error("Invalid date");
@@ -138,7 +151,7 @@ export default Vue.extend({
 
     async mounted() {
         await this.loadGroup(this.group);
-    }
+    },
 })
 
 </script>

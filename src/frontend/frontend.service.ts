@@ -112,6 +112,10 @@ export class FrontendService {
         });
     }
 
+    static getLocalUser(username: string): Promise<any> {
+        return Axios.get(`/api/v1/user/get-user/${username}`);
+    }
+
     /**
      * Gets the "role" of the user: user, moderator, admin, etc.
      *

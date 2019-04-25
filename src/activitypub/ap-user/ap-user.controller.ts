@@ -1,10 +1,11 @@
-import { Controller, Get, Param, NotImplementedException, Body, Post as HttpPost, MethodNotAllowedException, HttpCode, UseInterceptors, UseGuards, Query, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Param, Body, Post as HttpPost, HttpCode, UseInterceptors, UseGuards, Query, Request, Headers } from '@nestjs/common';
 import { ApUserService } from './ap-user.service';
 import { ConfigService } from '../../config/config.service';
 import { UserActor } from '../definitions/actors/user.actor';
 import { LocationInterceptor } from '../location.interceptor';
 import { ContentTypeGuard } from '../content-type.guard';
 import { FederationGuard } from '../federation.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
 export class ApUserController {
@@ -36,9 +37,9 @@ export class ApUserController {
 
     @HttpPost('/:name/outbox')
     @HttpCode(201)
-    // @UseGuards(ContentTypeGuard) // TODO: Add in AuthGuard here, too
+    @UseGuards(ContentTypeGuard, AuthGuard("jwt"))
     @UseInterceptors(new LocationInterceptor)
-    async postToOutbox(@Param('name') name: string, @Body() body) {
+    async postToOutbox(@Param('name') name: string, @Body() body, @Headers() headers) {
         return this.apUserService.acceptPostRequest(name, body);
     }
 

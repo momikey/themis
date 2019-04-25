@@ -2,6 +2,7 @@ import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
 import { UserService } from '../../user/user.service';
 import { UserAuthenticationService } from '../../user/user-authentication/user-authentication.service';
 import { UserRole } from '../../user/user-authentication/user-authentication.role';
+import { User } from '../../entities/user.entity';
 
 @Controller('api/v1/user')
 export class UserController {
@@ -9,6 +10,16 @@ export class UserController {
         private readonly userService: UserService,
         private readonly authService: UserAuthenticationService
     ) {}
+
+    @Get('get-user/:name')
+    async getLocalUser(@Param('name') username: string): Promise<User> {
+        return this.userService.findLocalByName(username);
+    }
+
+    @Get('get-user/:name/:server')
+    async getGlobalUser(@Param('name') username: string, @Param('server') server: string): Promise<User> {
+        return this.userService.findGlobalByName(username, server);
+    }
 
     @Get('get-permission/:user/:perm')
     async getPermission(@Param('user') username: string, @Param('perm') permission: string) : Promise<boolean> {

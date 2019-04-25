@@ -109,6 +109,7 @@
                 <v-flex xs12 sm6 md3 grow>
                     <column-thread-list v-if="selectedGroup"
                         :group="selectedGroup"
+                        :reload="reloadGroup"
                         @thread-selected="onThreadSelected"
                         @thread-create-started="onThreadStarted"
                         @update-progress="onProgressUpdated"
@@ -139,6 +140,8 @@
 import Vue, { VueConstructor } from 'vue';
 import { UserRole } from '../../user/user-authentication/user-authentication.role';
 
+import { PostSubmit } from '../post-submit.service';
+
 import ColumnGroupList from './ColumnGroupList.vue';
 import ColumnThreadList from './ColumnThreadList.vue';
 import ColumnPostView from './ColumnPostView.vue';
@@ -164,6 +167,8 @@ export default Vue.extend({
             selectedGroup: null,
             selectedThread: null,
             newThread: null,
+
+            reloadGroup: false,
         }
     },
 
@@ -212,7 +217,7 @@ export default Vue.extend({
             }
         },
 
-        onGroupSelected( groupId) {
+        onGroupSelected(groupId) {
             this.selectedGroup = groupId;
         },
 
@@ -225,10 +230,34 @@ export default Vue.extend({
             this.newThread = true;
         },
 
-        onThreadCreated (thread) {
+        async onThreadCreated (thread) {
             // TODO: Add in proper metadata and actually submit
             // Also probably reload the thread list, so it shows up.
-            console.log(thread);
+            const username = this.$warehouse.get('themis_login_user');
+            const token = this.$warehouse.get('themis_login_token');
+
+            this.onProgressUpdated(25);
+
+            try {
+                await PostSubmit.submitPostAP(
+                    username,
+                    token,
+                    thread.title,
+                    thread.body,
+                    this.selectedGroup
+                );
+
+                this.onProgressUpdated(100);
+
+                // TODO: Reload thread list
+                this.reloadGroup = true;
+                await this.$nextTick();
+                this.reloadGroup = false;
+            } catch (e) {
+                this.onProgressUpdated(100);
+                console.log(e);
+            }
+
             this.newThread = false;
         },
 
@@ -238,7 +267,7 @@ export default Vue.extend({
 
         onReplyCreated (post, reply) {
             // TODO: Everything needed to submit
-            console.log(`Reply to Post #${post.id}:`, reply);
+            console.log(`Reply to Post #${post.uri}:`, reply);
         }
     },
 
