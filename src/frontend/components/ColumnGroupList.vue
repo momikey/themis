@@ -35,25 +35,21 @@
                 </template>
             </v-list>
 
-            <!--
-                "Create new group" button; only shown if user *can*
-                create a new group.
-            -->
-            <v-btn
-                block dark class="mt-0" color="primary darken-4"
+            <!-- Group creation dialog -->
+            <dialog-group-create
+                @create-group="onCreateGroup"
                 v-if="createGroupPermission"
-            >
-                <v-icon left>add</v-icon>
-                <span>Create new group</span>
-            </v-btn>
-
+            />
         </v-flex>
+
     </v-layout>
 </template>
 
 <script lang="ts">
 import Vue, { VueConstructor } from 'vue';
 import { FrontendService } from '../frontend.service';
+
+import DialogGroupCreate from './DialogGroupCreate.vue';
 
 export default Vue.extend({
     data () {
@@ -64,6 +60,8 @@ export default Vue.extend({
 
             createGroupPermission: false,
             groupSubheader: "Showing all groups",
+
+            showGroupCreateDialog: false,
         }
     },
 
@@ -100,7 +98,29 @@ export default Vue.extend({
 
         onSelectGroup(group) {
             this.$emit('group-selected', group.id);
-        }
+        },
+
+        async onCreateGroup(groupData) {
+            const token = this.$warehouse.get('themis_login_token');
+            this.$emit('update-progress', 50);
+
+            try {
+                await FrontendService.createGroup(
+                    token,
+                    groupData.shortName,
+                    groupData.longName,
+                    groupData.summary
+                );
+
+                this.$emit('update-progress', 90);
+                await this.getGroupList();
+                this.$emit('update-progress', 100);
+
+            } catch (e) {
+                this.$emit('update-progress', 50);
+                console.log(e);
+            }
+        },
     },
 
     async mounted() {
@@ -110,6 +130,10 @@ export default Vue.extend({
         this.$emit('update-progress', 75);
         await this.userCanCreateGroup();
         this.$emit('update-progress', 100);
+    },
+
+    components: {
+        DialogGroupCreate
     }
 })
 </script>

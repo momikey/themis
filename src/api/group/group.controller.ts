@@ -1,7 +1,9 @@
-import { Controller, Get, Query, Param } from '@nestjs/common';
+import { Controller, Get, Query, Param, Post as HttpPost, UseGuards, Body } from '@nestjs/common';
 import { GroupService } from '../../group/group.service';
 import { Group } from '../../entities/group.entity';
 import { Post } from '../../entities/post.entity';
+import { AuthGuard } from '@nestjs/passport';
+import { CreateGroupDto } from '../../dtos/create-group.dto';
 
 /**
  * API endpoints for groups. This does not include ActivityPub.
@@ -44,5 +46,12 @@ export class GroupController {
     @Get('get-top-level-posts/:group')
     async getTopLevelPosts(@Param('group') group: number, @Query('since') since?: number): Promise<Post[]> {
         return this.groupService.getTopLevelPosts(group, +since || 0);
+    }
+
+    @HttpPost('create-group')
+    // TODO: Proper capability-based authorization
+    @UseGuards(AuthGuard("jwt"))
+    async createNewGroup(@Body() body: CreateGroupDto): Promise<Group> {
+        return this.groupService.create(body);
     }
 }

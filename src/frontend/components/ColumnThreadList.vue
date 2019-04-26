@@ -22,33 +22,41 @@
                     </v-tooltip>
                 </v-subheader>
 
-                <v-list-tile dark
-                    v-for="thread in groupThreads"
-                    :key="thread.id"
-                    @click="onSelectThread(thread)"
-                >
-                    <v-card dark flat tile
-                        elevation="0"
-                        color="rgba(0,0,0,0)"
-                        width="100%"
+                <template v-if="groupThreads.length">
+                    <v-list-tile dark
+                        v-for="thread in groupThreads"
+                        :key="thread.id"
+                        @click="onSelectThread(thread)"
                     >
-                        <v-container fluid class="pa-0"><v-layout row wrap justify-start>
-                        <v-flex xs9 grow>
-                            <v-card-text class="pa-0 body-2">{{ thread.subject }}</v-card-text>
-                            <v-card-text class="pt-0 body-1">
-                                {{ formatFrom(thread.sender) }}
-                            </v-card-text>
-                        </v-flex>
+                        <v-card dark flat tile
+                            elevation="0"
+                            color="rgba(0,0,0,0)"
+                            width="100%"
+                        >
+                            <v-container fluid class="pa-0"><v-layout row wrap justify-start>
+                            <v-flex xs9 grow>
+                                <v-card-text class="pa-0 body-2">{{ thread.subject }}</v-card-text>
+                                <v-card-text class="pt-0 body-1">
+                                    {{ formatFrom(thread.sender) }}
+                                </v-card-text>
+                            </v-flex>
 
-                        <v-spacer />
+                            <v-spacer />
 
-                        <v-flex xs1>
-                            <span class="caption narrow">{{ formatTime(thread.timestamp) }}</span>
-                        </v-flex>
+                            <v-flex xs1>
+                                <span class="caption narrow">{{ formatTime(thread.timestamp) }}</span>
+                            </v-flex>
 
-                        </v-layout></v-container>
-                    </v-card>
-                </v-list-tile>
+                            </v-layout></v-container>
+                        </v-card>
+                    </v-list-tile>
+                </template>
+
+                <template v-else>
+                    <v-list-tile dark>
+                        {{ noThreadsText }}
+                    </v-list-tile>
+                </template>
             </v-list>
         </v-flex>
     </v-layout>
@@ -68,6 +76,8 @@ export default Vue.extend({
             groupEntity: null,
             groupThreads: [],
             activePost: null,
+
+            noThreadsText: "This group has no posts. Create one by clicking the button above.",
         }
     },
 
@@ -85,6 +95,7 @@ export default Vue.extend({
     watch: {
         async reload () {
             if (this.reload) {
+                this._group = this.group;
                 await this.loadGroup(this.group);
             }
         }

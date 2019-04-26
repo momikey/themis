@@ -141,6 +141,7 @@
 import Vue, { VueConstructor } from 'vue';
 import { UserRole } from '../../user/user-authentication/user-authentication.role';
 
+import { FrontendService } from '../frontend.service';
 import { PostSubmit } from '../post-submit.service';
 
 import ColumnGroupList from './ColumnGroupList.vue';
@@ -219,8 +220,11 @@ export default Vue.extend({
             }
         },
 
-        onGroupSelected(groupId) {
-            this.selectedGroup = groupId;
+        async onGroupSelected(groupId) {
+            if (this.selectedGroup !== groupId) {
+                this.selectedGroup = groupId;
+                await this.reloadThreadList();
+            }
         },
 
         onThreadSelected (thread) {
@@ -248,11 +252,8 @@ export default Vue.extend({
                 );
 
                 this.onProgressUpdated(100);
+                await this.reloadThreadList();
 
-                // TODO: Reload thread list
-                this.reloadGroup = true;
-                await this.$nextTick();
-                this.reloadGroup = false;
             } catch (e) {
                 this.onProgressUpdated(100);
                 console.log(e);
@@ -294,7 +295,13 @@ export default Vue.extend({
                 this.onProgressUpdated(100);
                 console.log(e);
             }
-        }
+        },
+
+        async reloadThreadList () {
+            this.reloadGroup = true;
+            await this.$nextTick();
+            this.reloadGroup = false;
+        },
     },
 
     async mounted () {
@@ -305,7 +312,7 @@ export default Vue.extend({
         ColumnGroupList,
         ColumnThreadList,
         ColumnPostView,
-        ColumnPostCompose
+        ColumnPostCompose,
     }
 })
 

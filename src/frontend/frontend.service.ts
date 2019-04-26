@@ -7,6 +7,7 @@ import { formatServer } from "../server/format-server";
 import { Group } from "../entities/group.entity";
 import { Post } from "../entities/post.entity";
 import { User } from "../entities/user.entity";
+import { CreateGroupDto } from "../dtos/create-group.dto";
 
 /**
  * This service functions as a layer of indirection betweent
@@ -48,6 +49,18 @@ export class FrontendService {
         }
 
         return Axios.get(`/api/v1/group/list${sortQuery}${descQuery}`);
+    }
+
+    static createGroup(accessToken: string, name: string, displayName: string, summary: string): Promise<any> {
+        const dto : CreateGroupDto = {
+            name,
+            displayName,
+            summary
+        };
+
+        return Axios.post(`/api/v1/group/create-group`, dto, {
+            headers: { 'Authorization': `bearer ${accessToken}` }
+        });
     }
 
     static getGroupFromId(id: number): Promise<any> {

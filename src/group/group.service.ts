@@ -25,14 +25,15 @@ export class GroupService {
     ) {}
 
     async create(group: CreateGroupDto): Promise<Group> {
-        const hostname = this.serverService.parseHostname(group.server);
-        const server = (await this.serverService.findOrCreate(hostname)) ||
+        const hostname = 
+            (group.server && this.serverService.parseHostname(group.server)) || null;
+        const server = (hostname && await this.serverService.findOrCreate(hostname)) ||
             (await this.serverService.local());
         const groupEntity = this.groupRepository.create({
             name: group.name,
             server: server,
             displayName: group.displayName,
-            summary: group.summary
+            summary: group.summary || ''
         });
 
         groupEntity.uri = groupEntity.uri || getIdForActor(groupEntity, ActorType.Group);
@@ -185,18 +186,24 @@ export class GroupService {
     async getTopLevelPosts(group: number, since? : number): Promise<Post[]> {
         const sinceDate = new Date(since || 0).toJSON();
 
-        const response = this.groupRepository
-            .createQueryBuilder('groups')
-            .leftJoinAndSelect('groups.posts', 'post')
-            .leftJoinAndSelect('post.sender', 'sender')
-            .orderBy('post.timestamp', 'DESC')
-            .where('groups.id = :id', { id: group })
-            .andWhere('post.parentId is null')
-            .andWhere('post.timestamp >= :time', { time: sinceDate });
+        const g = (await this.groupRepository.findOne(group, { relations: ['posts']}));
+        
+        if (!g.posts || !g.posts.length) {
+            return [];
+        } else {
+            const response = this.groupRepository
+                .createQueryBuilder('groups')
+                .leftJoinAndSelect('groups.posts', 'post')
+                .leftJoinAndSelect('post.sender', 'sender')
+                .orderBy('post.timestamp', 'DESC')
+                .where('groups.id = :id', { id: group })
+                .andWhere('post.parentId is null')
+                .andWhere('post.timestamp >= :time', { time: sinceDate });
 
-        const posts = (await response.getOne()).posts;
+            const posts = (await response.getOne()).posts;
 
-        return posts;
+            return posts;
+        }
     }
 
     async getFollowers(group: Group): Promise<Group> {

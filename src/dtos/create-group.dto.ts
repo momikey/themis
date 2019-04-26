@@ -3,8 +3,8 @@
 
 export class CreateGroupDto {
     readonly name: string;
-    readonly server: string;
+    readonly server?: string;
     readonly displayName: string;
-    readonly summary: string;
+    readonly summary?: string;
     readonly uri?: string;
 }
