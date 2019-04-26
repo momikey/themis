@@ -115,7 +115,7 @@ export default Vue.extend({
                 this.$emit('update-progress', 90);
                 await this.getGroupList();
                 this.$emit('update-progress', 100);
-
+                this.$emit('group-created', groupData.shortName);
             } catch (e) {
                 this.$emit('update-progress', 50);
                 console.log(e);

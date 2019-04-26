@@ -101,6 +101,7 @@
                 <v-flex xs12 sm6 md3 grow>
                     <column-group-list
                         @group-selected="onGroupSelected"
+                        @group-created="onGroupCreated"
                         @update-progress="onProgressUpdated"
                     />
                 </v-flex>
@@ -223,8 +224,13 @@ export default Vue.extend({
         async onGroupSelected(groupId) {
             if (this.selectedGroup !== groupId) {
                 this.selectedGroup = groupId;
+                this.selectedThread = null;
                 await this.reloadThreadList();
             }
+        },
+
+        onGroupCreated(groupName) {
+            this.selectedThread = null;
         },
 
         onThreadSelected (thread) {
