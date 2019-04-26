@@ -120,6 +120,7 @@
                 <v-flex xs12 md6 grow>
                     <column-post-view v-if="selectedThread"
                         :post="selectedThread"
+                        :reload="reloadThread"
                         @create-reply="onReplyCreated"
                         @update-progress="onProgressUpdated"
                     />
@@ -169,6 +170,7 @@ export default Vue.extend({
             newThread: null,
 
             reloadGroup: false,
+            reloadThread: false,
         }
     },
 
@@ -231,8 +233,6 @@ export default Vue.extend({
         },
 
         async onThreadCreated (thread) {
-            // TODO: Add in proper metadata and actually submit
-            // Also probably reload the thread list, so it shows up.
             const username = this.$warehouse.get('themis_login_user');
             const token = this.$warehouse.get('themis_login_token');
 
@@ -265,9 +265,35 @@ export default Vue.extend({
             this.newThread = false;
         },
 
-        onReplyCreated (post, reply) {
-            // TODO: Everything needed to submit
-            console.log(`Reply to Post #${post.uri}:`, reply);
+        async onReplyCreated (post, reply) {
+            const username = this.$warehouse.get('themis_login_user');
+            const token = this.$warehouse.get('themis_login_token');
+
+            this.onProgressUpdated(25);
+
+            try {
+                await PostSubmit.submitPostAP(
+                    username,
+                    token,
+
+                    // TODO Implement changing subjects
+                    post.subject,
+
+                    reply,
+                    this.selectedGroup,
+                    post
+                );
+
+                this.onProgressUpdated(100);
+
+                const temp = this.selectedThread;
+                this.selectedThread = null;
+                await this.$nextTick();
+                this.selectedThread = temp;
+            } catch (e) {
+                this.onProgressUpdated(100);
+                console.log(e);
+            }
         }
     },
 

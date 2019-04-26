@@ -27,13 +27,14 @@ export default Vue.extend({
     },
 
     props: [
-        'post'
+        'post',
+        'reload'
     ],
 
     watch: {
         post () {
             this.$emit('update-progress', 100);
-        }
+        },
     },
 
     methods: {
