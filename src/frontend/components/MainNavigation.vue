@@ -1,6 +1,7 @@
 <template>
     <v-navigation-drawer app dark absolute temporary
         :value="value"
+        @input="$emit('input', $event)"
     >
         <!--
             Navbar header, with user name, role, and avatar
