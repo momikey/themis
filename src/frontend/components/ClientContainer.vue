@@ -20,68 +20,10 @@
     </v-toolbar>
 
     <!-- Navigation: this is hidden until the user clicks the menu button -->
-    <v-navigation-drawer app dark absolute temporary
+    <main-navigation
         v-model="showDrawer"
-    >
-        <!--
-            Navbar header, with user name, role, and avatar
-            Note that this is the same as the main toolbar for now, 
-            but we may add to it in the future
-        -->
-        <v-toolbar flat color="primary darken-4">
-            <v-toolbar-title>
-                <v-avatar color="secondary">
-                    <!-- TODO: Use user's avatar if available -->
-                    <v-icon dark large v-if="!userAvatar">account_circle</v-icon>
-                </v-avatar>
-                <span class="pl-3">@{{ userName }}</span>
-                <span class="pl-3">({{ userRole.text }})</span>
-            </v-toolbar-title>
-        </v-toolbar>
-
-        <!-- Navigation items list -->
-        <v-list class="pt-0">
-
-            <v-list-tile
-                v-for="item in navigationActions"
-                :key="item.title"
-                @click="navigate(item)"
-            >
-                <v-list-tile-action>
-                    <v-icon dark>{{ item.icon }}</v-icon>
-                </v-list-tile-action>
-
-                <v-list-tile-content>
-                    <v-list-tile-title>{{ item.title }}</v-list-tile-title>
-                </v-list-tile-content>
-            </v-list-tile>
-
-            <v-list-tile v-if="isAdmin"
-                @click="navigate({route: 'admin'})"
-            >
-                <v-list-tile-action>
-                    <v-icon dark>build</v-icon>
-                </v-list-tile-action>
-
-                <v-list-tile-content>
-                    <v-list-tile-title>Admin</v-list-tile-title>
-                </v-list-tile-content>
-            </v-list-tile>
-
-            <v-divider/>
-
-            <v-list-tile @click="logout">
-                <v-list-tile-action>
-                    <v-icon dark>power_settings_new</v-icon>
-                </v-list-tile-action>
-
-                <v-list-tile-content>
-                    <v-list-tile-title>Log out</v-list-tile-title>
-                </v-list-tile-content>
-            </v-list-tile>
-
-        </v-list>
-    </v-navigation-drawer>
+        :user-avatar="userAvatar"
+    />
 
     <!-- Main layout: three columns by default, but change on mobile -->
     <v-content>
@@ -149,6 +91,7 @@ import ColumnGroupList from './ColumnGroupList.vue';
 import ColumnThreadList from './ColumnThreadList.vue';
 import ColumnPostView from './ColumnPostView.vue';
 import ColumnPostCompose from './ColumnPostCompose.vue';
+import MainNavigation from './MainNavigation.vue';
 
 export default Vue.extend({
     data() {
@@ -158,14 +101,6 @@ export default Vue.extend({
             userAvatar: null,
 
             progress: 0,
-
-            navigationActions: [
-                { title: 'Home', icon: 'dashboard', route: ''},     // TODO
-                { title: 'Profile', icon: 'person', route: 'settings/profile' },
-                { title: 'Favorites', icon: 'star', route: '' },    // TODO
-                { title: 'Filters', icon: 'filter_list', route: 'settings/filters' },
-                { title: 'Preferences', icon: 'settings', route: 'settings/preferences' },
-            ],
 
             selectedGroup: null,
             selectedThread: null,
@@ -319,6 +254,7 @@ export default Vue.extend({
         ColumnThreadList,
         ColumnPostView,
         ColumnPostCompose,
+        MainNavigation,
     }
 })
 
