@@ -3,23 +3,25 @@
         :value="profileData"
         @input="$emit('input', profileData)"
     >
-        <v-form v-model="valid">
-            <v-avatar color="secondary" size="250">
+        <v-layout column align-center>
+            <v-avatar color="secondary" size="250" class="mx-auto">
                 <!-- TODO, use a placeholder for now -->
                 <v-icon dark size="200" v-if="!profileData.avatarUri">account_circle</v-icon>
             </v-avatar>
-            <p class="warning secondary--text text-xs-center mt-2 mb-5">
+            <p class="warning secondary--text text-xs-center mt-2 mb-5 px-3">
                 Avatars are not implemented yet
             </p>
+        </v-layout>
 
+        <v-form v-model="valid">
             <h1>{{ profileHeaderLabel }}</h1>
             <v-container fluid grid-list-lg>
                 <v-layout align-center justify-space-between>
-                    <v-flex>
+                    <v-flex xs4>
                         <p class="mb-0 text-xs-left">{{ yourUsernameLabel}}</p>
                     </v-flex>
-                    <v-flex>
-                        <p class="mb-0 font-weight-bold text-xs-right">{{ profileData.username }}</p>
+                    <v-flex xs8>
+                        <p class="mb-0 font-weight-bold">{{ profileData.username }}</p>
                     </v-flex>
                 </v-layout>
                 <p class="font-weight-bold my-0">{{ usernameWarning }}</p>

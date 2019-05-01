@@ -12,6 +12,7 @@ import { AP } from '../activitypub/definitions/constants';
 import * as URI from 'uri-js';
 import { Group } from '../entities/group.entity';
 import { ActorEntity } from '../entities/actor.entity';
+import { UpdateUserDto } from '../dtos/update-user-profile.dto';
 
 @Injectable()
 export class UserService {
@@ -82,6 +83,20 @@ export class UserService {
         // userEntity.actor = this.createActorEntity(this.createActor(userEntity));
 
         // return this.userRepository.save(userEntity);
+    }
+
+    async updateLocalUser(user: UpdateUserDto): Promise<User> {
+        const entity = await this.findLocalByName(user.name);
+
+        // Copy new data to DB entity
+        for (const prop in user) {
+            if (user[prop] && user[prop] !== entity[prop]) {
+                entity[prop] = user[prop];
+            }
+        }
+
+        // Save to DB
+        return this.userRepository.save(entity);
     }
 
     async update(user: User): Promise<User> {

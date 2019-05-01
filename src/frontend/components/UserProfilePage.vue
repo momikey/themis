@@ -66,12 +66,40 @@
             </v-layout>
         </v-container>
     </v-content>
+
+    <v-snackbar bottom left
+        v-model="updateSuccess"
+        color="success"
+        :timeout="5000"
+    >
+        {{ updateSuccessLabel }}
+        <v-btn dark flat
+            @click = 'updateSuccess = false'
+        >
+            Close
+        </v-btn>
+    </v-snackbar>
+
+    <v-snackbar bottom left
+        v-model="updateFailure"
+        color="error"
+        :timeout="5000"
+    >
+        {{ updateFailureLabel }}
+        <v-btn dark flat
+            @click = 'updateFailure = false'
+        >
+            Close
+        </v-btn>
+    </v-snackbar>
 </div>
 </template>
 
 <script lang="ts">
 
 import Vue, { VueConstructor } from 'vue';
+
+import { FrontendService } from '../frontend.service';
 
 import UserProfileInfo from './UserProfileInfo.vue';
 import UserProfileAccount from './UserProfileAccount.vue';
@@ -90,6 +118,11 @@ export default Vue.extend({
             ],
 
             profile: null,
+
+            updateSuccess: false,
+            updateFailure: false,
+            updateSuccessLabel: "Successfully updated your profile",
+            updateFailureLabel: "Couldn't update your profile"
         }
     },
 
@@ -114,8 +147,15 @@ export default Vue.extend({
             this.$vuetify.goTo(`#${target}`);
         },
 
-        onSaveChanges () {
-            console.log(this.profile);
+        async onSaveChanges () {
+            try {
+                const token = this.$warehouse.get("themis_login_token");
+                await FrontendService.updateUserProfile(this.user, token, this.profile);
+                this.updateSuccess = true;
+            } catch (e) {
+                console.log(e);
+                this.updateFailure = true;
+            }
         },
 
         onCancel () {

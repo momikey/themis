@@ -1,4 +1,4 @@
-import Axios from "axios";
+import Axios, { AxiosPromise } from "axios";
 import * as numberFormat from 'number-format.js';
 import * as URI from 'uri-js';
 import { CreateAccountDto } from "../dtos/create-account.dto";
@@ -8,6 +8,7 @@ import { Group } from "../entities/group.entity";
 import { Post } from "../entities/post.entity";
 import { User } from "../entities/user.entity";
 import { CreateGroupDto } from "../dtos/create-group.dto";
+import { UpdateUserDto } from "../dtos/update-user-profile.dto";
 
 /**
  * This service functions as a layer of indirection betweent
@@ -127,6 +128,23 @@ export class FrontendService {
 
     static getLocalUser(username: string): Promise<any> {
         return Axios.get(`/api/v1/user/get-user/${username}`);
+    }
+
+    static updateUserProfile(
+        username: string,
+        accessToken: string,
+        profile: any
+    ): AxiosPromise<User> {
+        const data: any = {
+            name: username,
+            displayName: profile.displayName || undefined,
+            summary: profile.summary || undefined,
+            icon: profile.avatarUri || undefined
+        };
+
+        return Axios.post(`/api/v1/user/update-profile/${username}`, data, {
+            headers: { 'Authorization': `bearer ${accessToken}` }
+        })
     }
 
     /**

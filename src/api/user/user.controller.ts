@@ -1,8 +1,10 @@
-import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Param, NotFoundException, Post as HttpPost, UseGuards, Body } from '@nestjs/common';
 import { UserService } from '../../user/user.service';
 import { UserAuthenticationService } from '../../user/user-authentication/user-authentication.service';
 import { UserRole } from '../../user/user-authentication/user-authentication.role';
 import { User } from '../../entities/user.entity';
+import { AuthGuard } from '@nestjs/passport';
+import { UpdateUserDto } from '../../dtos/update-user-profile.dto';
 
 @Controller('api/v1/user')
 export class UserController {
@@ -32,5 +34,11 @@ export class UserController {
         } catch (e) {
             throw new NotFoundException(`User ${username} does not exist on this server`);
         }
+    }
+
+    @HttpPost('update-profile/:user')
+    @UseGuards(AuthGuard('jwt'))
+    async updateProfile(@Body() user: UpdateUserDto): Promise<User> {
+        return this.userService.updateLocalUser(user);
     }
 }
