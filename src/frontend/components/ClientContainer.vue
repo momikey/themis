@@ -25,6 +25,17 @@
         :user-avatar="userAvatar"
     />
 
+    <!-- Info panel: this will pop up to show information about a user or group -->
+    <v-navigation-drawer app dark right temporary
+        :width="440"
+        v-model="showInfo"
+    >
+        <info-panel
+            v-if="infoPanelUser"
+            :user="infoPanelUser"
+        />
+    </v-navigation-drawer>
+
     <!-- Main layout: three columns by default, but change on mobile -->
     <v-content>
 
@@ -66,6 +77,7 @@
                         :reload="reloadThread"
                         @create-reply="onReplyCreated"
                         @update-progress="onProgressUpdated"
+                        @request-user="onRequestUser"
                     />
                     <column-post-compose v-else-if="newThread"
                         @create-thread="onThreadCreated"
@@ -92,11 +104,13 @@ import ColumnThreadList from './ColumnThreadList.vue';
 import ColumnPostView from './ColumnPostView.vue';
 import ColumnPostCompose from './ColumnPostCompose.vue';
 import MainNavigation from './MainNavigation.vue';
+import InfoPanel from './InfoPanel.vue';
 
 export default Vue.extend({
     data() {
         return {
             showDrawer: false,
+            showInfo: false,
 
             userAvatar: null,
 
@@ -105,6 +119,8 @@ export default Vue.extend({
             selectedGroup: null,
             selectedThread: null,
             newThread: null,
+
+            infoPanelUser: null,
 
             reloadGroup: false,
             reloadThread: false,
@@ -133,6 +149,10 @@ export default Vue.extend({
     methods: {
         drawerClicked () {
             this.showDrawer = !this.showDrawer;
+        },
+
+        showInfoPanel () {
+            this.showInfo = !this.showInfo;
         },
 
         navigate (loc) {
@@ -238,6 +258,11 @@ export default Vue.extend({
             }
         },
 
+        async onRequestUser (user) {
+            this.infoPanelUser = user;
+            this.showInfoPanel();
+        },
+
         async reloadThreadList () {
             this.reloadGroup = true;
             await this.$nextTick();
@@ -255,6 +280,7 @@ export default Vue.extend({
         ColumnPostView,
         ColumnPostCompose,
         MainNavigation,
+        InfoPanel
     }
 })
 
@@ -268,5 +294,9 @@ export default Vue.extend({
     .v-list.full-height {
         /* account for padding */
         max-height: calc(100vh - 72px);
+    }
+
+    .info-link {
+        text-decoration: none;
     }
 </style>

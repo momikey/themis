@@ -38,14 +38,19 @@ export default Vue.extend({
     },
 
     methods: {
-        replyTo(post, reply) {
+        replyTo (post, reply) {
             this.$emit('create-reply', post, reply);
         },
+
+        requestUserInfo (user) {
+            this.$emit('request-user', user);
+        }
     },
 
     provide() {
         return {
             replyTo: this.replyTo,
+            requestUserInfo: this.requestUserInfo,
         }
     },
 

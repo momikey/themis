@@ -13,7 +13,12 @@
                  <v-tooltip bottom nudge-left="24" open-delay="600">
                     <template v-slot:activator="{ on }">
                         <span v-on="on" class="caption">
-                            by {{ thePost.sender && thePost.sender.displayName || thePost.sender.name }}
+                            by <a target="_blank" class="info-link white--text"
+                                :href="thePost.sender.uri"
+                                @click.stop.prevent="onUserClicked"
+                            >
+                                {{ thePost.sender && thePost.sender.displayName || thePost.sender.name }}
+                            </a>
                         </span>
                     </template>
 
@@ -92,7 +97,8 @@ export default Vue.extend({
     ],
 
     inject: [
-        'replyTo'
+        'replyTo',
+        'requestUserInfo'
     ],
 
     watch: {
@@ -128,6 +134,10 @@ export default Vue.extend({
 
             // Clear out the reply textarea for future use
             this.cancelReply();
+        },
+
+        onUserClicked () {
+            this.requestUserInfo(this.thePost.sender);
         },
 
         formatTime (timestamp) {
