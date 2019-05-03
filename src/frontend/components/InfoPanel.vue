@@ -19,7 +19,6 @@
             <v-divider class="my-4" />
 
             <!-- TODO: Add follow button and maybe recent posts? -->
-            {{ user }}
         </v-layout>
     </v-container>
 </template>
@@ -49,8 +48,6 @@ export default Vue.extend({
     },
 
     async updated () {
-        console.log(this.user);
-        
     }
 })
 
