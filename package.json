@@ -1,6 +1,6 @@
 {
   "name": "themis",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "A threaded, topic-based ActivityPub implementation",
   "author": "Michael H. Potter",
   "license": "MIT",
