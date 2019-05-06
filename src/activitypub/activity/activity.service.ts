@@ -21,6 +21,15 @@ import { AcceptActivity } from '../definitions/activities/accept-activity';
 import { Group } from '../../entities/group.entity';
 import { AxiosResponse } from 'axios';
 
+/**
+ * This service handles functionality regarding ActivityPub
+ * Activity objects. These are the main communication method
+ * for server-to-server interaction, and Themis also uses them
+ * for many client-to-server actions.
+ *
+ * @export
+ * @class ActivityService
+ */
 @Injectable()
 export class ActivityService {
     constructor(
@@ -34,6 +43,14 @@ export class ActivityService {
         private readonly httpService: HttpService
     ) {}
 
+    /**
+     * Create a Post object from an Acctivity. The Post is not inserted
+     * into the database by this method.
+     *
+     * @param activity An Activity object
+     * @returns A Post object
+     * @memberof ActivityService
+     */
     async createPostFromActivity(activity: CreateActivity): Promise<Post> {
         const postObject = activity.object;
         const actor = getActorUri(activity.object.attributedTo);
@@ -61,6 +78,19 @@ export class ActivityService {
         throw new NotImplementedException();
     }
 
+    /**
+     * Create an Accept activity. Accepts are generated automatically
+     * in resoonse to Follow requests targeted at a group, and they
+     * will also be created for other situations. Accept is a "reaction"
+     * activity, so there is always an initiating activity to cause it.
+     *
+     * @param actor The actor URI of the sender
+     * @param object The object URI of the initiating activity
+     * @param target The recipient of the Accept message (usually
+     *  the sender of the initiating activity)
+     * @returns An Activity object with type "Accept"
+     * @memberof ActivityService
+     */
     createAcceptActivity(actor: string, object: string, target: string): AcceptActivity {
         const accept: AcceptActivity = {
             '@context': AP.Context,
@@ -76,8 +106,8 @@ export class ActivityService {
     /**
      * Find an activity by its database ID. Used for retrieving by URI.
      *
-     * @param id
-     * @returns
+     * @param id A database ID number
+     * @returns The Activity object associated with the given ID
      * @memberof ActivityService
      */
     async findById(id: number): Promise<Activity> {
@@ -117,16 +147,25 @@ export class ActivityService {
             }
 
             inserted.activityObject['id'] = inserted.uri;
-            const updated = await this.activityRepository.update(inserted.id, 
-                {
-                    uri: inserted.uri,
-                    activityObject: inserted.activityObject
-                });
+            const updated = await this.activityRepository.update(inserted.id, {
+                uri: inserted.uri,
+                activityObject: inserted.activityObject
+            });
         }
 
         return inserted;
     }
 
+    /**
+     * Deliver an Activity to its intended recipients. This does not include
+     * the "Public" address, as per AP spec.
+     *
+     * @param activity The activity object to be delivered
+     * @param targets An array of target URIs
+     * @returns An array of Axios response objects, each wrapping the
+     * result of one delivery
+     * @memberof ActivityService
+     */
     async deliverTo(activity: Activity, targets: Array<string>): Promise<AxiosResponse<any>[]> {
         const activityObject = activity.activityObject;
 
@@ -163,6 +202,15 @@ export class ActivityService {
         return Promise.all(results);
     }
 
+    /**
+     * Deliver an activity. This is essentially the same as `deliverTo()`,
+     * but it uses the proper ActivityPup properties in the given object.
+     * These are `to`, `cc`, `bto`, `bcc`, and `audience`.
+     *
+     * @param activity The activity to deliver
+     * @returns The activity's "payload" object (e.g., a post)
+     * @memberof ActivityService
+     */
     async deliver(activity: Activity): Promise<object> {
         const activityObject = activity.activityObject;        
 
@@ -227,6 +275,15 @@ export class ActivityService {
         return activityObject;
     }
 
+    /**
+     * Send a follow request to a given target.
+     *
+     * @param activity The Follow activity
+     * @param target The actor URI of the target
+     * @returns A single-element array containng an Axios response,
+     * as with `deliverTo()`
+     * @memberof ActivityService
+     */
     async sendFollowRequest(activity: Activity, target: Actor): Promise<any> {
         return this.deliverTo(activity, [activity.activityObject['object']]);
     }
@@ -279,7 +336,7 @@ export class ActivityService {
                 '@context': AP.Context,
                 id: post.uri,
                 type: 'Article',
-                attributedTo: post.sender.uri || getIdForActor(post.sender, ActorType.User) /* this.apUserService.idForUser(post.sender) */,
+                attributedTo: post.sender.uri || getIdForActor(post.sender, ActorType.User),
                 summary: post.subject,
                 content: post.content,
 
@@ -349,6 +406,13 @@ export class ActivityService {
         return this.activityRepository.find({ sourceUser: user });
     }
 
+    /**
+     * Returns a list of all known activities addressed to this user.
+     *
+     * @param user The user whose inbox is desired
+     * @returns An array containing all activities where the user is the target
+     * @memberof ActivityService
+     */
     async getInboxActivitiesForUser(user: User): Promise<Activity[]> {
         // return this.activityRepository.find({ destinationUsers: [user] });
         const result = this.activityRepository.createQueryBuilder("activity")
@@ -499,6 +563,22 @@ export class ActivityService {
             return page;
     }
 
+    /**
+     * Create a collection that contains a series of pages. Instead of
+     * directly containing all items, this holds only a single page of them
+     * (100 by default). All others can be referenced through URIs.
+     *
+     * @template Act The type of activity
+     * @param activities An array of activities
+     * @param numberPerPage The number of activities per page of the collection
+     * @param baseUri The URI for the collection as a whole; each page's URI
+     * will be generated from this
+     * @param [page] The page to be given -- if this is undefined or set to 1,
+     * this will be the "first" page; otherwise, it is considered the "current"
+     * page
+     * @returns
+     * @memberof ActivityService
+     */
     createPagedCollection<Act>(
         activities: Act[],
         numberPerPage: number,
@@ -526,7 +606,15 @@ export class ActivityService {
             return collection;
     }
 
-    pageQueryString(page: number) : string {
+    /**
+     * Helper to create a query string for a paged collection.
+     *
+     * @private
+     * @param page The page number
+     * @returns A query string intended to be added to a Collection URI
+     * @memberof ActivityService
+     */
+    private pageQueryString(page: number) : string {
         return `page=${page}`;
     }
 }
