@@ -29,6 +29,20 @@ export class ApGroupService {
         private readonly configService: ConfigService
     ) {}
 
+    /**
+     * Accept and handle a POST request to a group's outbox. Depending
+     * on the type of Activity received, this could do anything from
+     * creating a new post to accepting a follow request. The AP spec
+     * details all the various types of activities that can be received,
+     * but groups only handle a subset of them.
+     *
+     * @param groupname The name of a group on this server
+     * @param data The body of the POST request, which should be a JSON
+     * object representing an ActivityPub activity
+     * @returns The result of handling the request, in whatever fashion
+     * is necessary (usually, we'll return the activity's enclosed object)
+     * @memberof ApGroupService
+     */
     async acceptPostRequest(groupname: string, data: any): Promise<any> {
         const group = await this.groupService.findLocalByName(groupname);
 
@@ -77,6 +91,19 @@ export class ApGroupService {
         throw new InternalServerErrorException("Something went wrong");
     }
     
+    /**
+     * Handle a message that comes to this group's inbox. How we handle the
+     * message depends on what kind it is. "Create" activities representing
+     * posts are relayed to the group's followers, as that is what groups are
+     * intended to do. Follow requests are automatically accepted, and other
+     * types are (or will be) handled as necessary.
+     *
+     * @param groupname The name of a group on this server
+     * @param data An ActivityPub activity object
+     * @returns The result of handling the given object; this may be different
+     * for different activity types, so we default to a Promise of `any` for now
+     * @memberof ApGroupService
+     */
     async handleIncoming(groupname: string, data: any): Promise<any> {
         const group = await this.groupService.findLocalByName(groupname);
 
@@ -146,8 +173,8 @@ export class ApGroupService {
      * Get the activities in a group's outbox, as per AP spec.
      *
      * @param groupname The name of the local group
-     * @param [page]
-     * @returns
+     * @param [page] The page of the collection to return (default 1)
+     * @returns A Collection object containing the group's sent activities
      * @memberof ApGroupService
      */
     async getOutbox(groupname: string, page?: number): Promise<Collection> {
@@ -173,9 +200,19 @@ export class ApGroupService {
         }
     }
 
+    /**
+     * Get a group's inbox. Optionally, this can retrieve only a single page,
+     * in the event that the inbox is exceedingly large.
+     *
+     * @param groupname The name of a group on this server
+     * @param [page] The page of the collection to return (default 1)
+     * @returns A Collection object containing the group's received activities
+     * @memberof ApGroupService
+     */
     async getInbox(groupname: string, page?: number): Promise<Collection> {
         const group = this.getLocalGroup(groupname);
 
+        // Test that the group exists before we do anything with it
         try {
             (await group);
         } catch (e) {

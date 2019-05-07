@@ -12,6 +12,14 @@ import { fromUri, getActorUri, parseActor, ActorType } from '../definitions/acto
 import { DeleteActivity } from '../definitions/activities/delete-activity';
 import { UpdateActivity } from '../definitions/activities/update-activity';
 
+/**
+ * This service handles ActivityPub objects representing posts.
+ * Most delivery work is instead done by ApGroupService and
+ * ApUserService, but the post-specific bits are here.
+ *
+ * @export
+ * @class ApPostService
+ */
 @Injectable()
 export class ApPostService {
     constructor(
@@ -20,22 +28,59 @@ export class ApPostService {
         private readonly activityService: ActivityService
     ) {}
 
+    /**
+     * Get a post by its UUID, which is unique across the entire
+     * Themis network.
+     *
+     * @param uuid The UUID of the post
+     * @returns An ActivityPub object representing the post, or a
+     * Tombstone object if it has been deleted
+     * @memberof ApPostService
+     */
     async getPostByUuid(uuid: string): Promise<PostObject | TombstoneObject> {
         const post = await this.postService.findByUuid(uuid);
 
         return this.getLocalPostObject(post);
     }
 
+    /**
+     * Get a post by its internal database ID, which is unique
+     * only on this server. Posts originating from foreign servers
+     * *do* get IDs, because the frontend uses them, but this method
+     * throws an exception if they are requested.
+     *
+     * @param id The database ID of the post
+     * @returns An ActivityPub object representing the post, or a
+     * Tombstone object if it has been deleted
+     * @memberof ApPostService
+     */
     async getPostById(id: number): Promise<PostObject | TombstoneObject> {
         const post = await this.postService.find(id);
 
         return this.getLocalPostObject(post);
     }
 
+    /**
+     * Get a post's database record, given its URI. This is only needed
+     * for a few internal functions; it's not intended to be connected
+     * to an API endpoint.
+     *
+     * @param uri The URI of the post (local or foreign)
+     * @returns The database entity for the post
+     * @memberof ApPostService
+     */
     async getPostEntityByUri(uri: string): Promise<Post> {
         return this.postService.findByUri(uri);
     }
 
+    /**
+     * Get a local post (i.e., one originating on this server).
+     *
+     * @param post The post's database entity
+     * @returns An ActivityPub object for the post, or a Tombstone
+     * if it has been deleted
+     * @memberof ApPostService
+     */
     getLocalPostObject(post: Post): Promise<PostObject | TombstoneObject> {
         if (post == null) {
             return Promise.reject("Post does not exist");
