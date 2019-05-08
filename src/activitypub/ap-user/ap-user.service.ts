@@ -35,6 +35,14 @@ export class ApUserService {
         private readonly accountService: UserAuthenticationService
     ) {}
 
+    /**
+     * Get the database entry for a user on this server.
+     *
+     * @param name The name of the desired user
+     * @returns The database entry for the requested user, or
+     * a rejected Promise if no user with that name exists
+     * @memberof ApUserService
+     */
     async getLocalUser(name: string): Promise<User> {
         try {
             const user = await this.userService.findLocalByName(name);
@@ -45,6 +53,15 @@ export class ApUserService {
         }
     }
 
+    /**
+     * Get the Actor object for a user on this server. This is
+     * the ActivityPub "profile", including URIs for collections,
+     * as well as the nickname, bio, etc.
+     *
+     * @param name The name of a local user
+     * @returns The Actor object for the user
+     * @memberof ApUserService
+     */
     async getActorForUser(name: string): Promise<UserActor> {
         try {
             const user = await this.getLocalUser(name);
@@ -55,6 +72,17 @@ export class ApUserService {
         }
     }
 
+    /**
+     * Get a local user's outbox, or a single page from it.
+     * The outbox is an AP Collection, which may be paged. It holds
+     * all the Activities the user has sent, including posts, likes,
+     * etc.
+     *
+     * @param username The name of a local user
+     * @param [page] The page to retrieve (default 1)
+     * @returns The outbox collection, or a single page from it
+     * @memberof ApUserService
+     */
     async getOutbox(username: string, page?: number): Promise<Collection> {
         const user = this.getLocalUser(username);
 
@@ -78,6 +106,16 @@ export class ApUserService {
         }
     }
 
+    /**
+     * Get a user's inbox. This is an AP Collection containing
+     * all the Activities the user has received. As with the outbox,
+     * this may be paged.
+     *
+     * @param username The name of a local user
+     * @param [page] The page to retrieve (default 1)
+     * @returns The inbox for the user, or a single page from it
+     * @memberof ApUserService
+     */
     async getInbox(username: string, page?: number): Promise<Collection> {
         const user = this.getLocalUser(username);
 
@@ -212,6 +250,16 @@ export class ApUserService {
         }
     }
 
+    /**
+     * Handle a message received in a user's inbox. This is vague
+     * by definition, as it's more of a jumping-off point for the
+     * various types of activities.
+     *
+     * @param username The name of a local user
+     * @param data An AP activity object
+     * @returns The result of handling the activity (deliberately vague)
+     * @memberof ApUserService
+     */
     async handleIncoming(username: string, data: any): Promise<any> {
         const user = await this.userService.findLocalByName(username);
 
