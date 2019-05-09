@@ -14,6 +14,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Activity } from '../entities/activity.entity';
 import { ActivityController } from './activity/activity.controller';
 
+/**
+ * This module contains the controllers and services necessary
+ * for implemeting the ActivityPub interface for Themis. This includes
+ * both client-to-server and server-to-server (federation) interactions.
+ *
+ * @export
+ * @class ActivityPubModule
+ */
 @Module({
   imports: [
     TypeOrmModule.forFeature([Activity]),
