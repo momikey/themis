@@ -8,6 +8,13 @@ import { UserController } from './user/user.controller';
 import { PostController } from './post/post.controller';
 import { PostModule } from '../post/post.module';
 
+/**
+ * This module holds all the non-ActivityPub endpoints
+ * for the Themis API.
+ *
+ * @export
+ * @class ApiModule
+ */
 @Module({
   controllers: [ApiController, AuthenticationController, GroupController, UserController, PostController],
   imports: [
