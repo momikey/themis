@@ -1,6 +1,10 @@
-// This is the minimal set of data required for a top-level post.
-// Top-level posts are those which have no parent.
-
+/**
+ * This is the minimal set of data required for a top-level post.
+ * Top-level posts are those which have no parent.
+ *
+ * @export
+ * @class CreateTopLevelPostDto
+ */
 export class CreateTopLevelPostDto {
     readonly sender: string;
     readonly server: string;
