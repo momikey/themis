@@ -1,5 +1,14 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
+/**
+ * The ActorEntity contains the data for a group or user's
+ * ActivityPub Actor object. This is mostly just a bunch
+ * of URIs, since all the "core" info is stored with the
+ * actor's record.
+ *
+ * @export
+ * @class ActorEntity
+ */
 @Entity('actor')
 export class ActorEntity {
     @PrimaryGeneratedColumn()

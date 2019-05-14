@@ -1,9 +1,16 @@
 import { Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn, Column, ManyToMany, JoinTable } from "typeorm";
 import { User } from "./user.entity";
 import { UserRole } from "../user/user-authentication/user-authentication.role";
-import { Group } from "./group.entity";
-import { Post } from "./post.entity";
 
+/**
+ * An Account is a local user's login information:
+ * email and password. We also have a field for if
+ * a user needs a password reset, though that's not
+ * yet implemented.
+ *
+ * @export
+ * @class Account
+ */
 @Entity()
 export class Account {
     // A given user is only going to have one authentication entry,
