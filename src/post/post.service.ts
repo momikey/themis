@@ -1,5 +1,5 @@
-import { Injectable, BadRequestException, NotImplementedException } from '@nestjs/common';
-import { Repository, getRepository, Like } from 'typeorm';
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from '../entities/post.entity';
 import { CreatePostDto } from '../dtos/create-post.dto';
@@ -16,6 +16,15 @@ import { CreateGlobalPostDto } from '../dtos/create-global-post.dto';
 import { Actor } from '../activitypub/definitions/actor.interface';
 import { ServerService } from '../server/server.service';
 
+/**
+ * Anything dealing with posts eventually ends up in this service.
+ * Here is where we handle the basic CRUD operations, all the
+ * various searches (including the tree operations we need to deal
+ * with the threaded nature of Themis posting), and so on.
+ *
+ * @export
+ * @class PostService
+ */
 @Injectable()
 export class PostService {
     constructor(
@@ -27,7 +36,15 @@ export class PostService {
         private readonly serverService: ServerService
     ) {}
 
-    async create(post: CreatePostDto) {
+    /**
+     * Create a new post. This method will not be called in response to
+     * a received ActivityPub activity.
+     *
+     * @param post A DTO containing the post's content and metadata
+     * @returns The database entity for the new post
+     * @memberof PostService
+     */
+    async create(post: CreatePostDto): Promise<Post> {
         const postedGroupNames: string[] = [post.primaryGroup].concat(post.ccGroups);
         const postedGroups: Group[] = await Promise.all(postedGroupNames.map(
             (e) => this.groupService.findByName(e)
@@ -154,14 +171,27 @@ export class PostService {
         }
     }
 
-    // Create a new top-level (parent-less) post.
+    /**
+     * Create a new top-level (parent-less) post.
+     *
+     * @param post A DTO containing the post's content and metadata
+     * @returns The resulting post entity
+     * @memberof PostService
+     */
     async createTopLevel(post: CreateTopLevelPostDto): Promise<Post> {
         const postEntity = await this.createPostEntity(post);
 
         return this.postRepository.save(postEntity);
     }
 
-    // Create a reply to the post with the given UUID.
+    /**
+     * Create a reply to the post with the given UUID.
+     *
+     * @param post A DTO for the reply's content and metadata
+     * @param parent The URI of the reply's parent post
+     * @returns The entity for the reply
+     * @memberof PostService
+     */
     async createReply(post: CreateReplyDto, parent: string): Promise<Post> {
         const user = await this.userService.findByName(post.sender);
         const parentPost = await this.postRepository.findOne({ uuid: parent });
@@ -181,20 +211,52 @@ export class PostService {
         return this.postRepository.save(postEntity);
     }
 
+    /**
+     * Delete a post from the database. This is different from deleting
+     * it from groups or the server. This method is instead a "hard"
+     * delete; higher levels will issue the appropriate status codes
+     * when someone attempts to retrieve this post.
+     *
+     * @param uuid The UUID of the post (which can be obtained from the URI)
+     * @returns The post entity, now deleted from the DB
+     * @memberof PostService
+     */
     async delete(uuid: string): Promise<Post> {
         const post = await this.postRepository.findOne({ uuid: uuid });
 
         return await this.postRepository.remove(post);
     }
 
+    /**
+     * Update a post's database entry
+     *
+     * @param post The post entity, with updated fields
+     * @returns The updated post, after it has been saved to the DB
+     * @memberof PostService
+     */
     async update(post: Post): Promise<Post> {
         return this.postRepository.save(post);
     }
 
+    /**
+     * Get all the posts this server knows about. Warning: this can
+     * be a huge amount of data, as Themis stores both local posts
+     * and those it receives in federation.
+     *
+     * @returns An array of all posts stored in the database
+     * @memberof PostService
+     */
     async findAll(): Promise<Post[]> {
         return await this.postRepository.find();
     }
 
+    /**
+     * Get the post with a given ID.
+     *
+     * @param id The ID of a post this server knows about
+     * @returns The post with that ID
+     * @memberof PostService
+     */
     async find(id: number): Promise<Post> {
         return await this.postRepository.findOne(id);
     }
@@ -202,14 +264,22 @@ export class PostService {
     /**
      * Get a count of all posts on this server.
      *
+     * @returns The total number of posts this server knows about
      * @memberof PostService
      */
     async countLocal(): Promise<number> {
         return this.postRepository.count({ server: await this.serverService.local() });
     }
 
-    // TODO: Maybe consider changing to Flake or some other
-    // kind of temporally-sorted UUIDs?
+    /**
+     * Get a post given its UUID. These are auto-generated by
+     * the server, and not presently made to be ordered in any
+     * sense. (That may change in the future.)
+     *
+     * @param uuid The UUID of a post
+     * @returns The post, if it exists and is known by this server
+     * @memberof PostService
+     */
     async findByUuid(uuid: string): Promise<Post> {
         const postEntity = await this.postRepository.findOne({
             where: { uuid },
@@ -239,6 +309,13 @@ export class PostService {
         return this.postRepository.findOneOrFail({uri});
     }
 
+    /**
+     * Get all posts made by a certain user.
+     *
+     * @param id The database ID of the user
+     * @returns An array of post entities authored by that user
+     * @memberof PostService
+     */
     async findByUserId(id: number): Promise<Post[]> {
         const response = await this.postRepository
             .createQueryBuilder("post")
@@ -250,6 +327,15 @@ export class PostService {
         return response;
     }
 
+    /**
+     * Get all posts in a given group. This returns a flat list,
+     * not a tree structure, so it is not appropriate if threading
+     * needs to be maintained.
+     *
+     * @param group The name of a group on this server
+     * @returns An array of post entities posted in that group
+     * @memberof PostService
+     */
     async findByGroup(group: string): Promise<Post[]> {
         const groupEntity = await this.groupService.findByName(group);
 
@@ -263,6 +349,15 @@ export class PostService {
         return response;
     }
 
+    /**
+     * Get all posts in the group with a given ID. This can
+     * find "foreign" groups as well as local ones. The data
+     * is returned as a flat list, not a tree structure.
+     *
+     * @param id The ID of a group
+     * @returns An array of post entities for that group
+     * @memberof PostService
+     */
     async findByGroupId(id: number): Promise<Post[]> {
         const response = await this.postRepository
             .createQueryBuilder("post")
@@ -275,6 +370,15 @@ export class PostService {
         return response;
     }
 
+    /**
+     * Get all the top-level posts in a given group. These
+     * are the posts with no parent, thus sitting at the
+     * top of a thread.
+     *
+     * @param group The name of a group on this server
+     * @returns An array of post entities
+     * @memberof PostService
+     */
     async findTopLevelByGroup(group: string): Promise<Post[]> {
         const groupEntity = await this.groupService.findByName(group);
 
@@ -290,6 +394,13 @@ export class PostService {
         return response;
     }
 
+    /**
+     * Get a count of a post's children.
+     *
+     * @param id The ID of a post
+     * @returns The number of children of that post
+     * @memberof PostService
+     */
     async countChildren(id: number): Promise<number> {
         const treeRepository = this.postRepository.manager.getTreeRepository(Post);
         const post = await this.find(id);
@@ -299,6 +410,16 @@ export class PostService {
         return (await treeRepository.countDescendants(post)) - 1;
     }
 
+    /**
+     * Get the children of a post. This works recursively,
+     * following the tree structure of a Themis thread or
+     * subthread.
+     *
+     * @param id The ID of a post
+     * @returns An array containing that post's children; the `children`
+     * property of each child allows further descent
+     * @memberof PostService
+     */
     async findChildren(id: number): Promise<Post[]> {
         const treeRepository = this.postRepository.manager.getTreeRepository(Post);
         const parent = await this.find(id);
@@ -383,6 +504,15 @@ export class PostService {
         }
     }
 
+    /**
+     * Get the URI of a local post. In most cases, this is
+     * stored in the DB, but there may be cases where that
+     * doesn't happen, so we need to generate it.
+     *
+     * @param post The post entity
+     * @returns The URI for that post
+     * @memberof PostService
+     */
     async uriFromLocalPost(post: Post): Promise<string> {
         if (post.uri) {
             // We already have a URI, so just return that
@@ -396,6 +526,15 @@ export class PostService {
         }
     }
 
+    /**
+     * Create a post URI given the post's UUID. This is only
+     * needed for local posts, as incoming posts from other
+     * servers will already have a URI.
+     *
+     * @param uuid The post's UUID
+     * @returns The URI for the post
+     * @memberof PostService
+     */
     uriFromUuid(uuid: string): string {
         const host = this.configService.serverAddress;
         const port = this.configService.serverPort;
@@ -411,6 +550,15 @@ export class PostService {
         return uri;
     }
 
+    /**
+     * Create a new UUID for a post. This uses the server's
+     * hostname or IP address, as defined in the configuration
+     * settings.
+     *
+     * @param data The data of a post
+     * @returns A UUID
+     * @memberof PostService
+     */
     createNewUuid(data: any): string {
         const server = this.configService.serverAddress;
         const namespace = uuidv5(server, uuidv5.DNS);
@@ -418,7 +566,15 @@ export class PostService {
         return uuidv5(Date.now().toString() + data.toString(), namespace);
     }
 
-    private async createPostEntity(post: any) {
+    /**
+     * Create a database entity for a post.
+     *
+     * @private
+     * @param post An object contaiing the content and metadata for a post
+     * @returns The post entity
+     * @memberof PostService
+     */
+    private async createPostEntity(post: any): Promise<Post> {
         const user = await this.userService.findByName(post.sender);
 
         // TODO: Handle crossposting
@@ -445,8 +601,16 @@ export class PostService {
         return postEntity;
     }
 
-    // We need this helper method because TypeORM doesn't seem to support
-    // loading relations for child nodes in a tree structure.
+    /**
+     * Load the child relations of a post's database entity.
+     * We need this helper method because TypeORM doesn't seem to support
+     * loading relations for child nodes in a tree structure.
+     * 
+     * @private
+     * @param root The post
+     * @returns The same post, but with its children loaded into the `children` property
+     * @memberof PostService
+     */
     private async loadRelations(root: Post): Promise<Post> {
         const result = await this.postRepository.findOne(root.id, {relations : ['children'] });
 
@@ -457,6 +621,14 @@ export class PostService {
         return result;
     }
 
+    /**
+     * Returns whether this post originated on this server.
+     *
+     * @private
+     * @param post A post
+     * @returns Whether the post's origin is this server
+     * @memberof PostService
+     */
     private async isLocalPost(post: Post): Promise<boolean> {
         const local = await this.serverService.local();
         return (
