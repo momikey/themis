@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import * as pjson from 'pjson';
 
+/**
+ * This service handles any app-level functionality,
+ * though there's not much of that yet.
+ *
+ * @export
+ * @class AppService
+ */
 @Injectable()
 export class AppService {
   root() {

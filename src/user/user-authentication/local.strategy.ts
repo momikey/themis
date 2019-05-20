@@ -4,6 +4,15 @@ import { PassportStrategy } from "@nestjs/passport";
 import { UserAuthenticationService } from "./user-authentication.service";
 import { ConfigService } from "src/config/config.service";
 
+/**
+ * The "local" strategy is a simple user/password setup. We only use
+ * it for the initial authentication phase (logging in). The result,
+ * assuming a successful login, is a JWT token, which will be used
+ * for all further API access.
+ *
+ * @export
+ * @class LocalStrategy
+ */
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
     constructor(

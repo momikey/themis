@@ -13,6 +13,13 @@ import { FilterModule } from './filter/filter.module';
 import { ServerModule } from './server/server.module';
 import { ApiModule } from './api/api.module';
 
+/**
+ * The app module is the root of the Themis hierarchy,
+ * but it doesn't do much more than contain everything else.
+ *
+ * @export
+ * @class AppModule
+ */
 @Module({
   imports: [TypeOrmModule.forRoot(), UserModule, GroupModule, PostModule, ActivityPubModule, ConfigModule, MetaModule, FilterModule, ServerModule, ApiModule],
   controllers: [AppController],

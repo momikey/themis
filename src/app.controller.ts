@@ -1,6 +1,13 @@
 import { Get, Controller, Render } from '@nestjs/common';
 import { AppService } from './app.service';
 
+/**
+ * This is the "base" controller for Themis. In practice,
+ * almost all functionality is delegated to other controllers.
+ *
+ * @export
+ * @class AppController
+ */
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}

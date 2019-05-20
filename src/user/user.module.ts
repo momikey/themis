@@ -13,6 +13,14 @@ import { JwtStrategy } from './user-authentication/jwt.strategy';
 import passport = require('passport');
 import { LocalStrategy } from './user-authentication/local.strategy';
 
+/**
+ * This module deals with users. These aren't necessarily users
+ * on our server, however; all those we know about are stored in
+ * the database, for ease of access and caching purposes.
+ *
+ * @export
+ * @class UserModule
+ */
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Account]),
