@@ -8,13 +8,20 @@ import { Group } from "../entities/group.entity";
 import { Post } from "../entities/post.entity";
 import { User } from "../entities/user.entity";
 import { CreateGroupDto } from "../dtos/create-group.dto";
-import { UpdateUserDto } from "../dtos/update-user-profile.dto";
+import { NodeInfo } from "../activitypub/nodeinfo/nodeinfo.schema";
+import { Account } from "../entities/account.entity";
+import { TokenDto } from "../dtos/token.dto";
+import { UserRole } from "../user/user-authentication/user-authentication.role";
 
 /**
  * This service functions as a layer of indirection betweent
  * client and server, encapsulating Themis backend API requests
  * and other common tasks that we would otherwise need to repeat
  * all throughout the frontend.
+ * 
+ * TODO: Should we use vue-resource instead of axios? Also,
+ * consider handling response body/error stuff in here instead
+ * of forcing the callers to do it.
  *
  * @export
  * @class FrontendService
@@ -28,7 +35,7 @@ export class FrontendService {
      * following the Nodeinfo schema (currently version 2.1)
      * @memberof FrontendService
      */
-    static getNodeinfo(): Promise<any> {
+    static getNodeinfo(): AxiosPromise<NodeInfo> {
         return Axios.get('/.well-known/nodeinfo');
     }
 
@@ -40,7 +47,7 @@ export class FrontendService {
      * a list of Group entities (see API documentation for format)
      * @memberof FrontendService
      */
-    static getGroupList(sortBy? : string, descending? : boolean): Promise<any> {
+    static getGroupList(sortBy? : string, descending? : boolean): AxiosPromise<Group[]> {
         const sortQuery = sortBy ? `?sort=${sortBy}` : '';
         const descQuery = descending ? '&desc=1' : '';
 
@@ -52,7 +59,22 @@ export class FrontendService {
         return Axios.get(`/api/v1/group/list${sortQuery}${descQuery}`);
     }
 
-    static createGroup(accessToken: string, name: string, displayName: string, summary: string): Promise<any> {
+    /**
+     * Attempt to create a group on the local server. This won't
+     * necessarily succeed, as it's possible that the user lacks
+     * permission to create new groups.
+     *
+     * @static
+     * @param accessToken The user's API token
+     * @param name The "short" name of the new group (cf. username)
+     * @param displayName The user-friendly name for the group
+     * @param summary A brief description of the group
+     * @returns An Axios response whose `data` member holds the new group's
+     * database entity
+     * @memberof FrontendService
+     */
+    static createGroup(accessToken: string, name: string, displayName: string, summary: string)
+        : AxiosPromise<Group> {
         const dto : CreateGroupDto = {
             name,
             displayName,
@@ -64,21 +86,57 @@ export class FrontendService {
         });
     }
 
-    static getGroupFromId(id: number): Promise<any> {
+    /**
+     * Get a group given its database ID (on the local server).
+     *
+     * @static
+     * @param id The ID number for the group
+     * @returns An Axios response whoe `data` member is the group's DB entity
+     * @memberof FrontendService
+     */
+    static getGroupFromId(id: number): AxiosPromise<Group> {
         return Axios.get(`/api/v1/group/get-by-id/${id}`);
     }
 
-    static getGroupThreads(group: Group, since?: number): Promise<any> {
+    /**
+     * Get all the threads in a group, optionally since a given date.
+     *
+     * @static
+     * @param group The entity for the group
+     * @param [since] An optional cutoff date
+     * @returns An Axios response containing an array of Post entities
+     * @memberof FrontendService
+     */
+    static getGroupThreads(group: Group, since?: number): AxiosPromise<Post[]> {
         const sinceQuery = since ? `?since=${since}` : '';
 
         return Axios.get(`/api/v1/group/get-top-level-posts/${group.id}${sinceQuery}`);
     }
 
-    static getFullPost(post: Post): Promise<any> {
+    /**
+     * Get a post and its children, as the `getGroupThreads()` method
+     * only returns the top-level posts.
+     *
+     * @static
+     * @param post The post entity
+     * @returns An Axios response containing the same post, but with its
+     * `children` property filled with the post's descendants tree
+     * @memberof FrontendService
+     */
+    static getFullPost(post: Post): AxiosPromise<Post> {
         return Axios.get(`/api/v1/post/get-with-children/${post.id}`);
     }
 
-    static getChildrenOfPost(post: Post): Promise<any> {
+    /**
+     * Get the children of a post. Unlike `getFullPost()`, this doesn't
+     * return the initial post.
+     *
+     * @static
+     * @param post The post entity
+     * @returns An Axios response containing an array of Post entities
+     * @memberof FrontendService
+     */
+    static getChildrenOfPost(post: Post): AxiosPromise<Post[]> {
         return Axios.get(`/api/v1/post/get-children/${post.id}`);
     }
 
@@ -92,7 +150,7 @@ export class FrontendService {
      * whether the user has the given permission
      * @memberof FrontendService
      */
-    static getUserPermission(username: string, permission: string): Promise<any> {
+    static getUserPermission(username: string, permission: string): AxiosPromise<boolean> {
         return Axios.get(`/api/v1/user/get-permission/${username}/${permission}`);
     }
 
@@ -105,7 +163,7 @@ export class FrontendService {
      * for the new account, or an error if it could not be created
      * @memberof FrontendService
      */
-    static createAccount(accountInfo: CreateAccountDto): Promise<any> {
+    static createAccount(accountInfo: CreateAccountDto): AxiosPromise<Account> {
         return Axios.post('/api/v1/authentication/create-account', accountInfo);
     }
 
@@ -119,17 +177,39 @@ export class FrontendService {
      * will contain a login token. If a failure,  an appropriate error.
      * @memberof FrontendService
      */
-    static login(username: string, password: string): Promise<any> {
+    static login(username: string, password: string): AxiosPromise<TokenDto> {
         return Axios.post('/api/v1/authentication/login', {
             username,
             password
         });
     }
 
-    static getLocalUser(username: string): Promise<any> {
+    /**
+     * Get a local user, i.e., one registered on the local server.
+     *
+     * @static
+     * @param username The user's name
+     * @returns An Axios response containing a User database entity
+     * @memberof FrontendService
+     */
+    static getLocalUser(username: string): AxiosPromise<User> {
         return Axios.get(`/api/v1/user/get-user/${username}`);
     }
 
+    /**
+     * Update a user's "profile" information. This includes the
+     * primary fields of an ActivityPub Actor object, such as
+     * display name and summary (aka bio), as well as a URI for
+     * an avatar (not implemented yet). Note that this only allows
+     * updateing users local to this server.
+     *
+     * @static
+     * @param username The user's name
+     * @param accessToken The user's API token
+     * @param profile The updated profile object
+     * @returns An Axios response containing the updated User entity
+     * @memberof FrontendService
+     */
     static updateUserProfile(
         username: string,
         accessToken: string,
@@ -156,7 +236,7 @@ export class FrontendService {
      * @returns An Axios response containing in the `data` member the user's role
      * @memberof FrontendService
      */
-    static getUserRole(username: string, accessToken: string): Promise<any> {
+    static getUserRole(username: string, accessToken: string): AxiosPromise<UserRole> {
         return Axios.get(`/api/v1/authentication/role/${username}`, {
             headers: { 'Authorization': `bearer ${accessToken}` }
         });
