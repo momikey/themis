@@ -109,19 +109,24 @@ import InfoPanel from './InfoPanel.vue';
 export default Vue.extend({
     data() {
         return {
+            // Show/hide various parts of the UI
             showDrawer: false,
             showInfo: false,
 
+            // We hold the user's avatar here to save on network transfer
             userAvatar: null,
 
+            // Percentage value for the progress bar
             progress: 0,
 
+            // Properties for the various components
             selectedGroup: null,
             selectedThread: null,
             newThread: null,
-
             infoPanelUser: null,
 
+            // Vue makes it difficult to communicate from parent to child.
+            // We fake that with these variables, which work like triggers.
             reloadGroup: false,
             reloadThread: false,
         }
@@ -147,25 +152,34 @@ export default Vue.extend({
     },
 
     methods: {
+        /*
+         * The drawer is the main navigation panel that slides out
+         * when the nav button is clicked.
+         */
         drawerClicked () {
             this.showDrawer = !this.showDrawer;
         },
 
+        /*
+         * The info panel appears when the user clicks various parts
+         * of a message, such as the sender's name.
+         */
         showInfoPanel () {
             this.showInfo = !this.showInfo;
         },
 
-        navigate (loc) {
-            if (loc.route) {
-                this.$router.push(loc.route);
-            }
-        },
-
+        /*
+         * Log the user out, then redirect to the front page.
+         */
         logout () {
             // TODO: Remove auth stuff, so we're *really* logged out
             this.$router.push('/');
         },
 
+        /*
+         * Handle a request to change the progress bar's state.
+         * Components use this to indicate their status.
+         */
         onProgressUpdated (newVal) {
             this.progress = newVal;
 
@@ -176,6 +190,10 @@ export default Vue.extend({
             }
         },
 
+        /*
+         * Handle a group selection. This loads the thread list for
+         * that group in the middle pane.
+         */
         async onGroupSelected(groupId) {
             if (this.selectedGroup !== groupId) {
                 this.selectedGroup = groupId;
@@ -184,19 +202,37 @@ export default Vue.extend({
             }
         },
 
+        /*
+         * Handle group creation. This also clears the thread pane,
+         * since the current group is effectively in an indeterminate state.
+         */
         onGroupCreated(groupName) {
             this.selectedThread = null;
         },
 
+        /*
+         * Handle a thread selection. This loads the thread's messages
+         * in the thread pane.
+         */
         onThreadSelected (thread) {
             this.selectedThread = thread;
         },
 
+        /*
+         * Handle starting a new thread. This clears any current thread
+         * from that pane, replacing it with the post composer.
+         */
         onThreadStarted () {
             this.selectedThread = null;
             this.newThread = true;
         },
 
+        /*
+         * Handle posting in a new thread. We submit the post, then
+         * update the thread list.
+         * 
+         * TODO: Better error handling
+         */
         async onThreadCreated (thread) {
             const username = this.$warehouse.get('themis_login_user');
             const token = this.$warehouse.get('themis_login_token');
@@ -223,10 +259,19 @@ export default Vue.extend({
             this.newThread = false;
         },
 
+        /*
+         * If the user cancels creating a new thread, just close
+         * the composer and act like nothing happened.
+         */
         onThreadCanceled () {
             this.newThread = false;
         },
 
+        /*
+         * Handle posting a reply. The only tricky bit here is
+         * managing the thread pane, as we have to tell Vue to
+         * wait a tick. Otherwise, it ignores our attempt at updating.
+         */
         async onReplyCreated (post, reply) {
             const username = this.$warehouse.get('themis_login_user');
             const token = this.$warehouse.get('themis_login_token');
@@ -258,11 +303,19 @@ export default Vue.extend({
             }
         },
 
+        /*
+         * Handle a request to show a user's info in the info panel.
+         * This also shows the info panel if it's hidden.
+         */
         async onRequestUser (user) {
             this.infoPanelUser = user;
             this.showInfoPanel();
         },
 
+        /*
+         * Reload the list of threads in a group. This delegates to
+         * the thread list pane, so see that component for its logic.
+         */
         async reloadThreadList () {
             this.reloadGroup = true;
             await this.$nextTick();
