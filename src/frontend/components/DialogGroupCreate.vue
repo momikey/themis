@@ -1,4 +1,5 @@
 <template>
+    <!-- Group creation dialog -->
     <v-dialog v-model="show"
         persistent no-click-animation
         max-width="480px"
@@ -22,6 +23,7 @@
                 {{ createNewGroupText }}
             </v-card-title>
 
+            <!-- Metadata, such as the group's name, description, etc. -->
             <v-form v-model="valid" class="px-2">
                 <v-container>
                     <v-layout column>
@@ -87,15 +89,19 @@ import Vue, { VueConstructor } from 'vue';
 export default Vue.extend({
     data () {
         return {
+            // Model variables to show/hide and validate
             valid: false,
             show: false,
 
+            // Container for form fields
             form: {
                 shortName: '',
                 longName: '',
                 summary: ''
             },
 
+            // Labels for this component
+            // TODO: i18n
             createNewGroupText: "Create a new group",
             groupNameLabel: "Group name",
             groupShortNameLabel: "Short name",
@@ -113,16 +119,26 @@ export default Vue.extend({
     },
 
     methods: {
+        /*
+         * Create the group with the values entered in the form.
+         */
         create() {
             this.$emit('create-group', this.form);
             this.dismiss();
         },
 
+        /*
+         * Dismiss the dialog, clearing its form values. This is
+         * called for both the "confirm" and "cancel" actions.
+         */
         dismiss() {
             this.clearForm();
             this.show = false;
         },
 
+        /*
+         * Helper to clear the form fields.
+         */
         clearForm() {
             this.form = {
                 shortName: '',

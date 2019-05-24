@@ -5,6 +5,10 @@
             <v-list three-line subheader class="scroll-y full-height"
                 v-if="groupEntity"
             >
+                <!--
+                    Subheader will say which groups are shown, and also
+                    have the "New Thread" button.
+                -->
                 <v-subheader>
                     {{ threadListSubheader }}
                     <v-spacer />
@@ -22,6 +26,10 @@
                     </v-tooltip>
                 </v-subheader>
 
+                <!--
+                    The actual thread list. Each entry is a card so we
+                    can do more complex formatting.
+                -->
                 <template v-if="groupThreads.length">
                     <v-list-tile dark
                         v-for="thread in groupThreads"
@@ -52,6 +60,7 @@
                     </v-list-tile>
                 </template>
 
+                <!-- If the group doesn't have any threads, show a message saying as much -->
                 <template v-else>
                     <v-list-tile dark>
                         {{ noThreadsText }}
@@ -73,10 +82,12 @@ import { FrontendService } from '../frontend.service';
 export default Vue.extend({
     data () {
         return {
+            // The usual "container" variables for this component
             groupEntity: null,
             groupThreads: [],
-            activePost: null,
 
+            // UI Labels
+            // TODO: i18n
             noThreadsText: "This group has no posts. Create one by clicking the button above.",
         }
     },
@@ -95,13 +106,16 @@ export default Vue.extend({
     watch: {
         async reload () {
             if (this.reload) {
-                this._group = this.group;
                 await this.loadGroup(this.group);
             }
         }
     },
 
     methods: {
+        /*
+         * Load this group, if possible. This method fetches the metadata,
+         * and it calls `loadThreads()` below to get the actual posts.
+         */
         async loadGroup(id) {
             if (id) {
                 try {
@@ -116,6 +130,10 @@ export default Vue.extend({
             }
         },
 
+        /*
+         * Load the group's threads. This only fetches the parent posts
+         * for each thread, to save on network usage.
+         */
         async loadThreads(group) {
             try {
                 this.groupThreads = (await FrontendService.getGroupThreads(group)).data;
@@ -124,6 +142,13 @@ export default Vue.extend({
             }
         },
 
+        /*
+         * Format a timestamp into a short, human-readable value.
+         * For example, a time of 5 minutes ago should show as "5m", etc.
+         * (This matches Mastodon and Pleroma.)
+         * 
+         * TODO: We'll need to rewrite this once we add localization
+         */
         formatTime(timestamp) {
             const distance = distanceInWordsStrict(new Date, timestamp, { partialMethod: 'round' });
             const [num, unit] = distance.split(' ');
@@ -147,15 +172,29 @@ export default Vue.extend({
             }
         },
 
+        /*
+         * Format the sender of a thread's root post. At the moment,
+         * this simply shows the "display" name or, if that isn't present,
+         * the username.
+         */
         formatFrom(sender) {
             return `by ${sender.displayName || sender.name}`;
         },
 
-        onSelectThread (post) {
+        /*
+         * Send an event when a thread is selected, so it can be shown
+         * in the thread pane.
+         */
+        onSelectThread(post) {
             this.$emit('thread-selected', post);
         },
 
-        onCreateNewThread () {
+        /*
+         * Send an event to start creating a new thread in the
+         * selected group. This component won't have anything to do
+         * with that; it's all handled by the post composer.
+         */
+        onCreateNewThread() {
             this.$emit('thread-create-started');
         }
     },
