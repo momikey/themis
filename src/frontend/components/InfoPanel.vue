@@ -1,4 +1,5 @@
 <template>
+    <!-- Right-side panel to show user info -->
     <v-container fill-height fluid>
         <v-layout column>
             <v-flex xs12 align-self-center>
@@ -39,6 +40,10 @@ export default Vue.extend({
     ],
 
     methods: {
+        /*
+         * Pretty-print the user's name in both forms. We might change
+         * this to allow styling, etc.
+         */
         formatUserName (user) {
             return `${user.displayName} (@${user.name}@${user.server.host})`;
         }

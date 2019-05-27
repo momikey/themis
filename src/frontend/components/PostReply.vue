@@ -1,4 +1,5 @@
 <template>
+    <!-- An inline composer intended for replies to a post -->
     <v-expand-transition>
         <v-layout column :id="id" :v-show="show">
             <v-flex grow>
@@ -34,6 +35,8 @@ import Vue, { VueConstructor } from 'vue';
 export default Vue.extend({
     data () {
         return {
+            // Backing field for the post
+            // TODO: Possibly add the ability to change the subject
             replyText: '',
 
             // TODO: Make this locale-aware
@@ -54,16 +57,28 @@ export default Vue.extend({
     },
 
     methods: {
+        /*
+         * Emit an event to send the reply.
+         */
         sendReply () {
             this.$emit('send-reply', this.replyText);
             this.clearReplyText();
         },
 
+        /*
+         * Emit an event to cancel the reply. This hides the
+         * composer and clears its form fields.
+         */
         cancelReply () {
             this.$emit('cancel-reply');
-            this.clearReplyText
+            this.clearReplyText();
         },
 
+        /*
+         * Clear the form by resetting the backing field. Because
+         * this component is reused, this prevents stale data from
+         * showing up.
+         */
         clearReplyText () {
             this.replyText = '';
         }

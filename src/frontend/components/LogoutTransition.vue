@@ -18,18 +18,30 @@ export default Vue.extend({
     },
 
     methods: {
+        /*
+         * Log the user out by removing their name, role, and API
+         * token from browser storage. If we add in session stuff
+         * later on, this would handle it, too.
+         */
         logout() {
             this.$warehouse.set('themis_login_user', null);
             this.$warehouse.set('themis_login_token', null);
             this.$warehouse.set('themis_login_role', null);
         },
 
+        /*
+         * Redirect the user after logging out. This uses the
+         * `replace()` method rather than `push()` because we
+         * *want* to alter the browser history stack.
+         */
         redirect() {
             this.$router.replace('/');
         },
     },
 
-        mounted() {
+    mounted() {
+        // TODO: Maybe change the countdown here, or make it
+        // a server setting?
         setTimeout(() => {
             this.logout();
             this.redirect();

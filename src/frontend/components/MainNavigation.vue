@@ -72,10 +72,14 @@ import { UserRole } from '../../user/user-authentication/user-authentication.rol
 export default Vue.extend({
     data () {
         return {
+            // Navigation actions. These should all have the following properties:
+            // * title: The name to show the user (TODO: localization)
+            // * icon: The Material Design icon name to show with the entry
+            // * route: The target page for the entry
             navigationActions: [
-                { title: 'Home', icon: 'dashboard', route: 'web'},     // TODO
+                { title: 'Home', icon: 'dashboard', route: 'web'},
                 { title: 'Profile', icon: 'person', route: 'user/profile' },
-                { title: 'Favorites', icon: 'star', route: 'user/favorites' },    // TODO
+                { title: 'Favorites', icon: 'star', route: 'user/favorites' },
                 { title: 'Filters', icon: 'filter_list', route: 'user/filters' },
                 { title: 'Preferences', icon: 'settings', route: 'user/preferences' },
             ],

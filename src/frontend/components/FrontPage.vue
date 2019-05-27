@@ -1,178 +1,182 @@
 <template>
-    <!-- <div class="front-page-container"> -->
-    <v-container fluid><v-layout justify-start row fill-height wrap>
-        <v-flex xs12 sm4 lg3>
-            <v-container fluid><v-layout justify-start column fill-height>
-                <v-window
-                    class="login-or-create"
-                    v-model="isCreating"
-                >
-                    <v-window-item :value="false" reverse="true">
-                    <v-form class="existing-account" v-if="!isCreating" key="existing">
-                    <v-text-field 
-                        id="login-name" 
-                        name="login-name" 
-                        label="Username" 
-                        v-model="loginName"
-                    />
-                    <v-text-field 
-                        id="login-password" 
-                        name="login-password" 
-                        type="password" 
-                        label="Password" 
-                        v-model="loginPassword"
-                    />
-                    <br />
-                    <v-btn color="orange darken-4"
-                        id="login-submit"
-                        class="button login"
-                        @click="login">
-                        Log in
-                    </v-btn>
-                    <v-btn
-                        id="create-new-account"
-                        class="button submit"
-                        @click="showCreateForm">
-                        Create account
-                    </v-btn>
-                    <p id="login-invalid" v-if="invalidLogin">Invalid username or password</p>
-                    </v-form>
-                    </v-window-item>
+    <!-- Front page layout; different from the "main" page -->
+    <v-container fluid>
+        <v-layout justify-start row fill-height wrap>
 
-                    <v-window-item :value="true">
-                    <v-form class="new-account" v-if="isCreating" key="new">
-                        <v-text-field
-                            id="new-name"
-                            name="new-name"
-                            label="Username"
-                            v-model="newAccount.username"
-                            :rules="newAccountRules.name"
+            <!-- Login panel -->
+            <v-flex xs12 sm4 lg3>
+                <v-container fluid><v-layout justify-start column fill-height>
+                    <v-window
+                        class="login-or-create"
+                        v-model="isCreating"
+                    >
+                        <v-window-item :value="false" reverse="true">
+                        <v-form class="existing-account" v-if="!isCreating" key="existing">
+                        <v-text-field 
+                            id="login-name" 
+                            name="login-name" 
+                            label="Username" 
+                            v-model="loginName"
                         />
-                        <v-text-field
-                            id="new-email"
-                            name="new-email"
-                            label="Email address"
-                            v-model="newAccount.email"
-                            :rules="newAccountRules.email"
-                        />
-                        <v-text-field
-                            id="new-password"
-                            name="new-password"
-                            type="password"
-                            label="Password"
-                            v-model="newAccount.password"
-                            :rules="newAccountRules.password"
-                        />
-                        <v-text-field
-                            id="new-retype"
-                            name="new-retype"
-                            type="password"
-                            label="Retype password"
-                            v-model="retypePassword"
-                            :rules="newAccountRules.retype"
+                        <v-text-field 
+                            id="login-password" 
+                            name="login-password" 
+                            type="password" 
+                            label="Password" 
+                            v-model="loginPassword"
                         />
                         <br />
                         <v-btn color="orange darken-4"
-                            id="new-account-submit"
-                            class="button submit"
-                            @click="createAccount">
-                            Create account
+                            id="login-submit"
+                            class="button login"
+                            @click="login">
+                            Log in
                         </v-btn>
                         <v-btn
-                            id="new-account-cancel"
-                            class="button cancel"
-                            @click="cancelCreate">
-                            Cancel
+                            id="create-new-account"
+                            class="button submit"
+                            @click="showCreateForm">
+                            Create account
                         </v-btn>
-                        <p id="new-account-invalid-reason" :class="isAccountValid">{{validateAccount().reason}}</p>
-                    </v-form>
-                    </v-window-item>
-                </v-window>
-            </v-layout>
-            </v-container>
-        </v-flex>
+                        <p id="login-invalid" v-if="invalidLogin">Invalid username or password</p>
+                        </v-form>
+                        </v-window-item>
 
-        <v-flex xs12 sm8 lg6 pl-2>
-        <div class="front-column site-info">
-            <p>Put your site's info here...</p>
-            <p>(Eventually, we'll bring that in from the server.)</p>
-        </div>
-
-            <v-flex xs12 sm10 md8 offset-sm1 offset-md2 class="pt-5">
-            <v-sheet dark v-if="nodeinfo"
-                class="d-flex"
-                color="blue-grey darken-2"
-                elevation="4"
-                max-height="150"
-            >
-                <v-card class="pr-4">
-                    <v-card-title dark class="justify-end display-1">
-                        {{ serverTotalUsers }}
-                    </v-card-title>
-                    <v-card-text class="text-uppercase text-xs-right">
-                        total users
-                    </v-card-text>
-                </v-card>
-
-                <v-card class="pr-4">
-                    <v-card-title dark class="justify-end display-1">
-                        {{ serverTotalPosts }}
-                    </v-card-title>
-                    <v-card-text class="text-uppercase text-xs-right">
-                        total posts
-                    </v-card-text>
-                </v-card>
-            </v-sheet>
+                        <v-window-item :value="true">
+                        <v-form class="new-account" v-if="isCreating" key="new">
+                            <v-text-field
+                                id="new-name"
+                                name="new-name"
+                                label="Username"
+                                v-model="newAccount.username"
+                                :rules="newAccountRules.name"
+                            />
+                            <v-text-field
+                                id="new-email"
+                                name="new-email"
+                                label="Email address"
+                                v-model="newAccount.email"
+                                :rules="newAccountRules.email"
+                            />
+                            <v-text-field
+                                id="new-password"
+                                name="new-password"
+                                type="password"
+                                label="Password"
+                                v-model="newAccount.password"
+                                :rules="newAccountRules.password"
+                            />
+                            <v-text-field
+                                id="new-retype"
+                                name="new-retype"
+                                type="password"
+                                label="Retype password"
+                                v-model="retypePassword"
+                                :rules="newAccountRules.retype"
+                            />
+                            <br />
+                            <v-btn color="orange darken-4"
+                                id="new-account-submit"
+                                class="button submit"
+                                @click="createAccount">
+                                Create account
+                            </v-btn>
+                            <v-btn
+                                id="new-account-cancel"
+                                class="button cancel"
+                                @click="cancelCreate">
+                                Cancel
+                            </v-btn>
+                            <p id="new-account-invalid-reason" :class="isAccountValid">{{validateAccount().reason}}</p>
+                        </v-form>
+                        </v-window-item>
+                    </v-window>
+                </v-layout>
+                </v-container>
             </v-flex>
-        </v-flex>
 
-        <v-flex xs12 lg3>
-            <v-toolbar dark>
-                <v-spacer />
-                <v-toolbar-title>What we're talking about</v-toolbar-title>
-            </v-toolbar>
-            <v-list three-line>
-                <v-list-tile avatar v-for="group in groupList" :key="group.id">                    
-                    <v-list-tile-content>
-                        <v-list-tile-title>{{ group.displayName }}</v-list-tile-title>
-                        <v-list-tile-sub-title>{{ formatGroupName(group) }}</v-list-tile-sub-title>
-                        <v-list-tile-action-text>{{ group.summary }}</v-list-tile-action-text>
-                    </v-list-tile-content>
-                </v-list-tile>
-            </v-list>
-        </v-flex>
-    </v-layout>
+            <!-- Site info panel -->
+            <v-flex xs12 sm8 lg6 pl-2>
+            <div class="front-column site-info">
+                <p>Put your site's info here...</p>
+                <p>(Eventually, we'll bring that in from the server.)</p>
+            </div>
 
-    <site-footer/>
+                <v-flex xs12 sm10 md8 offset-sm1 offset-md2 class="pt-5">
+                <v-sheet dark v-if="nodeinfo"
+                    class="d-flex"
+                    color="blue-grey darken-2"
+                    elevation="4"
+                    max-height="150"
+                >
+                    <v-card class="pr-4">
+                        <v-card-title dark class="justify-end display-1">
+                            {{ serverTotalUsers }}
+                        </v-card-title>
+                        <v-card-text class="text-uppercase text-xs-right">
+                            total users
+                        </v-card-text>
+                    </v-card>
 
-    <!-- Popup for invalid account info -->
-    <v-snackbar bottom left
-        v-model="invalidLogin"
-        color="error"
-        :timeout="5000"
-    >
-        {{ invalidLoginText }}
-    <v-btn dark flat
-        @click = 'invalidLogin = false'
-    >
-        Close
-    </v-btn>
-    </v-snackbar>
+                    <v-card class="pr-4">
+                        <v-card-title dark class="justify-end display-1">
+                            {{ serverTotalPosts }}
+                        </v-card-title>
+                        <v-card-text class="text-uppercase text-xs-right">
+                            total posts
+                        </v-card-text>
+                    </v-card>
+                </v-sheet>
+                </v-flex>
+            </v-flex>
 
-    <!-- Popup for successful account creation -->
-    <v-snackbar bottom left
-        v-model="createdAccount.flag"
-        color="success"
-        :timeout="5000"
-    >
-        {{ createdAccount.message }}
-    <v-btn dark flat
-        @click = 'createdAccount.flag = false'
-    >
-        Close
-    </v-btn>
-    </v-snackbar>
+            <!-- "A look inside"-style panel -->
+            <v-flex xs12 lg3>
+                <v-toolbar dark>
+                    <v-spacer />
+                    <v-toolbar-title>What we're talking about</v-toolbar-title>
+                </v-toolbar>
+                <v-list three-line>
+                    <v-list-tile avatar v-for="group in groupList" :key="group.id">                    
+                        <v-list-tile-content>
+                            <v-list-tile-title>{{ group.displayName }}</v-list-tile-title>
+                            <v-list-tile-sub-title>{{ formatGroupName(group) }}</v-list-tile-sub-title>
+                            <v-list-tile-action-text>{{ group.summary }}</v-list-tile-action-text>
+                        </v-list-tile-content>
+                    </v-list-tile>
+                </v-list>
+            </v-flex>
+        </v-layout>
 
+        <site-footer/>
+
+        <!-- Popup for invalid account info -->
+        <v-snackbar bottom left
+            v-model="invalidLogin"
+            color="error"
+            :timeout="5000"
+        >
+            {{ invalidLoginText }}
+            <v-btn dark flat
+                @click = 'invalidLogin = false'
+            >
+                Close
+            </v-btn>
+        </v-snackbar>
+
+        <!-- Popup for successful account creation -->
+        <v-snackbar bottom left
+            v-model="createdAccount.flag"
+            color="success"
+            :timeout="5000"
+        >
+            {{ createdAccount.message }}
+            <v-btn dark flat
+                @click = 'createdAccount.flag = false'
+            >
+                Close
+            </v-btn>
+        </v-snackbar>
     </v-container>
 </template>
 
@@ -188,14 +192,18 @@ import SiteFooter from './SiteFooter.vue';
 export default Vue.extend({
     data () {
         return {
+            // Server info stuff
             nodeinfo: {},
             groupList: [],
 
+            // Model variable for login/create account
             isCreating: false,
 
+            // Login fields
             loginName: '',
             loginPassword: '',
 
+            // New account form fields
             newAccount: {
                 username: '',
                 email: '',
@@ -203,9 +211,11 @@ export default Vue.extend({
             },
             retypePassword: '',
 
+            // These control whether the "invalid login" notification shows
             invalidLogin: false,
             invalidLoginText: '',
 
+            // Status for account creation
             createdAccount: {
                 flag: false,
                 message: ''
@@ -265,6 +275,10 @@ export default Vue.extend({
         }
     },
     methods: {
+        /*
+         * Get the server's Nodeinfo response, which holds a lot
+         * of useful properties like stats.
+         */
         async getNodeinfo() {
             try {
                 this.nodeinfo = (await FrontendService.getNodeinfo()).data;
@@ -273,6 +287,12 @@ export default Vue.extend({
             }
         },
 
+        /*
+         * Get the list of groups for this server. Unlike the "main"
+         * app page, the front page just fetches the list. This is meant
+         * to give lurkers and potential users a look at what kind of
+         * groups the server offers.
+         */
         async getGroupList() {
             try {
                 this.groupList = (await FrontendService.getGroupList('name')).data;
@@ -281,6 +301,10 @@ export default Vue.extend({
             }
         },
 
+        /*
+         * Attempt a login with the entered username/password. If successful,
+         * we'll redirect to the main app. Otherwise, show a notification.
+         */
         async login() {
             try {
                 // Try to log in. If there are any errors (wrong password,
@@ -302,8 +326,9 @@ export default Vue.extend({
                 const userRole = (await FrontendService.getUserRole(
                     this.loginName, loginResponse.accessToken
                 )).data;
-
                 this.$warehouse.set('themis_login_role', userRole);
+
+                // Redirect to the main app.
                 this.$router.push('web');
             } catch (e) {
                 // Something went wrong with one of the two API calls.
@@ -319,6 +344,12 @@ export default Vue.extend({
             }
         },
 
+        /*
+         * Validate the data in the account creation form, to see if
+         * a new account can be created. We do some of the obvious
+         * checks on the client side to save on traffic and offer the
+         * user a more responsive app.
+         */
         validateAccount() {
             // A potential account must have all parts valid.
             // Of course, we'll eventually need to do a lot of checking to see
@@ -354,6 +385,12 @@ export default Vue.extend({
             return result;
         },
 
+        /*
+         * Create a new account on the server. This still might not
+         * work, as the server might, for instance, already have a
+         * user with the same name. But that's for the back end to
+         * decide.
+         */
         async createAccount() {
             const validationResult = this.validateAccount();
 
@@ -362,9 +399,6 @@ export default Vue.extend({
                 console.log(validationResult.reason);
             } else {
                 // Looks like we're good. The back end can handle it from here.
-                // axios.post('/internal/authenticate/create-account', this.newAccount)
-                // .then(response => console.log(response.data))
-                // .catch(error => console.log(error));
                 try {
                     const createResponse =
                         (await FrontendService.createAccount(this.newAccount)).data;
@@ -381,14 +415,28 @@ export default Vue.extend({
             }
         },
 
+        /*
+         * Cancel account creation. This is done in response to the user
+         * clicking the "Cancel" button on the form. As yet, there isn't
+         * much here, but we may need to add other logic later.
+         */
         cancelCreate() {
             this.isCreating = false;
         },
 
+        /*
+         * Show the account creation form. This is done in response to
+         * the user clicking the "Create Account" button. Again, not much
+         * logic here yet, but that may change in the future.
+         */
         showCreateForm() {
             this.isCreating = true;
         },
 
+        /*
+         * Format a group name. We need this wrapper because Vue
+         * doesn't let us call methods on another object from the HTML part.
+         */
         formatGroupName(group) {
             return FrontendService.formatGroupName(group);
         }
