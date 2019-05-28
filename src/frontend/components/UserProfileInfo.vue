@@ -1,4 +1,5 @@
 <template>
+    <!-- The bio section for a user's profile settings page -->
     <v-flex id="user"
         :value="profileData"
         @input="$emit('input', profileData)"
@@ -62,8 +63,10 @@ import { FrontendService } from '../frontend.service';
 export default Vue.extend({
     data () {
         return {
+            // Model variable for profile form
             valid: false,
 
+            // Backing fields for profile form
             profileData: {
                 username: null,
                 displayName: null,
@@ -74,6 +77,7 @@ export default Vue.extend({
             // TODO: Implement avatar handling
             avatar: null,
 
+            // TODO: Heavy i18n
             profileHeaderLabel: "Your profile",
             yourUsernameLabel: "Your username",
             usernameWarning: "This cannot be changed",
@@ -89,6 +93,11 @@ export default Vue.extend({
     ],
 
     methods: {
+        /*
+         * Get the user's data from the server. The "core" parts are
+         * in the ActivityPub Actor object, but anything else we add
+         * later might need another API call.
+         */
         async getUser () {
             const user = (await FrontendService.getLocalUser(this.username)).data;
             this.profileData.username = user.name;

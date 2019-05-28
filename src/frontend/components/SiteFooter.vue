@@ -1,4 +1,5 @@
-<template>    
+<template>
+    <!-- The site footer, aka the only branding Themis will have -->
     <v-footer absolute app class="pa-2">
         <v-spacer/>
         <div>This site proudly runs {{ serverVersionString }}.</div>
@@ -16,6 +17,11 @@ export default Vue.extend({
         }
     },
     computed: {
+        /*
+         * Format the version string. Note that only the "loading" text
+         * should be localized. Themis stays Themis no matter what the
+         * user's locale.
+         */
         serverVersionString() {
             if (this.nodeinfo.software) {
                 return `Themis v${this.nodeinfo.software.version}`;
@@ -25,6 +31,10 @@ export default Vue.extend({
         },
     },
     methods: {
+        /*
+         * Get the server's Nodeinfo.
+         * TODO: Can we pass the one from the front page?
+         */
         async getNodeinfo() {
             try {
                 this.nodeinfo = (await FrontendService.getNodeinfo()).data;
