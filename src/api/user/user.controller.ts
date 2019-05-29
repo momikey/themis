@@ -5,6 +5,7 @@ import { UserRole } from '../../user/user-authentication/user-authentication.rol
 import { User } from '../../entities/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { UpdateUserDto } from '../../dtos/update-user-profile.dto';
+import { Post } from '../../entities/post.entity';
 
 /**
  * These endpoints deal with users. Users in Themis are separated
@@ -47,6 +48,45 @@ export class UserController {
     @Get('get-user/:name/:server')
     async getGlobalUser(@Param('name') username: string, @Param('server') server: string): Promise<User> {
         return this.userService.findGlobalByName(username, server);
+    }
+
+    /**
+     * Get the IDs of all posts a given user on this server has liked.
+     * We use a separate endpoint for this to keep from sending the full
+     * list of posts multiple times.
+     *
+     * @param username The name of the user
+     * @returns A list of database IDs for the user's liked posts
+     * @memberof UserController
+     */
+    @Get('get-like-ids/:name')
+    async getLocalUserLikeIds(@Param('name') username: string): Promise<number[]> {
+        try {
+            const user = await this.userService.findLocalByName(username);
+
+            return (await this.userService.getLikes(user)).liked.map(l => l.id);
+        } catch (e) {
+            throw new NotFoundException(`User ${username} does not exist on this server`);
+        }
+    }
+
+    /**
+     * Get all the posts a user has liked. This does return full posts,
+     * not only IDs or metadata, so beware of data usage.
+     *
+     * @param username The name of the user
+     * @returns An array of database entities for posts the user has liked
+     * @memberof UserController
+     */
+    @Get('get-likes/:name')
+    async getLocalUserLikes(@Param('name') username: string): Promise<Post[]> {
+        try {
+            const user = await this.userService.findLocalByName(username);
+
+            return (await this.userService.getLikes(user)).liked;
+        } catch (e) {
+            throw new NotFoundException(`User ${username} does not exist on this server`);
+        }
     }
 
     /**
