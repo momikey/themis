@@ -57,7 +57,33 @@
             <v-container fluid pa-2>
                 <v-layout justify-end>
                     <v-flex shrink>
-                        <span class="my-0 py-0">
+                        <span class="mx-1 my-0 py-0">
+                            <v-tooltip bottom close-delay="100" v-if="isNotLiked">
+                                <template #activator="{ on }">
+                                    <v-btn icon dark
+                                        @click="onLikeClicked"
+                                        v-on="on"
+                                    >
+                                        <v-icon>star_border</v-icon>
+                                    </v-btn>
+                                </template>
+
+                                <span>Like</span>
+                            </v-tooltip>
+                            <v-tooltip bottom close-delay="100" v-else>
+                                <template #activator="{ on }">
+                                    <v-btn icon dark
+                                        v-on="on"
+                                    >
+                                        <v-icon color="yellow darken-2">star</v-icon>
+                                    </v-btn>
+                                </template>
+
+                                <span>You liked this post</span>
+                            </v-tooltip>
+                        </span>
+
+                        <span class="mx-1 my-0 py-0">
                             <v-tooltip bottom close-delay="100">
                                 <template #activator="{ on }">
                                     <v-btn icon dark
@@ -117,6 +143,12 @@ export default Vue.extend({
         }
     },
 
+    computed: {
+        isNotLiked() {
+            return !this.likes.has(this.post.id);
+        }
+    },
+
     props: [
         'post'
     ],
@@ -128,7 +160,9 @@ export default Vue.extend({
      */
     inject: [
         'replyTo',
-        'requestUserInfo'
+        'requestUserInfo',
+        'likePost',
+        'likes'
     ],
 
     watch: {
@@ -186,6 +220,14 @@ export default Vue.extend({
 
             // Clear out the reply textarea for future use
             this.cancelReply();
+        },
+
+        /*
+         * If the like button is clicked, like the post (unless
+         * it's already been liked)
+         */
+        onLikeClicked () {
+            this.likePost(this.post);
         },
 
         /*

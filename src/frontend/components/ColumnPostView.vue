@@ -33,7 +33,8 @@ export default Vue.extend({
 
     props: [
         'post',
-        'reload'
+        'reload',
+        'likes'
     ],
 
     watch: {
@@ -59,6 +60,14 @@ export default Vue.extend({
          */
         requestUserInfo (user) {
             this.$emit('request-user', user);
+        },
+
+        /*
+         * Send a request to like a post in this thread.
+         * This will bubble up to the container for the API call.
+         */
+        likePost (post) {
+            this.$emit('like-post', post);
         }
     },
 
@@ -78,6 +87,8 @@ export default Vue.extend({
         return {
             replyTo: this.replyTo,
             requestUserInfo: this.requestUserInfo,
+            likePost: this.likePost,
+            likes: this.likes
         }
     },
 

@@ -243,6 +243,23 @@ export class FrontendService {
     }
 
     /**
+     * Get the IDs of all a user's liked posts. This uses less data
+     * than retrieving a full post list, so use it if we already have
+     * the posts.
+     *
+     * @static
+     * @param username The name of the local user
+     * @param accessToken The user's API token
+     * @returns An Axios response containing a list of post IDs
+     * @memberof FrontendService
+     */
+    static getUserLikeIds(username: string, accessToken: string): AxiosPromise<number[]> {
+        return Axios.get(`/api/v1/user/get-like-ids/${username}`, {
+            headers: { 'Authorization': `bearer ${accessToken}` }
+        });
+    }
+
+    /**
      * Format an integer for display in the frontend. Basically, this
      * just inserts commas for separators.
      *

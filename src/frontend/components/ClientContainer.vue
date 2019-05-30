@@ -75,9 +75,11 @@
                     <column-post-view v-if="selectedThread"
                         :post="selectedThread"
                         :reload="reloadThread"
+                        :likes="userLikes"
                         @create-reply="onReplyCreated"
                         @update-progress="onProgressUpdated"
                         @request-user="onRequestUser"
+                        @like-post="onPostLiked"
                     />
                     <column-post-compose v-else-if="newThread"
                         @create-thread="onThreadCreated"
@@ -98,6 +100,7 @@ import { UserRole } from '../../user/user-authentication/user-authentication.rol
 
 import { FrontendService } from '../frontend.service';
 import { PostSubmit } from '../post-submit.service';
+import { APClient } from '../ap-client.service';
 
 import ColumnGroupList from './ColumnGroupList.vue';
 import ColumnThreadList from './ColumnThreadList.vue';
@@ -115,6 +118,9 @@ export default Vue.extend({
 
             // We hold the user's avatar here to save on network transfer
             userAvatar: null,
+
+            // Same for likes,
+            userLikes: null,
 
             // Percentage value for the progress bar
             progress: 0,
@@ -234,15 +240,10 @@ export default Vue.extend({
          * TODO: Better error handling
          */
         async onThreadCreated (thread) {
-            const username = this.$warehouse.get('themis_login_user');
-            const token = this.$warehouse.get('themis_login_token');
-
             this.onProgressUpdated(25);
 
             try {
-                await PostSubmit.submitPostAP(
-                    username,
-                    token,
+                await this.$client.submitPost(
                     thread.title,
                     thread.body,
                     this.selectedGroup
@@ -273,16 +274,10 @@ export default Vue.extend({
          * wait a tick. Otherwise, it ignores our attempt at updating.
          */
         async onReplyCreated (post, reply) {
-            const username = this.$warehouse.get('themis_login_user');
-            const token = this.$warehouse.get('themis_login_token');
-
             this.onProgressUpdated(25);
 
             try {
-                await PostSubmit.submitPostAP(
-                    username,
-                    token,
-
+                await this.$client.submitPost(
                     // TODO Implement changing subjects
                     post.subject,
 
@@ -304,6 +299,21 @@ export default Vue.extend({
         },
 
         /*
+         * Handle a request to like a post.
+         */
+        async onPostLiked (post) {
+            if (!this.userLikes.has(post.id)) {
+                try {
+                    await this.$client.likePost(post);
+                    this.userLikes.add(post.id);
+                    this.$warehouse.set('themis_login_likes', this.userLikes);
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+        },
+
+        /*
          * Handle a request to show a user's info in the info panel.
          * This also shows the info panel if it's hidden.
          */
@@ -321,10 +331,36 @@ export default Vue.extend({
             await this.$nextTick();
             this.reloadGroup = false;
         },
+
+        /*
+         * Get a user's list of liked posts.
+         */
+        async getLikes () {
+            const likes = (await FrontendService.getUserLikeIds(this.userName,
+                this.$warehouse.get('themis_login_token'))).data;
+
+            this.userLikes = new Set(likes);
+
+            this.$warehouse.set('themis_login_likes', Array.from(this.userLikes.keys()));
+        }
     },
 
     async mounted () {
+        // On mount, set up the client object
+        this.$client = new APClient(
+            this.$warehouse.get('themis_login_user'),
+            this.$warehouse.get('themis_login_token')
+        );
 
+        // Retrieve the user's likes, if they're there
+        this.getLikes();
+    },
+
+    /*
+     * Use provide/inject until we can find a way to do a stateful plugin.
+     */
+    provide: {
+        $client: this.$client
     },
 
     components: {
@@ -334,7 +370,7 @@ export default Vue.extend({
         ColumnPostCompose,
         MainNavigation,
         InfoPanel
-    }
+    },
 })
 
 </script>

@@ -15,7 +15,7 @@ import Axios from "axios";
  * @class PostSubmit
  */
 export class PostSubmit {
-    static async submitPostAP(
+    static async submitPost(
         username: string,
         accessToken: string,
         subject: string,
