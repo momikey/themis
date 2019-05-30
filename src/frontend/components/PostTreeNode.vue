@@ -58,7 +58,7 @@
                 <v-layout justify-end>
                     <v-flex shrink>
                         <span class="mx-1 my-0 py-0">
-                            <v-tooltip bottom close-delay="100" v-if="isNotLiked">
+                            <v-tooltip bottom close-delay="100" v-if="!hasLiked">
                                 <template #activator="{ on }">
                                     <v-btn icon dark
                                         @click="onLikeClicked"
@@ -138,14 +138,12 @@ export default Vue.extend({
             // If the user wants to reply to a post, we show an inline composer.
             isReplying: false,
 
+            // Has the user liked this post? This is mainly a hack to get around
+            // the fact that provide/inject ignores reactivity
+            hasLiked: false,
+
             // TODO: Make this locale-aware
             tooltipTimeFormat: "MMM D, YYYY, HH:mm",
-        }
-    },
-
-    computed: {
-        isNotLiked() {
-            return !this.likes.has(this.post.id);
         }
     },
 
@@ -228,6 +226,7 @@ export default Vue.extend({
          */
         onLikeClicked () {
             this.likePost(this.post);
+            this.hasLiked = true;
         },
 
         /*
@@ -263,6 +262,8 @@ export default Vue.extend({
     
     async mounted () {
         await this.loadPost();
+
+        this.hasLiked = this.likes.has(this.post.id);
     },
 
     components: {
