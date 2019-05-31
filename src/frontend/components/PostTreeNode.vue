@@ -49,7 +49,7 @@
 
         <!-- Post content; in the future, make this Markdown or HTML -->
         <v-card-text>
-            {{ thePost.content }}
+            <div class="post-content">{{ thePost.content }}</div>
         </v-card-text>
 
         <!-- Post actions, such as replying or marking as a favorite -->
@@ -273,5 +273,7 @@ export default Vue.extend({
 </script>
 
 <style>
-
+    .post-content {
+        white-space: pre-wrap;
+    }
 </style>

@@ -45,7 +45,7 @@
                             </v-card-title>
 
                             <v-card-text class="pt-1">
-                                {{ post.content }}
+                                <div class="post-content">{{ post.content }}</div>
                             </v-card-text>
                         </v-card>
                     </v-flex>
@@ -154,5 +154,7 @@ export default Vue.extend({
 </script>
 
 <style>
-
+    .post-content {
+        white-space: pre-wrap;
+    }
 </style>
