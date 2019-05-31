@@ -260,6 +260,23 @@ export class FrontendService {
     }
 
     /**
+     * Get all of a user's liked posts. This *does* download the full
+     * post entities, which may be a considerable amount of data. Thus,
+     * we only use this in cases where we don't already have a list of posts.
+     *
+     * @static
+     * @param username The name of the local user
+     * @param accessToken The user's API token
+     * @returns An Axios response containing an array of post entities
+     * @memberof FrontendService
+     */
+    static getLikedPosts(username: string, accessToken: string): AxiosPromise<Post[]> {
+        return Axios.get(`/api/v1/user/get-likes/${username}`, {
+            headers: { 'Authorization': `bearer ${accessToken}` }
+        });
+    }
+
+    /**
      * Format an integer for display in the frontend. Basically, this
      * just inserts commas for separators.
      *
